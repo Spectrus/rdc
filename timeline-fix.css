@@ -1,0 +1,209 @@
+/* Enhanced timeline styling to fix remaining issues */
+.timeline-section {
+    margin: 50px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.timeline-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--primary-color);
+    font-size: 2rem;
+}
+
+.horizontal-timeline {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    height: 450px;
+    display: block !important;
+}
+
+.timeline-track {
+    position: relative;
+    display: inline-block;
+    height: 400px;
+    min-width: 100%;
+    padding: 20px 0;
+    white-space: nowrap;
+}
+
+/* The horizontal line */
+.timeline-track::before {
+    content: '';
+    position: absolute;
+    height: 6px;
+    background-color: var(--gold-color);
+    top: 50%;
+    left: 0;
+    right: 0;
+    margin-top: -3px;
+    z-index: 0;
+}
+
+.timeline-item-horizontal {
+    position: relative;
+    display: inline-block !important;
+    width: 300px;
+    margin-right: 50px;
+    vertical-align: top;
+    animation: slideIn 0.5s ease forwards;
+    opacity: 1 !important;
+    transition: transform 0.5s ease-in-out;
+    height: 400px;
+}
+
+/* The circle markers on the timeline */
+.timeline-item-horizontal::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border: 4px solid var(--gold-color);
+    border-radius: 50%;
+    left: 140px;
+    top: 50%;
+    margin-top: -10px;
+    z-index: 1;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: block !important;
+}
+
+.timeline-item-horizontal.highlight::after {
+    transform: scale(1.5);
+    background-color: var(--gold-color);
+    box-shadow: 0 0 15px var(--gold-color);
+}
+
+.timeline-content-horizontal {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    width: 280px;
+    top: 30%;
+    transform: translateY(-100%);
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+    display: block !important;
+}
+
+.timeline-item-horizontal.highlight .timeline-content-horizontal {
+    border: 2px solid var(--gold-color);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.timeline-year-horizontal {
+    font-weight: bold;
+    color: var(--gold-color);
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.timeline-text-horizontal {
+    margin-bottom: 0.5rem;
+    white-space: normal;
+    font-weight: bold;
+}
+
+.timeline-author-horizontal {
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+.timeline-tag-horizontal {
+    display: inline-block;
+    background-color: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.timeline-button-horizontal {
+    background-color: var(--gold-color);
+    color: var(--primary-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: 'Playfair Display', serif;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.timeline-button-horizontal:hover {
+    background-color: var(--primary-color);
+    color: var(--gold-color);
+}
+
+/* Controls styling */
+.timeline-controls {
+    display: flex !important;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.timeline-control-button {
+    background-color: var(--primary-color);
+    color: var(--gold-color);
+    border: none;
+    padding: 8px 15px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: 'Playfair Display', serif;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    display: inline-block !important;
+}
+
+.timeline-control-button:hover {
+    background-color: var(--gold-color);
+    color: var(--primary-color);
+}
+
+/* Animation for timeline items */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Navigation arrows */
+.timeline-nav {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.timeline-nav-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.timeline-nav-button:hover {
+    color: var(--gold-color);
+}

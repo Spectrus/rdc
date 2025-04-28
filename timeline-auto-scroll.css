@@ -1,0 +1,202 @@
+/* Timeline styling with conditional visibility and increased height */
+.timeline-controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.timeline-control-button {
+    background-color: var(--primary-color);
+    color: var(--gold-color);
+    border: none;
+    padding: 8px 15px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: 'Playfair Display', serif;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+.timeline-control-button:hover {
+    background-color: var(--gold-color);
+    color: var(--primary-color);
+}
+
+.timeline-section {
+    margin: 50px 0;
+    position: relative;
+    overflow: hidden;
+    min-height: 700px; /* Increased overall section height */
+}
+
+.timeline-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--primary-color);
+    font-size: 2rem;
+}
+
+.horizontal-timeline {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    height: 650px; /* Significantly increased height to accommodate content */
+    display: block !important; /* Force display as block */
+}
+
+.timeline-track {
+    position: relative;
+    display: inline-block;
+    height: 600px; /* Increased track height */
+    min-width: 100%;
+    padding: 20px 0;
+    white-space: nowrap;
+}
+
+.timeline-track::before {
+    content: '';
+    position: absolute;
+    height: 6px;
+    background-color: var(--gold-color);
+    top: 50%;
+    left: 0;
+    right: 0;
+    margin-top: -3px;
+    z-index: 0;
+}
+
+.timeline-item-horizontal {
+    position: relative;
+    display: inline-block !important; /* Force display as inline-block */
+    width: 300px;
+    margin-right: 50px;
+    vertical-align: top;
+    animation: slideIn 0.5s ease forwards;
+    transition: transform 0.5s ease-in-out;
+    height: 600px; /* Increased item height to match track */
+}
+
+/* Hide content by default */
+.timeline-content-horizontal {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    width: 280px;
+    top: 35%; /* Adjusted position to be higher above the timeline line */
+    transform: translateY(-100%); /* Move it up completely above the line */
+    opacity: 0; /* Hide by default */
+    visibility: hidden; /* Hide by default */
+    z-index: 2;
+    display: block !important; /* Ensure display property is set */
+    max-height: 350px; /* Set maximum height for content */
+    overflow-y: auto; /* Allow scrolling if content is too tall */
+}
+
+/* Show content only for highlighted items */
+.timeline-item-horizontal.highlight .timeline-content-horizontal,
+.timeline-item-horizontal:hover .timeline-content-horizontal {
+    opacity: 1;
+    visibility: visible;
+    border: 2px solid var(--gold-color);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.timeline-item-horizontal.highlight {
+    transform: translateY(-5px);
+}
+
+.timeline-item-horizontal.highlight::after {
+    transform: scale(1.5);
+    background-color: var(--gold-color);
+    box-shadow: 0 0 15px var(--gold-color);
+}
+
+.timeline-item-horizontal::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border: 4px solid var(--gold-color);
+    border-radius: 50%;
+    left: 140px;
+    top: 50%;
+    margin-top: -10px;
+    z-index: 1;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: block !important; /* Ensure visibility */
+}
+
+.timeline-year-horizontal {
+    font-weight: bold;
+    color: var(--gold-color);
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.timeline-text-horizontal {
+    margin-bottom: 0.5rem;
+    white-space: normal;
+    font-weight: bold;
+}
+
+.timeline-author-horizontal {
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+.timeline-tag-horizontal {
+    display: inline-block;
+    background-color: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.timeline-button-horizontal {
+    background-color: var(--gold-color);
+    color: var(--primary-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: 'Playfair Display', serif;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.timeline-button-horizontal:hover {
+    background-color: var(--primary-color);
+    color: var(--gold-color);
+}
+
+/* Animation for timeline items */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Navigation arrows */
+.timeline-nav {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+}

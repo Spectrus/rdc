@@ -1,0 +1,87 @@
+/* Estilos para os controles de navegação */
+
+/* Estilos para as setas de navegação */
+.nav-arrow {
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    background-color: var(--gold-color);
+    color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.nav-arrow:hover {
+    background-color: var(--primary-color);
+    color: var(--gold-color);
+    transform: scale(1.1);
+}
+
+.nav-arrow-up {
+    top: 20px;
+    right: 20px;
+}
+
+.nav-arrow-down {
+    bottom: 20px;
+    right: 20px;
+}
+
+/* Estilos para o cabeçalho condicional */
+.nav-bar {
+    background-color: var(--header-bg);
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+    position: fixed;
+    top: -80px; /* Inicialmente escondido acima da tela */
+    left: 0;
+    right: 0;
+    z-index: 100;
+    transition: top 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.nav-bar a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0 2rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.nav-bar a:hover {
+    text-decoration: underline;
+}
+
+/* Ajustes para dispositivos móveis */
+@media (max-width: 768px) {
+    .nav-bar {
+        flex-direction: column;
+        align-items: center;
+        padding: 0.5rem 0;
+    }
+    
+    .nav-bar a {
+        margin: 0.3rem 0;
+        font-size: 1rem;
+    }
+    
+    .nav-arrow {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+}
