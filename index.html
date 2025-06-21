@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biblioteca Digital Reinaldo Duarte Castanheira</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="file_viewer.css" rel="stylesheet">
+    <link href="timeline-auto-scroll.css" rel="stylesheet">
+    <link href="timeline-fix.css" rel="stylesheet">
+    <link href="navigation-controls.css" rel="stylesheet">
+
     
     <style>
         :root {
@@ -33,31 +38,8 @@
             line-height: 1.6;
         }
         
-        .nav-bar {
-            background-color: var(--header-bg);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-        }
-        
-        .nav-bar a {
-            color: var(--header-text);
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.1rem;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        
-        .nav-bar a:hover {
-            background-color: rgba(74, 44, 42, 0.1);
-        }
+        /* Estilos da barra de navegação movidos para navigation-controls.css */
+        /* Estilos dos links da barra de navegação movidos para navigation-controls.css */
         
         .container {
             max-width: 1200px;
@@ -80,72 +62,6 @@
             align-items: center;
             margin-bottom: 1.5rem;
             position: relative;
-        }
-        
-        .stylized-r {
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 80px;
-            height: 80px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-        
-        .stylized-r:hover {
-            transform: translateY(-50%) scale(1.1);
-        }
-        
-        .r-letter {
-            font-family: 'Playfair Display', serif;
-            font-size: 70px;
-            font-weight: 700;
-            color: var(--gold-color);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            position: relative;
-            z-index: 2;
-            font-style: italic;
-        }
-        
-        .r-shadow {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background: var(--primary-color);
-            border-radius: 50%;
-            z-index: 1;
-            opacity: 0.2;
-            transform: translate(5px, 5px);
-        }
-        
-        .welcome-message {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            background-color: var(--gold-color);
-            padding: 10px;
-            border-radius: 5px;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            z-index: 10;
-            margin-top: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        
-        .welcome-message.show {
-            opacity: 1;
-            transform: translateY(0);
         }
         
         .intro h1 {
@@ -383,9 +299,6 @@
             font-weight: bold;
             margin-bottom: 1rem;
             color: var(--gold-color);
-            display: block;
-            clear: both;
-            margin-top: 0.5rem;
         }
         
         .document-card p {
@@ -469,234 +382,15 @@
             color: var(--primary-color);
         }
         
-        .horizontal-timeline {
+        /* Password protection styles */
+        .password-protected .read-button {
             position: relative;
-            overflow-x: auto;
-            padding: 2rem 0;
         }
         
-        .timeline-track {
-            display: flex;
-            gap: 2rem;
-            min-width: max-content;
-            padding: 0 1rem;
-        }
-        
-        .timeline-item-horizontal {
-            flex: 0 0 auto;
-            opacity: 0;
-            animation: slideInFromLeft 0.8s ease forwards;
-        }
-        
-        .timeline-content-horizontal {
-            background: #fff;
-            border: 2px solid var(--gold-color);
-            border-radius: 10px;
-            padding: 1.5rem;
-            width: 250px;
-            min-height: 200px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .timeline-content-horizontal:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        }
-        
-        .timeline-year-horizontal {
-            background: var(--gold-color);
-            color: var(--primary-color);
-            font-weight: bold;
-            font-size: 1.2rem;
-            padding: 0.5rem;
-            text-align: center;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-        }
-        
-        .timeline-text-horizontal {
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            color: var(--primary-color);
-            flex-grow: 1;
-        }
-        
-        .timeline-author-horizontal {
-            font-style: italic;
-            color: #666;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-        
-        .timeline-tag-horizontal {
-            background: var(--primary-color);
-            color: #fff;
-            padding: 0.2rem 0.5rem;
-            border-radius: 3px;
+        .password-protected .read-button::after {
+            content: '🔒';
             font-size: 0.8rem;
-            align-self: flex-start;
-            margin-bottom: 1rem;
-        }
-        
-        .timeline-button-horizontal {
-            background: var(--gold-color);
-            color: var(--primary-color);
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            text-align: center;
-            transition: all 0.3s ease;
-            font-family: 'Playfair Display', serif;
-        }
-        
-        .timeline-button-horizontal:hover {
-            background: var(--primary-color);
-            color: var(--gold-color);
-        }
-        
-        @keyframes slideInFromLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        #hidden-documents {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transition: max-height 0.6s ease, opacity 0.4s ease;
-        }
-        
-        #hidden-documents.expanded {
-            max-height: 10000px;
-            opacity: 1;
-        }
-        
-        .video-section {
-            margin: 3rem 0;
-            padding: 2rem;
-            border: 1px solid #e0e0e0;
-            background-color: #fff;
-        }
-        
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        .video-card {
-            border: 1px solid #e0e0e0;
-            background-color: #fff;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            position: relative;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            opacity: 0;
-            animation: fadeIn 0.5s ease forwards;
-        }
-        
-        .video-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        
-        .video-card h3 {
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
-        
-        .video-thumbnail {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%;
-            overflow: hidden;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-            display: block;
-        }
-        
-        .video-thumbnail img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-        
-        .video-thumbnail:hover img {
-            transform: scale(1.05);
-        }
-        
-        .play-button {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
-            background-color: rgba(212, 180, 95, 0.8);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            font-size: 1.5rem;
-            transition: all 0.3s ease;
-        }
-        
-        .video-thumbnail:hover .play-button {
-            background-color: rgba(74, 44, 42, 0.8);
-            transform: translate(-50%, -50%) scale(1.1);
-        }
-        
-        .protected-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: var(--primary-color);
-            color: #fff;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 0.8rem;
-        }
-        
-        .video-synopsis {
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: #f9f9f9;
-            border-left: 3px solid var(--gold-color);
-            font-style: italic;
-            color: #555;
-            line-height: 1.5;
-            border-radius: 0 5px 5px 0;
-            flex-grow: 1;
-            display: block;
-            clear: both;
-            margin-top: 0.5rem;
+            margin-left: 5px;
         }
         
         .footer {
@@ -720,396 +414,269 @@
             text-decoration: underline;
         }
         
-        /* CSS PARA MODO DE EDIÇÃO */
-        .edit-mode-active {
-            position: relative;
-        }
-        
-        .edit-mode-active [contenteditable="true"] {
-            border: 2px dashed var(--gold-color) !important;
-            background-color: rgba(212, 180, 95, 0.1) !important;
-            padding: 2px !important;
-            min-height: 20px !important;
-            transition: all 0.3s ease;
-        }
-        
-        .edit-mode-active [contenteditable="true"]:hover {
-            background-color: rgba(212, 180, 95, 0.2) !important;
-            box-shadow: 0 0 10px rgba(212, 180, 95, 0.5) !important;
-        }
-        
-        .edit-mode-active [contenteditable="true"]:focus {
-            outline: 3px solid var(--gold-color) !important;
-            background-color: rgba(212, 180, 95, 0.3) !important;
-        }
-        
-        .edit-mode-active img {
-            border: 2px dashed #ff6b6b !important;
-            cursor: pointer !important;
-            transition: all 0.3s ease;
-        }
-        
-        .edit-mode-active img:hover {
-            border-color: #ff5252 !important;
-            box-shadow: 0 0 15px rgba(255, 107, 107, 0.5) !important;
-            transform: scale(1.02) !important;
-        }
-        
-        .edit-mode-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(45deg, var(--gold-color), #e6c87d);
-            color: var(--primary-color);
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 9999;
-            animation: pulse 2s infinite;
-            border: 2px solid var(--primary-color);
-        }
-        
-        .edit-mode-controls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--primary-color);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            z-index: 9999;
-            display: flex;
-            gap: 10px;
-            flex-direction: column;
-        }
-        
-        .edit-control-btn {
-            background: var(--gold-color);
-            color: var(--primary-color);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-family: 'Playfair Display', serif;
-            transition: all 0.3s ease;
-        }
-        
-        .edit-control-btn:hover {
-            background: #e6c87d;
-            transform: translateY(-2px);
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        .image-upload-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-        }
-        
-        .image-upload-dialog {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
-        
-        .image-upload-dialog h3 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-        
-        .image-upload-dialog input[type="file"] {
-            margin: 15px 0;
-            padding: 10px;
-            border: 2px dashed var(--gold-color);
-            border-radius: 5px;
-            width: 100%;
-        }
-        
-        .image-upload-dialog button {
-            margin: 5px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Playfair Display', serif;
-            font-weight: bold;
-        }
-        
-        .btn-upload {
-            background: var(--gold-color);
-            color: var(--primary-color);
-        }
-        
-        .btn-cancel {
-            background: #ccc;
-            color: #333;
-        }
-        
-        /* Indicador de salvamento */
-        .save-indicator {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 9999;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.3s ease;
-        }
-        
-        .save-indicator.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .save-indicator.error {
-            background: #f44336;
-        }
-        
-        .save-indicator.warning {
-            background: #ff9800;
-        }
-        
-        /* Notificação de rebuild */
-        .rebuild-notification {
-            position: fixed;
-            top: 140px;
-            right: 20px;
-            background: linear-gradient(45deg, #2196F3, #64B5F6);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 9999;
-            animation: slideInRight 0.5s ease;
-            border: 2px solid #1976D2;
-            text-align: center;
-            min-width: 250px;
-        }
-        
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(100%);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        /* Modal de configuração GitHub */
-        .github-config-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10001;
-        }
-        
-        .github-config-dialog {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            max-width: 500px;
-            width: 90%;
-        }
-        
-        .github-config-dialog h3 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .config-field {
-            margin-bottom: 15px;
-        }
-        
-        .config-field label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .config-field input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-family: 'Playfair Display', serif;
-        }
-        
-        .config-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        
-        .btn-save-config {
-            background: var(--gold-color);
-            color: var(--primary-color);
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Playfair Display', serif;
-            font-weight: bold;
-        }
-        
-        .btn-cancel-config {
-            background: #ccc;
-            color: #333;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Playfair Display', serif;
-            font-weight: bold;
-        }
-        
         @media (max-width: 768px) {
             .nav-bar {
                 flex-direction: column;
                 align-items: center;
             }
-            
+        
             .nav-bar a {
                 margin: 0.5rem 0;
             }
-            
+        
             .intro h1 {
                 font-size: 2rem;
             }
-            
+        
             .intro h2 {
                 font-size: 1.5rem;
             }
-            
-            .stylized-r {
-                position: relative;
-                left: auto;
-                top: auto;
-                transform: none;
-                margin-right: 15px;
-                width: 50px;
-                height: 50px;
-            }
-            
-            .stylized-r:hover {
-                transform: scale(1.1);
-            }
-            
-            .r-letter {
-                font-size: 45px;
-            }
-            
-            .r-shadow {
-                width: 40px;
-                height: 40px;
-            }
-            
-            .intro-header {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .intro-header h1 {
-                font-size: 1.8rem;
-                text-align: center;
-            }
-            
-            .welcome-message {
-                position: relative;
-                margin-top: 15px;
-                font-size: 1.2rem;
-            }
-            
+        
             .stat-badge {
                 position: relative;
                 margin: 1rem auto;
                 right: 0;
                 transform: none;
             }
-            
-            .search-container {
-                flex-direction: column;
-            }
-            
-            .search-input {
-                border-radius: 30px;
-                margin-bottom: 0.5rem;
-            }
-            
-            .search-button {
-                border-radius: 30px;
-            }
-            
-            .filter-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .filter-button {
-                width: 100%;
-                margin-bottom: 0.5rem;
-            }
-            
+        
             .documents-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .timeline-content-horizontal {
-                width: 200px;
-                min-height: 180px;
-            }
-            
-            .edit-mode-controls {
-                bottom: 10px;
-                right: 10px;
-                padding: 10px;
-            }
-            
-            .edit-control-btn {
-                padding: 6px 12px;
-                font-size: 12px;
-            }
         }
+        
+        /* === New expand/collapse transitions === */
+        
+        /* collapse by default */
+        #hidden-documents {
+            display: grid; /* keep grid layout */
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-height: 0;          /* collapsed */
+            opacity: 0;             /* invisible */
+            overflow: hidden;       /* hide overflow */
+            transition:
+                max-height 0.6s ease,  /* slide open/closed */
+                opacity    0.4s ease;  /* fade in/out */
+        }
+        
+        /* when expanded… */
+        #hidden-documents.expanded {
+            max-height: 10000px;  /* large enough for all cards */
+            opacity:     1;
+        }
+        /* …your existing .read-button rules… */
+
+.read-button:hover {
+    background-color: var(--primary-color);
+    color: var(--gold-color);
+  }
+  
+  /* ===== Video‐card styles ===== */
+  .video-thumbnail {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%;
+    overflow: hidden;
+    border-radius: 5px;
+  }
+  .video-thumbnail img {
+    position: absolute; top:0; left:0;
+    width:100%; height:100%; object-fit:cover;
+  }
+  .play-button {
+    position: absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    font-size:2rem; color:#fff;
+    background:rgba(212,180,95,0.8);
+    width:60px; height:60px;
+    border-radius:50%;
+    display:flex; justify-content:center; align-items:center;
+  }
+  .video-thumbnail:hover .play-button {
+    background:rgba(74,44,42,0.8);
+    transform:translate(-50%,-50%) scale(1.1);
+  }
+  .video-section {
+    margin: 3rem 0;
+    padding: 2rem;
+    border: 1px solid #e0e0e0;
+    background-color: #fff;
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.video-card {
+    border: 1px solid #e0e0e0;
+    background-color: #fff;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.video-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.video-card h3 {
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.video-thumbnail {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    overflow: hidden;
+    border-radius: 5px;
+}
+
+.video-thumbnail img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.video-thumbnail:hover img {
+    transform: scale(1.05);
+}
+
+.play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background-color: rgba(212, 180, 95, 0.8);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.video-thumbnail:hover .play-button {
+    background-color: rgba(74, 44, 42, 0.8);
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.protected-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--primary-color);
+    color: #fff;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .nav-bar {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .nav-bar a {
+        margin: 0.5rem 0;
+    }
+    
+    .intro h1 {
+        font-size: 2rem;
+    }
+    
+    .intro h2 {
+        font-size: 1.5rem;
+    }
+    
+    .stamp {
+        width: 80px;
+        height: 80px;
+        top: 10px;
+        right: 10px;
+    }
+    
+    .stamp-number {
+        font-size: 1.2rem;
+    }
+    
+    .stamp-text {
+        font-size: 0.7rem;
+    }
+    
+    .search-container {
+        flex-direction: column;
+    }
+    
+    .search-input {
+        border-radius: 30px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .search-button {
+        border-radius: 30px;
+    }
+    
+    .filter-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .filter-button {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .documents-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .timeline-content-horizontal {
+        width: 200px;
+        min-height: 180px;
+    }
+}
+              
+video-synopsis {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-left: 3px solid var(--gold-color);
+    font-style: italic;
+    color: #555;
+    line-height: 1.5;
+    border-radius: 0 5px 5px 0;
+    flex-grow: 1;
+}
+.document-year {
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: var(--gold-color);
+}
+
     </style>
 </head>
 <body>
@@ -1134,18 +701,170 @@
                 <div id="welcome-message" class="welcome-message"></div>
             </div>
             
+            <style>
+                .intro-header {
+                    position: relative;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin-bottom: 1.5rem;
+                }
+                
+                .stylized-r {
+                    position: absolute;
+                    left: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 80px;
+                    height: 80px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    cursor: pointer;
+                    transition: transform 0.3s ease;
+                }
+                
+                .stylized-r:hover {
+                    transform: translateY(-50%) scale(1.1);
+                }
+                
+                .r-letter {
+                    font-family: 'Playfair Display', serif;
+                    font-size: 70px;
+                    font-weight: 700;
+                    color: var(--gold-color);
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                    position: relative;
+                    z-index: 2;
+                    font-style: italic;
+                }
+                
+                .r-shadow {
+                    position: absolute;
+                    width: 60px;
+                    height: 60px;
+                    background: var(--primary-color);
+                    border-radius: 50%;
+                    z-index: 1;
+                    opacity: 0.2;
+                    transform: translate(5px, 5px);
+                }
+                
+                .welcome-message {
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    text-align: center;
+                    font-family: 'Playfair Display', serif;
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    color: var(--primary-color);
+                    background-color: var(--gold-color);
+                    padding: 10px;
+                    border-radius: 5px;
+                    opacity: 0;
+                    transform: translateY(-20px);
+                    transition: opacity 0.5s ease, transform 0.5s ease;
+                    z-index: 10;
+                    margin-top: 10px;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                }
+                
+                .welcome-message.show {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                
+                @media (max-width: 768px) {
+                    .stylized-r {
+                        position: relative;
+                        left: auto;
+                        top: auto;
+                        transform: none;
+                        margin-right: 15px;
+                        width: 50px;
+                        height: 50px;
+                    }
+                    
+                    .stylized-r:hover {
+                        transform: scale(1.1);
+                    }
+                    
+                    .r-letter {
+                        font-size: 45px;
+                    }
+                    
+                    .r-shadow {
+                        width: 40px;
+                        height: 40px;
+                    }
+                    
+                    .intro-header {
+                        flex-direction: row;
+                        flex-wrap: wrap;
+                        justify-content: center;
+                    }
+                    
+                    .intro-header h1 {
+                        font-size: 1.8rem;
+                        text-align: center;
+                    }
+                    
+                    .welcome-message {
+                        position: relative;
+                        margin-top: 15px;
+                        font-size: 1.2rem;
+                    }
+                }
+                .video-thumbnail {
+                    margin-bottom: 1rem;
+                    display: block;
+                }
+                
+                .document-year {
+                    display: block;
+                    clear: both;
+                    margin-top: 0.5rem;
+                }
+            </style>
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const passwordR = document.getElementById('password-r');
+                    const welcomeMessage = document.getElementById('welcome-message');
+                    
+                    passwordR.addEventListener('click', function() {
+                        const password = prompt('Digite a senha:');
+                        if (password === '24042003') {
+                            welcomeMessage.textContent = 'Bem-Vindo Reinaldão!';
+                            welcomeMessage.classList.add('show');
+                            
+                            // Hide the message after 5 seconds
+                            setTimeout(function() {
+                                welcomeMessage.classList.remove('show');
+                            }, 5000);
+                        }
+                    });
+                });
+            </script>
+            
             <p>Acervo de Histórias, Contos, Fotos, Livros e Vídeos que resolvi guardar em arquivos digitais. Assim fazendo, tenho condições de preservar os guardados, evitando que caiam no esquecimento, nos sebos e/ou descarte nos lixos. Com este propósito possibilito que outras pessoas possam apreciar e revisitar quantos momentos que guardei.</p>
             <p>Alguns arquivos de livre acesso e outros que, dado o conteúdo privado – restrito a grupos específicos.</p>
             
             <div class="historical-photo">
-                <img src="https://via.placeholder.com/500x300/d4b45f/4a2c2a?text=Álvaro+e+Maria+-+meus+pais" alt="Foto histórica da cidade">
+                <img src="historical_couple.jpg" alt="Foto histórica da cidade">
                 <p class="historical-photo-caption">Álvaro e Maria - meus pais</p>
             </div>
         </section>
         
         <section id="timeline" class="timeline-section">
-            <h2 class="timeline-title">Linha do Tempo</h2>
+            <h2 class="timeline-title">Linha do Tempo </h2>
             
+            <div style="text-align: center; margin-bottom: 15px;">
+               
+            </div>
+        
             <div class="horizontal-timeline">
                 <div class="timeline-track">
                     <div class="timeline-item-horizontal" style="animation-delay: 0.1s;">
@@ -1154,7 +873,7 @@
                             <div class="timeline-text-horizontal">Carta de meu bisavô José Antonio Duraes Castanheira</div>
                             <div class="timeline-author-horizontal">Francisco Augusto Durães Castanheira</div>
                             <div class="timeline-tag-horizontal">Documento</div>
-                            <a href="#" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Carta de 1878 do Bisav├┤ para Vov├┤ por Elisa Lima.pdf" class="timeline-button-horizontal">Ler obra</a>
                         </div>
                     </div>
                     
@@ -1164,37 +883,259 @@
                             <div class="timeline-text-horizontal">O Livro da Vovó Magdalena</div>
                             <div class="timeline-author-horizontal">Maria Magdalena Moura Costa Castanheira</div>
                             <div class="timeline-tag-horizontal">Livro</div>
-                            <a href="#" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="O Livro da Vov├│ Magdalena.pdf" class="timeline-button-horizontal">Ler obra</a>
                         </div>
                     </div>
                     
                     <div class="timeline-item-horizontal" style="animation-delay: 0.3s;">
                         <div class="timeline-content-horizontal">
-                            <div class="timeline-year-horizontal">2012</div>
-                            <div class="timeline-text-horizontal">Monsenhor Moreira - Uma vida a serviço do Reino de Deus</div>
-                            <div class="timeline-author-horizontal">Luiza Izabel Biagioni</div>
-                            <div class="timeline-tag-horizontal">Livro</div>
-                            <a href="#" class="timeline-button-horizontal">Ler obra</a>
+                            <div class="timeline-year-horizontal">1910</div>
+                            <div class="timeline-text-horizontal">Se</div>
+                            <div class="timeline-author-horizontal">Rudyard Kipling</div>
+                            <div class="timeline-tag-horizontal">Poema</div>
+                            <a href="Se.pdf" class="timeline-button-horizontal">Ler obra</a>
                         </div>
                     </div>
                     
                     <div class="timeline-item-horizontal" style="animation-delay: 0.4s;">
                         <div class="timeline-content-horizontal">
-                            <div class="timeline-year-horizontal">2021</div>
-                            <div class="timeline-text-horizontal">O segredo</div>
+                            <div class="timeline-year-horizontal">1967</div>
+                            <div class="timeline-text-horizontal">Nosso casamento 15 julho 1967</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
-                            <div class="timeline-tag-horizontal">Conto</div>
-                            <a href="#" class="timeline-button-horizontal">Ler obra</a>
+                            <div class="timeline-tag-horizontal">Documento</div>
+                            <a href="Nosso casamento 15 jul 1967.mpg" class="timeline-button-horizontal">Ver obra</a>
                         </div>
                     </div>
                     
                     <div class="timeline-item-horizontal" style="animation-delay: 0.5s;">
                         <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1978</div>
+                            <div class="timeline-text-horizontal">Fotos e slides 1973-78</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Documento</div>
+                            <a href="Fotos e Slides 1970 e anos seguintes.mpg" class="timeline-button-horizontal">Ver obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.6s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1986</div>
+                            <div class="timeline-text-horizontal">Imagens de nossa casa e de Lafaiete</div>
+                            <div class="timeline-author-horizontal">João Pio Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Mídia</div>
+                            <a href="Lafaiete do passado nossa casa e cidade (2).mpg" class="timeline-button-horizontal">Ver obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.7s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1990</div>
+                            <div class="timeline-text-horizontal">História do Tio Antonio</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Documento</div>
+                            <a href="Hist├│ria do Tio Antonio.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.8s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1995</div>
+                            <div class="timeline-text-horizontal">Docum fotos Castanheira em Portugal</div>
+                            <div class="timeline-author-horizontal">Família Castanheira</div>
+                            <div class="timeline-tag-horizontal">Documento</div>
+                            <a href="Docum fotos Castanheira em Portugal.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.9s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2000</div>
+                            <div class="timeline-text-horizontal">Queluzíadas</div>
+                            <div class="timeline-author-horizontal">Alberto Libanio Rodrigues</div>
+                            <div class="timeline-tag-horizontal">Livro</div>
+                            <a href="Queluz├¡adas .pdf autor - Alberto Libanio Rodrigues.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.0s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2002</div>
+                            <div class="timeline-text-horizontal">Avenida Parque</div>
+                            <div class="timeline-author-horizontal">Marina Biagioni Marques</div>
+                            <div class="timeline-tag-horizontal">Livro</div>
+                            <a href="Avenida Parque Completo.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.1s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2005</div>
+                            <div class="timeline-text-horizontal">História da Medicina de Queluz a Lafaiete</div>
+                            <div class="timeline-author-horizontal">José Álvaro Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Livro</div>
+                            <a href="Hist├│ria da Medicina de Queluz a Lafaiete.pdf autor Jos├® ├ülvaro Duarte Castanheira.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.2s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2007</div>
+                            <div class="timeline-text-horizontal">Felipe 2007 Vila da Criança</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Mídia</div>
+                            <a href="Felipe 2007 Vila da Crian├ºa.MPG" class="timeline-button-horizontal">Ver obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.3s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2008</div>
+                            <div class="timeline-text-horizontal">As Melhores das Melhores</div>
+                            <div class="timeline-author-horizontal">José Álvaro Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Livro</div>
+                            <a href="As melhores das melhores JA.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.4s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2010</div>
+                            <div class="timeline-text-horizontal">Crônicas, Religião e Psiquiatria</div>
+                            <div class="timeline-author-horizontal">José Álvaro Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Livro</div>
+                            <a href="CrÔö£Ôöñnicas_ReligiÔö£├║o_e_Psiquiatria.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.5s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2012</div>
+                            <div class="timeline-text-horizontal">Monsenhor Moreira - Uma vida a serviço do Reino de Deus</div>
+                            <div class="timeline-author-horizontal">Luiza Izabel Biagioni</div>
+                            <div class="timeline-tag-horizontal">Livro</div>
+                            <a href="Monsenhor Moreira - Uma vida a servi├ºo do Reino de Deus.pdf autora_ Luiza Izabel Biagioni.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.6s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2015</div>
+                            <div class="timeline-text-horizontal">Missão - Homenagem a Luiza Biagioni</div>
+                            <div class="timeline-author-horizontal">Pedro de Lima Belisário</div>
+                            <div class="timeline-tag-horizontal">Livro</div>
+                            <a href="Miss├úo - Homenagem a Luiza Biagioni.pdf autor Pedro de Lima Belis├írio.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.7s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2017</div>
+                            <div class="timeline-text-horizontal">Flores de Australia</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Mídia</div>
+                            <a href="Flores_de_Australia.mp4" class="timeline-button-horizontal">Ver obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.8s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2018</div>
+                            <div class="timeline-text-horizontal">Eduardo Biagioni visita Lenita e Carmem</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Documento</div>
+                            <a href="Eduardo Biagioni visita Lenita e Carmem.pptx" class="timeline-button-horizontal">Ver obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.9s;">
+                        <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2020</div>
-                            <div class="timeline-text-horizontal">Antologia</div>
+                            <div class="timeline-text-horizontal">Antologia Lafaiete em Prosa e Verso</div>
                             <div class="timeline-author-horizontal">Reuber Lana Antoniazzi</div>
                             <div class="timeline-tag-horizontal">Antologia</div>
-                            <a href="#" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Antologia Lafaiete em Prosa e Verso.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.0s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2021</div>
+                            <div class="timeline-text-horizontal">O segredo da vida</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Conto</div>
+                            <a href="O segredo da vida.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.1s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2022</div>
+                            <div class="timeline-text-horizontal">Uma mulher de fibra chamada Regina Coeli</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Biografia</div>
+                            <a href="Uma mulher de fibra chamada Regina Coeli.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.2s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2023</div>
+                            <div class="timeline-text-horizontal">Primo Francisco Augusto</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Mídia</div>
+                            <a href="Primo Francisco Augusto.mp4" class="timeline-button-horizontal">Ver obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.3s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2023</div>
+                            <div class="timeline-text-horizontal">A Herança dos Castanheiras</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Documento</div>
+                            <a href="A Heran├ºa dos Castanheiras.docx.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.4s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2024</div>
+                            <div class="timeline-text-horizontal">Amigos que ganhei de meu Pai</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Conto</div>
+                            <a href="Amigos que ganhei de meu Pai.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.5s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2024</div>
+                            <div class="timeline-text-horizontal">Homenagem ao meu Pai</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Documento</div>
+                            <a href="Homenagem ao meu Pai.docx.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.6s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2024</div>
+                            <div class="timeline-text-horizontal">Banana crescendo</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Documento</div>
+                            <a href="Banana crescendo.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.7s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2024</div>
+                            <div class="timeline-text-horizontal">A história da Cachaça - Pinga e da Água Ardente</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Conto</div>
+                            <a href="A Hist├│ria da Cacha├ºa - Pinga e Agua Ardente.pdf" class="timeline-button-horizontal">Ler obra</a>
+                         
+
                         </div>
                     </div>
                 </div>
@@ -1202,37 +1143,307 @@
         </section>
         
         <section id="acervo">
-            <h2 class="acervo-title">Acervo Digital</h2>
-            <p class="acervo-subtitle">Explore nossa coleção de documentos históricos, livros e memórias</p>
+            <h2 class="acervo-title">Acervo</h2>
+            <p class="acervo-subtitle">Explore as obras e documentos históricos dos autores de nossa cidade</p>
             
             <div class="search-container">
                 <div class="search-box">
-                    <input type="text" class="search-input" placeholder="Buscar por título, autor, ano ou código...">
+                    <input type="text" class="search-input" placeholder="Buscar por título, autor, tema, ano ou código...">
                     <button class="search-button">Buscar</button>
                 </div>
             </div>
             
             <div class="filter-container">
-                <button class="filter-button active" data-filter="all">Todos</button>
+                <button class="filter-button active" data-filter="todos">Todos</button>
                 <button class="filter-button" data-filter="livro">Livros</button>
-                <button class="filter-button" data-filter="documento">Documentos</button>
                 <button class="filter-button" data-filter="conto">Contos</button>
-                <button class="filter-button" data-filter="antologia">Antologias</button>
-                <button class="filter-button" data-filter="poema">Poemas</button>
+                <button class="filter-button" data-filter="poema">Poesia</button>
+                <button class="filter-button" data-filter="documento">Documentos</button>
                 <button class="filter-button" data-filter="mídia">Mídia</button>
             </div>
             
             <div class="sort-container">
                 <select class="sort-select">
-                    <option value="newest">Mais recentes</option>
-                    <option value="oldest">Mais antigos</option>
-                    <option value="title">Por título</option>
-                    <option value="author">Por autor</option>
+                    <option>Ordenar por Código</option>
+                    <option>Ordenar por Título</option>
+                    <option>Ordenar por Autor</option>
+                    <option>Ordenar por Data</option>
                 </select>
             </div>
             
-            <div class="documents-grid">
-                <div class="document-card">
+            <div class="documents-grid" id="visible-documents">
+                <!-- Primeiros 9 itens visíveis -->
+                <div class="document-card" style="animation-delay: 0.1s;">
+                    <div class="document-code">301</div>
+                    <h3>O Livro da Vovó Magdalena</h3>
+                    <div class="document-author">Maria Magdalena Moura Costa Castanheira</div>
+                    <div class="document-year">1900</div>
+                    <p>Memórias, contos e histórias registradas, de forma manuscrita, por minha Avó. Preserva tradições e valores de forma pessoal e crítica.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Livro</span>
+                        <a href="O Livro da Vov├│ Magdalena.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.2s;">
+                    <div class="document-code">302</div>
+                    <h3>Se</h3>
+                    <div class="document-author">Rudyard Kipling</div>
+                    <div class="document-year">1910</div>
+                    <p>Poema inspirador sobre virtudes e qualidades humanas, traduzido e preservado como parte importante de meu acervo literário.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Poema</span>
+                        <a href="Se.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.3s;">
+                    <div class="document-code">303</div>
+                    <h3>Nosso casamento 15 julho 1967</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">1967</div>
+                    <p>Registro do enlace matrimonial realizado em 15 de julho de 1967, com algumas fotografias daqueles momentos especiais.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Documento</span>
+                        <a href="Nosso casamento 15 jul 1967.mpg" class="read-button">Ver</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.4s;">
+                    <div class="document-code">304</div>
+                    <h3>Fotos e slides 1973-78</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">1978</div>
+                    <p>	Coleção de fotos do período entre 1973 e 1978, documentando momentos familiares e sociais da época.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Documento</span>
+                        <a href="Fotos e Slides 1970 e anos seguintes.mpg" class="read-button">Ver</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.5s;">
+                    <div class="document-code">305</div>
+                    <h3>História da Medicina de Queluz a Lafaiete</h3>
+                    <div class="document-author">José Álvaro Duarte Castanheira</div>
+                    <div class="document-year">2005</div>
+                    <p>Narrativa histórica sobre o desenvolvimento da medicina na região, desde o período em que a cidade se chamava Queluz até Conselheiro Lafaiete.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Livro</span>
+                        <a href="Hist├│ria da Medicina de Queluz a Lafaiete.pdf autor Jos├® ├ülvaro Duarte Castanheira.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.6s;">
+                    <div class="document-code">306</div>
+                    <h3>Amigos que ganhei de meu Pai</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2024</div>
+                    <p>Narrativa pessoal sobre amizades que herdei de meu Pai, destacando valores de amizade, carinho e sabedoria transmitidos entre gerações.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href="Amigos que ganhei de meu Pai.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.7s;">
+                    <div class="document-code">307</div>
+                    <h3>A história da Cachaça - Pinga e da Água Ardente</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2024</div>
+                    <p>Lenda da história da cachaça no Brasil, sua produção artesanal e importância cultural na sociedade brasileira.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href="A Hist├│ria da Cacha├ºa - Pinga e Agua Ardente.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.8s;">
+                    <div class="document-code">140</div>
+                    <h3>Flores de Australia</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2017</div>
+                    <p>Lindo conjunto visual da flora australiana, destacando espécies exóticas e sua beleza natural única.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Mídia</span>
+                        <a href="Flores_de_Australia.mp4" class="read-button">Ver</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.9s;">
+                    <div class="document-code">309</div>
+                    <h3>Queluzíadas</h3>
+                    <div class="document-author">Alberto Libanio Rodrigues</div>
+                    <div class="document-year">2000</div>
+                    <p>Obra literária  que retrata a história e Cultura de Queluz em estilo épico preservando a memória da Cidade</p>
+                    <div class="document-footer">
+                        <span class="document-type">Livro</span>
+                        <a href="Queluz├¡adas .pdf autor - Alberto Libanio Rodrigues.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="toggle-button" id="explore-button">&#9660;</button>  <!-- ▼ down arrow -->
+           
+            
+            <div class="documents-grid hidden-documents" id="hidden-documents">
+                <!-- Itens ocultos que serão exibidos ao clicar no botão "+" -->
+                <div class="document-card" style="animation-delay: 1.0s;">
+                    <div class="document-code">310</div>
+                    <h3>Carta de 1878 do Bisavô para Vovô</h3>
+                    <div class="document-author">Francisco Augusto Durães Castanheira</div>
+                    <div class="document-year">1878</div>
+                    <p>Carta saudosa. Onze meses depois que o filho veio para o Brasil. Destaque especial para o texto da última página "E tu abrace esta carta, como se abraçasses a mim". Versão comentada pela querida prima Elisa Lima.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Documento</span>
+                        <a href="Carta de 1878 do Bisav├┤ para Vov├┤ por Elisa Lima.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 1.1s;">
+                    <div class="document-code">311</div>
+                    <h3>As Melhores das Melhores</h3>
+                    <div class="document-author">José Álvaro Duarte Castanheira</div>
+                    <div class="document-year">2008</div>
+                    <p>Coletânea de frases, histórias selecionadas pelo autor como as mais significativas de sua carreira literária</p>
+                    <div class="document-footer">
+                        <span class="document-type">Livro</span>
+                        <a href="As melhores das melhores JA.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 1.2s;">
+                    <div class="document-code">312</div>
+                    <h3>Avenida Parque</h3>
+                    <div class="document-author">Marina Biagioni Marques</div>
+                    <div class="document-year">2002</div>
+                    <p>Obra que retrata a história e importância da Avenida Parque para a cidade, destacando seu papel no desenvolvimento urbano e social.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Livro</span>
+                        <a href="Avenida Parque Completo.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 1.3s;">
+                    <div class="document-code">313</div>
+                    <h3>Banana crescendo</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2024</div>
+                    <p>Documento expedido em 30 de novembro de 2021, para compor meu processo de cidadania portuguesa, em andamento na Conservatória de Lisboa.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Documento</span>
+                        <a href="Banana crescendo.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 1.4s;">
+                    <div class="document-code">314</div>
+                    <h3>Crônicas, Religião e Psiquiatria</h3>
+                    <div class="document-author">José Álvaro Duarte Castanheira</div>
+                    <div class="document-year">2010</div>
+                    <p>Coletânea de crônicas que exploram as interseções entre religiosidade e saúde mental, baseadas na experiência profissional do autor.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Livro</span>
+                        <a href="CrÔö£Ôöñnicas_ReligiÔö£├║o_e_Psiquiatria.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 1.5s;">
+                    <div class="document-code">315</div>
+                    <h3>Docum fotos Castanheira em Portugal</h3>
+                    <div class="document-author">Família Castanheira</div>
+                    <div class="document-year">1995</div>
+                    <p>Documentação fotográfica da visita da família Castanheira a Portugal, registrando a busca pelas origens familiares.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Documento</span>
+                        <a href="Docum fotos Castanheira em Portugal.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 1.6s;">
+                    <div class="document-code">316</div>
+                    <h3>Eduardo Biagioni visita Lenita e Carmem</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2018</div>
+                    <p>Alegre visita que Eduardo Biagioni fez às minhas primas Lenita e Carmem Friche, recordando e lembrando épocas do passado, em Lafaiete</p>
+                    <div class="document-footer">
+                        <span class="document-type">Documento</span>
+                        <a href="Eduardo Biagioni visita Lenita e Carmem.pptx" class="read-button">Ver</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 1.7s;">
+                    <div class="document-code">137</div>
+                    <h3>Felipe 2007 Vila da Criança</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2007</div>
+                    <p>Documentário sobre as atividades de Felipe na Vila da Criança em 2007, registrando momentos importantes de sua infância.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Mídia</span>
+                        <a href="Felipe 2007 Vila da Crian├ºa.MPG" class="read-button">Ver</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 1.8s;">
+                    <div class="document-code">136</div>
+                    <h3>Flores de Australia</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2017</div>
+                    <p>Catálogo ilustrado das flores e plantas nativas da Austrália, destacando sua beleza e diversidade.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Livro</span>
+                        <a href="Flores de Australia.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 1.9s;">
+                    <div class="document-code">319</div>
+                    <h3>História do Tio Antonio</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">1990</div>
+                    <p>Antonio Durães Castanheira, irmão de meu avô Francisco Augusto, veio de Portugal por volta do ano de 1900. Com ele veio um amigo e vizinho lá de Fiais da Telha. Seguiram para Ponte Nova..</p>
+                    <div class="document-footer">
+                        <span class="document-type">Documento</span>
+                        <a href="Hist├│ria do Tio Antonio.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 2.0s;">
+                    <div class="document-code">320</div>
+                    <h3>Homenagem ao meu Pai</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2024</div>
+                    <p>Texto que fiz (em 1974), em homenagem ao meu Pai, destacando um pouco de sua história, suas qualidades, ensinamentos e o legado deixado para a família</p>
+                    <div class="document-footer">
+                        <span class="document-type">Documento</span>
+                        <a href="Homenagem ao meu Pai.docx.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 2.1s;">
+                    <div class="document-code">138</div>
+                    <h3>Lafaiete do passado nossa casa e cidade</h3>
+                    <div class="document-author">João Pio Duarte Castanheira</div>
+                    <div class="document-year">1986</div>
+                    <p>Vídeo mostrando alguns móveis de nossa casa, sua fachada e um passeio pelo quintal, ainda coberto de vegetação (hoje repleto de construções).</p>
+                    <div class="document-footer">
+                        <span class="document-type">Mídia</span>
+                        <a href="Lafaiete do passado nossa casa e cidade (2).mpg" class="read-button">Ver</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 2.2s;">
+                    <div class="document-code">322</div>
+                    <h3>Missão - Homenagem a Luiza Biagioni</h3>
+                    <div class="document-author">Pedro de Lima Belisário</div>
+                    <div class="document-year">2015</div>
+                    <p>Texto em homenagem a Luiza Izabel Biagioni, destacando sua missão de vida e contribuições para a comunidade</p>
+                    <div class="document-footer">
+                        <span class="document-type">Livro</span>
+                        <a href="Miss├úo - Homenagem a Luiza Biagioni.pdf autor Pedro de Lima Belis├írio.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 2.3s;">
                     <div class="document-code">323</div>
                     <h3>Monsenhor Moreira - Uma vida a serviço do Reino de Deus</h3>
                     <div class="document-author">Luiza Izabel Biagioni</div>
@@ -1240,947 +1451,720 @@
                     <p>Sucinta biografia de Monsenhor Moreira, relatando sua trajetória religiosa e contribuições para a comunidade católica local.</p>
                     <div class="document-footer">
                         <span class="document-type">Livro</span>
-                        <a href="#" class="read-button">Ler</a>
+                        <a href="Monsenhor Moreira - Uma vida a servi├ºo do Reino de Deus.pdf autora_ Luiza Izabel Biagioni.pdf" class="read-button">Ler</a>
                     </div>
                 </div>
                 
-                <div class="document-card">
+                <div class="document-card" style="animation-delay: 2.4s;">
                     <div class="document-code">324</div>
-                    <h3>O segredo</h3>
+                    <h3>O segredo da vida</h3>
                     <div class="document-author">Reinaldo Duarte Castanheira</div>
                     <div class="document-year">2021</div>
-                    <p>Reflexões filosóficas sobre a vida e os segredos que carregamos, uma narrativa significativa sobre a condição humana.</p>
+                    <p>Reflexões filosóficas sobre o sentido da vida e os segredos para uma existência plena e significativa</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="#" class="read-button">Ler</a>
+                        <a href="O segredo da vida.pdf" class="read-button">Ler</a>
                     </div>
                 </div>
                 
-                <div class="document-card">
-                    <div class="document-code">325</div>
-                    <h3>Antologia</h3>
+                <div class="document-card" style="animation-delay: 2.5s;">
+                    <div class="document-code">139</div>
+                    <h3>Primo Francisco Augusto</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2023</div>
+                    <p>Coletâneas de fotos de família, Video de 2018, delicada mensagem de Tia Carmita, fotos dos casamentos Flávia e Wagner e Leonardo e Esther</p>
+                    <div class="document-footer">
+                        <span class="document-type">Mídia</span>
+                        <a href="Primo Francisco Augusto.mp4" class="read-button">Ver</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 2.6s;">
+                    <div class="document-code">326</div>
+                    <h3>Uma mulher de fibra chamada Regina Coeli</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2022</div>
+                    <p>Um texto que fiz homenageando minha querida mãe-irmã, quando de sua partida em 6 de junho de 2024.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Biografia</span>
+                        <a href="Uma mulher de fibra chamada Regina Coeli.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 2.7s;">
+                    <div class="document-code">327</div>
+                    <h3>A Herança dos Castanheiras</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2023</div>
+                    <p>Fruto de uma carta vinda, provavelmente, de um paciente de manicômio do Rio, que provocou na divulgação de uma falsa herança.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Documento</span>
+                        <a href="A Heran├ºa dos Castanheiras.docx.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 2.8s;">
+                    <div class="document-code">328</div>
+                    <h3>Antologia Lafaiete em Prosa e Verso</h3>
                     <div class="document-author">Reuber Lana Antoniazzi</div>
                     <div class="document-year">2020</div>
                     <p>A vida é feita de degraus como uma pirâmide que tem a pretensão de alcançar o infinito. É quando a Fênix sobrevoa Lafaiete através dos tempos e deixa o legado para o futuro.</p>
                     <div class="document-footer">
                         <span class="document-type">Antologia</span>
-                        <a href="#" class="read-button">Ler</a>
+                        <a href="Antologia Lafaiete em Prosa e Verso.pdf" class="read-button">Ler</a>
+                       
                     </div>
+                  
                 </div>
             </div>
-            
             <div id="videos-container" class="video-grid">
-                <!-- Os vídeos serão inseridos aqui pelo JavaScript -->
+                <!-- Vídeos serão renderizados aqui pelo JavaScript -->
+                 
             </div>
+            <button class="toggle-button recolher-button" id="recolher-button">&#9650;</button>  <!-- ▲ up arrow -->
             
-            <button id="explore-button" class="toggle-button">+</button>
-            <button id="recolher-button" class="toggle-button recolher-button">-</button>
-            
-            <div id="hidden-documents">
-                <!-- Documentos adicionais serão inseridos aqui -->
-            </div>
+    
+          
         </section>
+        <button class="toggle-button recolher-button" id="recolher-button">&#9650;</button>  <!-- ▲ up arrow -->
+        <script>document.addEventListener('DOMContentLoaded', function() {
+            renderizarVideos()})</script>
+        
     </div>
     
     <footer class="footer">
-        <p>&copy; 2024 Biblioteca Digital Reinaldo Duarte Castanheira. Todos os direitos reservados.</p>
-        <p>Preservando memórias e histórias para as futuras gerações.</p>
-        <p><a href="mailto:contato@bibliotecacastanheira.com">contato@bibliotecacastanheira.com</a></p>
+        <p>Biblioteca Digital Pessoal de Reinaldo Duarte Castanheira &copy; 2024</p>
+        <p>Aquele que conta histórias e relembra os seus, celebra a vida. Um trabalho contínuo por Reinaldo e Felipe Castanheira</p>
+        <p>Contato: <a href="mailto:reinaldoduarte080@gmail.com ">reinaldoduarte080@gmail.com </a></p>
     </footer>
-
+    <script src="password-protection.js"></script>
+   
     <script>
-        // ========================================
-        // SERVIDOR FANTASMA - CONFIGURAÇÃO GITHUB
-        // ========================================
+        document.addEventListener("DOMContentLoaded", function () {
+            const correctPassword = "194348"; // your password here
+            const entered = sessionStorage.getItem("authorized");
         
-        // CONFIGURAÇÕES DO GITHUB (CONFIGURE AQUI)
-        let GITHUB_CONFIG = {
-            owner: '',                    // SEU USUÁRIO GITHUB
-            repo: '',                     // NOME DO REPOSITÓRIO  
-            branch: 'main',               // BRANCH PRINCIPAL
-            token: '',                    // PERSONAL ACCESS TOKEN
-            filename: 'index.html'        // ARQUIVO A SER ATUALIZADO
-        };
+            if (entered !== "true") {
+              const attempt = prompt("Digite a senha para acessar a biblioteca:");
         
-        // Verificar se configuração existe no localStorage
-        function loadGitHubConfig() {
-            const saved = localStorage.getItem('github_config');
-            if (saved) {
-                GITHUB_CONFIG = { ...GITHUB_CONFIG, ...JSON.parse(saved) };
+              if (attempt === correctPassword) {
+                sessionStorage.setItem("authorized", "true");
+              } else {
+                document.body.innerHTML = "<h1 style='text-align:center; padding-top: 20vh;'>Acesso negado.</h1>";
+              }
             }
-        }
-        
-        // Salvar configuração no localStorage
-        function saveGitHubConfig() {
-            localStorage.setItem('github_config', JSON.stringify(GITHUB_CONFIG));
-        }
-        
-        // ========================================
-        // MODO DE EDIÇÃO - FUNCIONALIDADE COMPLETA
-        // ========================================
-        
-        let editModeActive = false;
-        let currentEditingImage = null;
-        let originalContent = new Map();
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            loadGitHubConfig();
-            
-            const passwordR = document.getElementById('password-r');
-            const welcomeMessage = document.getElementById('welcome-message');
-            
-            passwordR.addEventListener('click', function() {
-                const password = prompt('Digite a senha:');
-                if (password === '24042003') {
-                    if (!editModeActive) {
-                        // Verificar configuração GitHub antes de ativar
-                        if (!GITHUB_CONFIG.owner || !GITHUB_CONFIG.repo || !GITHUB_CONFIG.token) {
-                            showGitHubConfigModal();
-                            return;
-                        }
-                        
-                        activateEditMode();
-                        welcomeMessage.textContent = 'Modo de Edição Ativado!';
-                    } else {
-                        deactivateEditMode();
-                        welcomeMessage.textContent = 'Modo de Edição Desativado!';
-                    }
-                    welcomeMessage.classList.add('show');
-                    
-                    setTimeout(function() {
-                        welcomeMessage.classList.remove('show');
-                    }, 3000);
-                }
-            });
+          });
+          const videos = [
+          {
+              titulo: "Picinic na Fazenda Castanheira",
+              id: "TfojYU3qad0",
+              protegido: true,
+              codigo: "101",
+              ano: "1985",
+              sinopse: "Fomos, doze meninos e meninas, passear na cachoeira do Rio Paraopeba, na Fazenda de meu Pai. Que bela recordação. "
+          },
+          {
+              titulo: "Picnic no Quintal da Casa de nosso Pai",
+              id: "-OCvEII3Xyg",
+              protegido: true,
+              codigo: "102",
+              ano: "1985",
+              sinopse: "Outra vez, num grupo de 14 meninos e meninas fazer um inesquecível Picnic na região onde hoje é o Bairro Colibri."
+          },
+          {
+              titulo: "Lembranças de Lugares",
+              id: "V9zv1ltttXU",
+              protegido: false,
+              codigo: "103",
+              ano: "1979",
+              sinopse: "Lugares onde por, incontáveis vezes, passeava com meu Pai e Juquinha Congonhas, Alto do Maranhão, Fazenda Castanheira terminando sempre em São Brás do Suassuí"
+          },
+          {
+              titulo: "Geração XUXA. O tempo passou",
+              id: "D1dNMD7rd-U",
+              protegido: true,
+              codigo: "104",
+              ano: "1985",
+              sinopse: "No páteo da casa do José Álvaro Isabella, primas e amigas dançam coreografias do Show da XUXA"
+          },
+          {
+              titulo: "José Álvaro e Mari Carmen Cinquenta anos depois",
+              id: "04qJBryv53M",
+              protegido: true,
+              codigo: "105",
+              ano: "2011",
+              sinopse: "Celebração das Bodas de Ouro, com retrospecto da cerimônia em Madrid e comemorações no páteo da casa em Lafaiete."
+          },
+          {
+            titulo: "José Alvaro e Mari Carmem comemoram Bodas de Ouro",
+            id: "2GDY20aWciM",
+            protegido: true,
+            codigo: "106",
+            ano: "2010",
+            sinopse: "Celebração das Bodas de Ouro, com retrospecto da cerimônia em Madrid e comemorações no páteo da casa em Lafaiete. "
+        },
+          {
+              titulo: "Recordações de Natal 1982 e 83– Fotos sem som",
+              id: "CwUSWc4u6N0",
+              protegido: true,
+              codigo: "107",
+              ano: "2011",
+              sinopse: "José Álvaro vai fazer curso em Madrid e numa excursão de ônibus, se conhecem. A partir de então tudo acontece."
+          },
+          {
+              titulo: "Aniversário Bella dois anos - Brasília",
+              id: "WaeSjD2UZdE",
+              protegido: true,
+              codigo: "108",
+              ano: "1982-1983",
+              sinopse: "Lindas festas de Natal com os inesquecíveis encontros da Tias. Tios, primas e primos e o Papai Noel. Dezenas de anos passados."
+          },
+          {
+              titulo: "86 anos Pai – 50 anos Augusto",
+              id: "mRn20jWdNd8",
+              protegido: true,
+              codigo: "109",
+              ano: "1978",
+              sinopse: "Na grande mesa de nossa sala de jantar comemoramos a data festiva. Cenas do irmão Augusto Álvaro."
+          },
+    {
+        titulo: "Dona Avelina = Parte 1",
+        id: "GglxnXBYs5E",
+        protegido: false,
+        codigo: "110"
+    },
+    {
+        titulo: "Dona Avelina - Final",
+        id: "Hdb-hTM03ds",
+        protegido: false,
+        codigo: "111"
+    },
+    {
+        titulo: "Professora Didi Ramos",
+        id: "HmjuEzKMmoY",
+        protegido: false,
+        codigo: "112"
+    },
+    {
+        titulo: "Família Duarte",
+        id: "8i8Hi4KFzu8",
+        protegido: false,
+        codigo: "113"
+    },
+    {
+        titulo: "Assoc. Médica Lafaiete 1956 Dr. Pedro Paulo",
+        id: "bqaObzM_STU",
+        protegido:  false,
+        codigo: "114"
+    },
+    {
+        titulo: "Geraldo Zebral",
+        id: "yYN8vIgaGTM",
+        protegido: false,
+        codigo: "115"
+    },
+    {
+        titulo: "Viação Pássaro Branco	Homenagem a Antonio Eduardo Castanheira",
+        id: "o3q5THVKjpE",
+        protegido:  false,
+        autor: "Viação Pássaro Branco",
+        sinopse: "Homenagem da Viação Pássaro Branco, promovida por seus empregados, em 2010, ao cidadão que à frente da Empresa, celebrava 40 anos de serena e promissora Administração.",
+        ano: "2010",
+        codigo: "116"
+    },
+    {
+        titulo: "Despedida nossa Casa Rua Melo Viana 75",
+        id: "tC6wVpqTo2Y",
+        protegido:  true,
+        codigo: "117"
+    },
+    {
+        titulo: "Fumec – Comemoração 40 anos formatura - Início",
+        id: "pyTHG4CRWG8",
+        protegido: false,
+        codigo: "118"
+    },
+    {
+        titulo: "Fumec - Comemoração 40 anos formatura - Final",
+        id: "8uweco9C2F8",
+        protegido: false,
+        codigo: "119"
+    },
+    {
+        titulo: "FUMEC – Solenidade na Fumec - 40 anos Formados",
+        id: "kAlTIJZTq1c",
+        protegido: false,
+        codigo: "120"
+    },
+    {
+        titulo: "Natal Família na Casa Tia Dulce",
+        id: "WmiPzL3zfB4",
+        protegido: true,
+        codigo: "121"
+    },
+    {
+        titulo: "Procissão em Salamanca 1",
+        id: "du84A_ryPRA",
+        protegido: false,
+        codigo: "122"
+    },
+    {
+        titulo: "Procissão em Salamanca 2",
+        id: "ijdR6F4SwHI",
+        protegido: false,
+        codigo: "123"
+    },
+    {
+        titulo: "Procissão em Salamanca 3",
+        id: "4TM2HK6kH4c",
+        protegido: false,
+        codigo: "124"
+    },
+    {
+        titulo: "Procissão em Salamanca 4",
+        id: "Gx9I3X6y5a8",
+        protegido: false,
+        codigo: "125"
+    },
+    {
+        titulo: "Professora Odete Costa",
+        id: "ryxRnbQK728",
+        protegido: false,
+        codigo: "126"
+    },
+    {
+        titulo: "Professora Dona Raquel",
+        id: "tUURcIUgbRY",
+        protegido: false,
+        codigo: "127"
+    },
+    {
+        titulo: "FUMEC BH três depoimentos",
+        id: "QiJlTOvM4bU",
+        protegido: false,
+        codigo: "128"
+    },
+    {
+        titulo: "FUMEC BH dois depoimentos",
+        id: "TBsjIp2XWjA",
+        protegido: false,
+        codigo: "129"
+    },
+    {
+        titulo: "Aniversário 50 anos do João Pio",
+        id: "TXCPfzG4AD0",
+        protegido: false,
+        codigo: "130"
+    },
+    {
+        titulo: "Missa campal em Lafaiete - 1983",
+        id: "_AWfyiFmlZE",
+        protegido: false,
+        codigo: "131"
+    },
+    {
+        titulo: "Minhas primas Castanheira Friche",
+        id: "53XbKmx2LQo",
+        protegido: false,
+        codigo: "132"
+    },
+    {
+        titulo: "Centenário Dr Ary Belisário I",
+        id: "MWwodGr86FM",
+        protegido: false,
+        codigo: "133"
+    },
+    {
+        titulo: "Centenário Dr Ary Belisário II",
+        id: "Evk4YtiqW9w",
+        protegido: false,
+        codigo: "134"
+    },
+    {
+        titulo: "Luiza Izabel Biagioni Uma mulher iluminada",
+        id: "2YJyskkDJLc",
+        protegido: false,
+        codigo: "135"
+    },
+    {
+        titulo: "SEST SENAT Patos de Minas",
+        id: "SVf5Mh3hIz8",
+        protegido: true,
+        codigo: "136"
+    },
+    
+    {
+        titulo: "Passeio aéreo sobre Lafaiete",
+        id: "unupxsXrAkc",
+        protegido: false,
+        autor: "Rodrigo Queiroz Castanheira",
+        sinopse: "Vídeo amador, gerado por drone, sobre parte da cidade, guardando fase de desenvolvimento da cidade.",
+        ano : "2018",
+        codigo: "137"
+    },
+    
+];
+
+
+
+// Função para renderizar a seção de vídeos
+
+// Inicializar a seção de vídeos quando o DOM estiver carregado
+document.addEventListener('DOMContentLoaded', function() {
+    renderizarVideos();
+    
+    // Add event listener to update all video links to use password protection
+    setTimeout(() => {
+        const videoLinks = document.querySelectorAll('.video-thumbnail a');
+        videoLinks.forEach(link => {
+            if (link.hasAttribute('target') && link.getAttribute('href').includes('youtube.com/watch?v=')) {
+                const videoId = link.getAttribute('href').split('v=')[1];
+                const isProtected = link.querySelector('.protected-badge') !== null;
+                
+                link.setAttribute('href', 'javascript:void(0)');
+                link.removeAttribute('target');
+                link.setAttribute('onclick', `openVideo('${videoId}', ${isProtected})`);
+                console.log(`Updated video link for ID: ${videoId}, Protected: ${isProtected}`);
+            }
         });
-        
-        // ========================================
-        // MODAL DE CONFIGURAÇÃO GITHUB
-        // ========================================
-        
-        function showGitHubConfigModal() {
-            const modal = document.createElement('div');
-            modal.className = 'github-config-modal';
-            modal.id = 'github-config-modal';
-            
-            modal.innerHTML = `
-                <div class="github-config-dialog">
-                    <h3>🔧 Configuração do Servidor Fantasma</h3>
-                    <p style="margin-bottom: 20px; color: #666; text-align: center;">
-                        Configure sua conta GitHub para salvar alterações automaticamente
-                    </p>
-                    
-                    <div class="config-field">
-                        <label>Usuário GitHub:</label>
-                        <input type="text" id="github-owner" placeholder="seu-usuario" value="${GITHUB_CONFIG.owner}">
-                    </div>
-                    
-                    <div class="config-field">
-                        <label>Nome do Repositório:</label>
-                        <input type="text" id="github-repo" placeholder="biblioteca-digital" value="${GITHUB_CONFIG.repo}">
-                    </div>
-                    
-                    <div class="config-field">
-                        <label>Branch:</label>
-                        <input type="text" id="github-branch" placeholder="main" value="${GITHUB_CONFIG.branch}">
-                    </div>
-                    
-                    <div class="config-field">
-                        <label>Personal Access Token:</label>
-                        <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx" value="${GITHUB_CONFIG.token}">
-                        <small style="color: #666;">
-                            <a href="https://github.com/settings/tokens" target="_blank">Criar token aqui</a>
-                        </small>
-                    </div>
-                    
-                    <div class="config-field">
-                        <label>Nome do Arquivo:</label>
-                        <input type="text" id="github-filename" placeholder="index.html" value="${GITHUB_CONFIG.filename}">
-                    </div>
-                    
-                    <div class="config-buttons">
-                        <button class="btn-save-config" onclick="saveGitHubConfigFromModal()">💾 Salvar e Ativar</button>
-                        <button class="btn-cancel-config" onclick="closeGitHubConfigModal()">❌ Cancelar</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-        }
-        
-        function saveGitHubConfigFromModal() {
-            GITHUB_CONFIG.owner = document.getElementById('github-owner').value;
-            GITHUB_CONFIG.repo = document.getElementById('github-repo').value;
-            GITHUB_CONFIG.branch = document.getElementById('github-branch').value;
-            GITHUB_CONFIG.token = document.getElementById('github-token').value;
-            GITHUB_CONFIG.filename = document.getElementById('github-filename').value;
-            
-            if (!GITHUB_CONFIG.owner || !GITHUB_CONFIG.repo || !GITHUB_CONFIG.token) {
-                alert('Por favor, preencha todos os campos obrigatórios!');
-                return;
-            }
-            
-            saveGitHubConfig();
-            closeGitHubConfigModal();
-            
-            // Ativar modo de edição
-            activateEditMode();
-            const welcomeMessage = document.getElementById('welcome-message');
-            welcomeMessage.textContent = 'Servidor Fantasma Configurado!';
-            welcomeMessage.classList.add('show');
-            
-            setTimeout(function() {
-                welcomeMessage.classList.remove('show');
-            }, 3000);
-        }
-        
-        function closeGitHubConfigModal() {
-            const modal = document.getElementById('github-config-modal');
-            if (modal) modal.remove();
-        }
-        
-        // ========================================
-        // FUNÇÕES DO MODO DE EDIÇÃO
-        // ========================================
-        
-        function activateEditMode() {
-            editModeActive = true;
-            document.body.classList.add('edit-mode-active');
-            
-            const editableElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span:not(.document-code), .document-author, .document-year, .timeline-text-horizontal, .timeline-author-horizontal, .intro p, .historical-photo-caption');
-            
-            editableElements.forEach(element => {
-                if (!element.closest('.document-code') && 
-                    !element.closest('.play-button') && 
-                    !element.closest('.protected-badge') &&
-                    !element.closest('.stat-badge') &&
-                    !element.closest('button') &&
-                    !element.closest('a')) {
-                    
-                    element.setAttribute('contenteditable', 'true');
-                    originalContent.set(element, element.innerHTML);
-                }
-            });
-            
-            const images = document.querySelectorAll('img');
-            images.forEach(img => {
-                img.addEventListener('click', handleImageEdit);
-                img.style.cursor = 'pointer';
-                originalContent.set(img, img.src);
-            });
-            
-            createEditModeIndicator();
-            createEditModeControls();
-        }
-        
-        function deactivateEditMode() {
-            editModeActive = false;
-            document.body.classList.remove('edit-mode-active');
-            
-            const editableElements = document.querySelectorAll('[contenteditable="true"]');
-            editableElements.forEach(element => {
-                element.removeAttribute('contenteditable');
-            });
-            
-            const images = document.querySelectorAll('img');
-            images.forEach(img => {
-                img.removeEventListener('click', handleImageEdit);
-                img.style.cursor = '';
-            });
-            
-            removeEditModeIndicator();
-            removeEditModeControls();
-            removeSaveIndicator();
-        }
-        
-        function createEditModeIndicator() {
-            const indicator = document.createElement('div');
-            indicator.className = 'edit-mode-indicator';
-            indicator.id = 'edit-mode-indicator';
-            indicator.innerHTML = '🎭 SERVIDOR FANTASMA ATIVO';
-            document.body.appendChild(indicator);
-        }
-        
-        function createEditModeControls() {
-            const controls = document.createElement('div');
-            controls.className = 'edit-mode-controls';
-            controls.id = 'edit-mode-controls';
-            controls.innerHTML = `
-                <button class="edit-control-btn" onclick="saveChangesToGitHub()">💾 Salvar no Servidor</button>
-                <button class="edit-control-btn" onclick="undoChanges()">↶ Desfazer Tudo</button>
-                <button class="edit-control-btn" onclick="viewGitHubCommits()">📁 Ver Histórico</button>
-                <button class="edit-control-btn" onclick="showGitHubConfigModal()">⚙️ Configurações</button>
-                <button class="edit-control-btn" onclick="deactivateEditMode()">❌ Sair do Modo Edição</button>
-            `;
-            document.body.appendChild(controls);
-        }
-        
-        function removeEditModeIndicator() {
-            const indicator = document.getElementById('edit-mode-indicator');
-            if (indicator) indicator.remove();
-        }
-        
-        function removeEditModeControls() {
-            const controls = document.getElementById('edit-mode-controls');
-            if (controls) controls.remove();
-        }
-        
-        // ========================================
-        // SISTEMA DE INDICADORES
-        // ========================================
-        
-        function showSaveIndicator(message, type = 'success') {
-            removeSaveIndicator();
-            
-            const indicator = document.createElement('div');
-            indicator.className = 'save-indicator';
-            indicator.id = 'save-indicator';
-            indicator.textContent = message;
-            
-            if (type === 'error') {
-                indicator.classList.add('error');
-            } else if (type === 'warning') {
-                indicator.classList.add('warning');
-            }
-            
-            document.body.appendChild(indicator);
-            
-            setTimeout(() => {
-                indicator.classList.add('show');
-            }, 100);
-            
-            setTimeout(() => {
-                indicator.classList.remove('show');
-                setTimeout(() => {
-                    removeSaveIndicator();
-                }, 300);
-            }, 4000);
-        }
-        
-        function removeSaveIndicator() {
-            const indicator = document.getElementById('save-indicator');
-            if (indicator) indicator.remove();
-        }
-        
-        function showRebuildNotification() {
-            const notification = document.createElement('div');
-            notification.className = 'rebuild-notification';
-            notification.innerHTML = `
-                🚀 Netlify atualizando...<br>
-                <small>Mudanças visíveis em ~2 minutos</small>
-            `;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 10000);
-        }
-        
-        // ========================================
-        // SERVIDOR FANTASMA - GITHUB API
-        // ========================================
-        
-        async function saveChangesToGitHub() {
-            try {
-                showSaveIndicator('🔄 Conectando ao servidor...', 'warning');
-                
-                // 1. Detectar alterações
-                const changes = detectChanges();
-                if (changes.length === 0) {
-                    showSaveIndicator('ℹ️ Nenhuma alteração detectada');
-                    return;
-                }
-                
-                showSaveIndicator('📝 Preparando alterações...');
-                
-                // 2. Obter conteúdo HTML atual
-                const htmlContent = document.documentElement.outerHTML;
-                
-                // 3. Obter SHA atual do arquivo
-                showSaveIndicator('🔍 Verificando arquivo atual...');
-                const currentFile = await getFileFromGitHub();
-                
-                // 4. Fazer commit
-                showSaveIndicator('💾 Salvando no servidor...');
-                const result = await commitToGitHub(htmlContent, currentFile.sha);
-                
-                if (result.commit) {
-                    showSaveIndicator('✅ Salvo com sucesso!');
-                    showRebuildNotification();
-                    
-                    // Atualizar conteúdo original
-                    updateOriginalContent();
-                    
-                    console.log('Commit realizado:', result.commit.html_url);
-                } else {
-                    throw new Error(result.message || 'Erro desconhecido');
-                }
-                
-            } catch (error) {
-                console.error('Erro ao salvar:', error);
-                showSaveIndicator(`❌ Erro: ${error.message}`, 'error');
-            }
-        }
-        
-        async function getFileFromGitHub() {
-            const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.filename}`;
-            
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `token ${GITHUB_CONFIG.token}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Erro ao obter arquivo: ${response.status} ${response.statusText}`);
-            }
-            
-            return await response.json();
-        }
-        
-        async function commitToGitHub(content, sha) {
-            const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.filename}`;
-            
-            const commitMessage = `📝 Atualização da biblioteca - ${new Date().toLocaleString('pt-BR')}`;
-            
-            const response = await fetch(url, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${GITHUB_CONFIG.token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/vnd.github.v3+json'
-                },
-                body: JSON.stringify({
-                    message: commitMessage,
-                    content: btoa(unescape(encodeURIComponent(content))),
-                    sha: sha,
-                    branch: GITHUB_CONFIG.branch
-                })
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP ${response.status}`);
-            }
-            
-            return await response.json();
-        }
-        
-        function detectChanges() {
-            const changes = [];
-            
-            // Verificar textos editados
-            const editedElements = document.querySelectorAll('[contenteditable="true"]');
-            editedElements.forEach(element => {
-                const original = originalContent.get(element);
-                const current = element.innerHTML;
-                if (original !== current) {
-                    changes.push({
-                        type: 'text',
-                        element: element.tagName + (element.className ? '.' + element.className : ''),
-                        original: original,
-                        new: current
-                    });
-                }
-            });
-            
-            // Verificar imagens modificadas
-            const modifiedImages = document.querySelectorAll('img[data-modified="true"]');
-            modifiedImages.forEach(img => {
-                const original = originalContent.get(img);
-                changes.push({
-                    type: 'image',
-                    element: 'img',
-                    original: original,
-                    new: img.src
-                });
-            });
-            
-            return changes;
-        }
-        
-        function updateOriginalContent() {
-            // Atualizar conteúdo original após salvar
-            const editedElements = document.querySelectorAll('[contenteditable="true"]');
-            editedElements.forEach(element => {
-                originalContent.set(element, element.innerHTML);
-            });
-            
-            document.querySelectorAll('img').forEach(img => {
-                originalContent.set(img, img.src);
-                img.removeAttribute('data-modified');
-            });
-        }
-        
-        // ========================================
-        // UPLOAD DE IMAGENS VIA GITHUB
-        // ========================================
-        
-        function handleImageEdit(event) {
-            if (!editModeActive) return;
-            
-            event.preventDefault();
-            event.stopPropagation();
-            
-            currentEditingImage = event.target;
-            showImageUploadDialog();
-        }
-        
-        function showImageUploadDialog() {
-            const overlay = document.createElement('div');
-            overlay.className = 'image-upload-overlay';
-            overlay.id = 'image-upload-overlay';
-            
-            overlay.innerHTML = `
-                <div class="image-upload-dialog">
-                    <h3>🖼️ Substituir Imagem</h3>
-                    <p>Selecione uma nova imagem para substituir:</p>
-                    <input type="file" id="image-file-input" accept="image/*">
-                    <div>
-                        <button class="btn-upload" onclick="uploadImageToGitHub()">📤 Substituir</button>
-                        <button class="btn-cancel" onclick="closeImageDialog()">❌ Cancelar</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(overlay);
-        }
-        
-        async function uploadImageToGitHub() {
-            const fileInput = document.getElementById('image-file-input');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                alert('Por favor, selecione uma imagem.');
-                return;
-            }
-            
-            try {
-                showSaveIndicator('📤 Fazendo upload da imagem...');
-                
-                // 1. Converter para Base64
-                const base64Content = await fileToBase64(file);
-                
-                // 2. Gerar nome único
-                const timestamp = Date.now();
-                const extension = file.name.split('.').pop();
-                const filename = `images/${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-                
-                // 3. Upload para GitHub
-                const result = await uploadFileToGitHub(filename, base64Content);
-                
-                if (result.content) {
-                    // 4. Atualizar imagem na página
-                    const imageUrl = `https://raw.githubusercontent.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${filename}`;
-                    
-                    if (currentEditingImage) {
-                        currentEditingImage.src = imageUrl;
-                        currentEditingImage.setAttribute('data-modified', 'true');
-                    }
-                    
-                    showSaveIndicator('✅ Imagem substituída com sucesso!');
-                    closeImageDialog();
-                } else {
-                    throw new Error('Falha no upload');
-                }
-                
-            } catch (error) {
-                console.error('Erro no upload:', error);
-                showSaveIndicator(`❌ Erro no upload: ${error.message}`, 'error');
-            }
-        }
-        
-        async function uploadFileToGitHub(filename, base64Content) {
-            const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filename}`;
-            
-            const response = await fetch(url, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${GITHUB_CONFIG.token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/vnd.github.v3+json'
-                },
-                body: JSON.stringify({
-                    message: `📷 Upload de imagem: ${filename}`,
-                    content: base64Content,
-                    branch: GITHUB_CONFIG.branch
-                })
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP ${response.status}`);
-            }
-            
-            return await response.json();
-        }
-        
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => {
-                    // Remover o prefixo "data:image/...;base64,"
-                    const base64 = reader.result.split(',')[1];
-                    resolve(base64);
-                };
-                reader.onerror = error => reject(error);
-            });
-        }
-        
-        function closeImageDialog() {
-            const overlay = document.getElementById('image-upload-overlay');
-            if (overlay) overlay.remove();
-            currentEditingImage = null;
-        }
-        
-        // ========================================
-        // HISTÓRICO DE COMMITS (SIMULA BACKUPS)
-        // ========================================
-        
-        async function viewGitHubCommits() {
-            try {
-                showSaveIndicator('📁 Carregando histórico...');
-                
-                const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/commits?path=${GITHUB_CONFIG.filename}&per_page=10`;
-                
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_CONFIG.token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Erro ao obter histórico: ${response.status}`);
-                }
-                
-                const commits = await response.json();
-                
-                if (commits.length > 0) {
-                    let commitList = '📁 Histórico de Alterações:\n\n';
-                    commits.forEach((commit, index) => {
-                        const date = new Date(commit.commit.author.date).toLocaleString('pt-BR');
-                        const message = commit.commit.message;
-                        const author = commit.commit.author.name;
-                        
-                        commitList += `${index + 1}. ${message}\n`;
-                        commitList += `   📅 ${date}\n`;
-                        commitList += `   👤 ${author}\n`;
-                        commitList += `   🔗 ${commit.html_url}\n\n`;
-                    });
-                    
-                    alert(commitList);
-                } else {
-                    alert('📁 Nenhum histórico encontrado.');
-                }
-                
-                removeSaveIndicator();
-                
-            } catch (error) {
-                console.error('Erro ao obter histórico:', error);
-                showSaveIndicator(`❌ Erro: ${error.message}`, 'error');
-            }
-        }
-        
-        // ========================================
-        // FUNÇÃO DESFAZER
-        // ========================================
-        
-        function undoChanges() {
-            if (confirm('🔄 Tem certeza que deseja desfazer todas as alterações?')) {
-                // Restaurar textos
-                const editedElements = document.querySelectorAll('[contenteditable="true"]');
-                editedElements.forEach(element => {
-                    const original = originalContent.get(element);
-                    if (original) {
-                        element.innerHTML = original;
-                    }
-                });
-                
-                // Restaurar imagens
-                const images = document.querySelectorAll('img');
-                images.forEach(img => {
-                    const original = originalContent.get(img);
-                    if (original && img.getAttribute('data-modified')) {
-                        img.src = original;
-                        img.removeAttribute('data-modified');
-                    }
-                });
-                
-                showSaveIndicator('↶ Alterações desfeitas!');
-            }
-        }
-        
-        // ========================================
-        // FUNCIONALIDADE DE VÍDEOS
-        // ========================================
-        
-        const videos = [
-            {
-                titulo: "Picnic na Fazenda Castanheira",
-                id: "2GDY20aWciM",
-                protegido: true,
-                codigo: "101",
-                ano: "1985",
-                sinopse: "Fomos, doze meninos e meninas, passear na cachoeira do Rio Paraopeba, na Fazenda de meu Pai. Que bela recordação."
-            },
-            {
-                titulo: "Picnic no Quintal da Casa de nosso Pai",
-                id: "-OCvEII3Xyg",
-                protegido: true,
-                codigo: "102",
-                ano: "1985",
-                sinopse: "Outra vez, num grupo de 14 meninos e meninas fazer um inesquecível Picnic na região onde hoje é o Bairro Colibri."
-            },
-            {
-                titulo: "Lembranças de Lugares",
-                id: "V9zv1ltttXU",
-                protegido: false,
-                codigo: "103",
-                ano: "1979",
-                sinopse: "Lugares onde por, incontáveis vezes, passeava com meu Pai e Juquinha Congonhas, Alto do Maranhão, Fazenda Castanheira terminando sempre em São Brás do Suassuí"
-            },
-            {
-                titulo: "Geração XUXA. O tempo passou",
-                id: "D1dNMD7rd-U",
-                protegido: true,
-                codigo: "104",
-                ano: "1985",
-                sinopse: "No páteo da casa do José Álvaro Isabella, primas e amigas dançam coreografias do Show da XUXA"
-            },
-            {
-                titulo: "José Álvaro e Mari Carmen Cinquenta anos depois",
-                id: "04qJBryv53M",
-                protegido: true,
-                codigo: "105",
-                ano: "2011",
-                sinopse: "Celebração das Bodas de Ouro, com retrospecto da cerimônia em Madrid e comemorações no páteo da casa em Lafaiete."
-            },
-            {
-                titulo: "Recordações de Natal 1982 e 83– Fotos sem som",
-                id: "CwUSWc4u6N0",
-                protegido: true,
-                codigo: "106",
-                ano: "2011",
-                sinopse: "José Álvaro vai fazer curso em Madrid e numa excursão de ônibus, se conhecem. A partir de então tudo acontece."
-            },
-            {
-                titulo: "Aniversário Bella dois anos - Brasília",
-                id: "WaeSjD2UZdE",
-                protegido: true,
-                codigo: "107",
-                ano: "1982-1983",
-                sinopse: "Lindas festas de Natal com os inesquecíveis encontros da Tias. Tios, primas e primos e o Papai Noel. Dezenas de anos passados."
-            },
-            {
-                titulo: "86 anos Pai – 50 anos Augusto",
-                id: "mRn20jWdNd8",
-                protegido: true,
-                codigo: "108",
-                ano: "1978",
-                sinopse: "Na grande mesa de nossa sala de jantar comemoramos a data festiva. Cenas do irmão Augusto Álvaro."
-            }
-        ];
+    }, 1000); // Small delay to ensure all videos are rendered
+});
 
-        function openVideo(videoId, isProtected) {
-            if (isProtected) {
-                const password = prompt('Este vídeo é protegido. Digite a senha:');
-                if (password !== '24042003') {
-                    alert('Senha incorreta!');
-                    return false;
-                }
-            }
-            window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
-            return false;
-        }
-
-        function renderizarVideos() {
-            const videosContainer = document.getElementById('videos-container');
-            
-            videos.forEach(video => {
-                const videoCard = document.createElement('div');
-                videoCard.className = 'video-card';
-                
-                let videoContent = `
-                    <div class="document-code">${video.codigo}</div>
-                    <h3>${video.titulo}</h3>
-                    <div class="document-author">Reinaldo Duarte Castanheira</div>
-                    <div class="video-thumbnail">
-                        <a href="javascript:void(0)" onclick="openVideo('${video.id}', ${video.protegido})">
-                            <img src="https://img.youtube.com/vi/${video.id}/mqdefault.jpg" alt="${video.titulo}">
-                            <div class="play-button">▶</div>
-                            ${video.protegido ? '<div class="protected-badge">P</div>' : ''}
-                        </a>
-                    </div>
-                    <div class="document-year">${video.ano}</div>
-                    ${video.sinopse ? `<div class="video-synopsis">${video.sinopse}</div>` : ''}
-                    <div class="document-footer">
-                        <span class="document-type">Mídia</span>
-                    </div>
-                `;
-                
-                videoCard.innerHTML = videoContent;
-                videosContainer.appendChild(videoCard);
-            });
-        }
-
-        // ========================================
-        // FUNCIONALIDADE PRINCIPAL DA BIBLIOTECA
-        // ========================================
-        
         document.addEventListener('DOMContentLoaded', function() {
-            // Renderizar vídeos
-            renderizarVideos();
-            
+           
+
             // Botões de expandir e recolher
-            const exploreButton = document.getElementById('explore-button');
-            const recolherButton = document.getElementById('recolher-button');
+            const exploreButton   = document.getElementById('explore-button');
+            const recolherButton  = document.getElementById('recolher-button');
             const hiddenDocuments = document.getElementById('hidden-documents');
-            
-            // Adicionar vídeos à seção expandida
             videos.forEach(v => hiddenDocuments.insertAdjacentHTML('beforeend',
-                `<div class="document-card video-card">
-                    <div class="document-code">${v.codigo}</div>
-                    <h3>${v.titulo}</h3>
-                    <div class="document-author">Reinaldo Duarte Castanheira</div>
-                    <div class="video-thumbnail">
-                        <a href="javascript:void(0)" onclick="return openVideo('${v.id}', ${v.protegido});">
-                            <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${v.titulo}">
-                            <div class="play-button">▶</div>
-                            ${v.protegido ? '<div class="protected-badge">P</div>' : ''}
-                        </a>
-                    </div>
-                    <div class="document-year">${v.ano}</div>
-                    ${v.sinopse ? `<div class="video-synopsis">${v.sinopse}</div>` : ''}
-                    <div class="document-footer"><span class="document-type">Mídia</span></div>
-                </div>`
-            ));
+            `<div class="document-card video-card">
+                <div class="document-code">${v.codigo}</div>
+                <h3>${v.titulo}</h3>
+                <div class="document-author">${v.autor || 'Reinaldo Duarte Castanheira'}</div>
+               
+                <div class="video-thumbnail">
+                    <a href="javascript:void(0)" onclick="return openVideo('${v.id}', ${v.protegido});">
+                        <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${v.titulo}">
+                        <div class="play-button">▶</div>
+                        ${v.protegido ? '<div class="protected-badge">P</div>' : ''}
+                    </a>
+                </div>
+                 <div class="document-year">${v.ano}</div>
+                ${v.sinopse ? `<div class="video-synopsis">${v.sinopse}</div>` : ''}
+                <div class="document-footer"><span class="document-type">Mídia</span></div>
+            </div>`
+        ));
+
             
-            // Smooth expand/collapse via CSS class
+            // → Smooth expand/collapse via CSS class
             exploreButton.addEventListener('click', function() {
-                hiddenDocuments.classList.add('expanded');
-                exploreButton.style.display = 'none';
-                recolherButton.style.display = 'flex';
+              hiddenDocuments.classList.add('expanded');
+              exploreButton.style.display  = 'none';
+              recolherButton.style.display = 'flex';
             });
-            
+        
             recolherButton.addEventListener('click', function() {
-                hiddenDocuments.classList.remove('expanded');
-                exploreButton.style.display = 'flex';
-                recolherButton.style.display = 'none';
+              hiddenDocuments.classList.remove('expanded');
+              exploreButton.style.display  = 'flex';
+              recolherButton.style.display = 'none';
             });
-            
-            // Adicionar documentos ocultos
-            const hiddenDocs = [
-                {
-                    code: "001",
-                    title: "Carta de 1878 do Bisavô para Vovô",
-                    author: "Francisco Augusto Durães Castanheira",
-                    year: "1878",
-                    description: "Documento histórico familiar de grande valor sentimental e genealógico.",
-                    type: "Documento",
-                    file: "#"
-                },
-                {
-                    code: "002",
-                    title: "O Livro da Vovó Magdalena",
-                    author: "Maria Magdalena Moura Costa Castanheira",
-                    year: "1900",
-                    description: "Memórias e registros pessoais da matriarca da família, preservando tradições e histórias.",
-                    type: "Livro",
-                    file: "#"
-                },
-                {
-                    code: "003",
-                    title: "Lafaiete Ontem e Hoje - Parte 1",
-                    author: "Reinaldo Duarte Castanheira",
-                    year: "2007",
-                    description: "Primeira parte da série que documenta a evolução histórica de Lafaiete.",
-                    type: "Livro",
-                    file: "#"
-                },
-                {
-                    code: "004",
-                    title: "Lafaiete Ontem e Hoje - Parte 2",
-                    author: "Reinaldo Duarte Castanheira",
-                    year: "2008",
-                    description: "Continuação da documentação histórica de Lafaiete, com novos aspectos e períodos.",
-                    type: "Livro",
-                    file: "#"
-                },
-                {
-                    code: "005",
-                    title: "História da Medicina de Queluz a Lafaiete",
-                    author: "José Álvaro Duarte Castanheira",
-                    year: "2005",
-                    description: "Estudo histórico sobre o desenvolvimento da medicina na região.",
-                    type: "Livro",
-                    file: "#"
-                }
-            ];
-            
-            hiddenDocs.forEach(doc => {
-                const docCard = document.createElement('div');
-                docCard.className = 'document-card';
-                docCard.innerHTML = `
-                    <div class="document-code">${doc.code}</div>
-                    <h3>${doc.title}</h3>
-                    <div class="document-author">${doc.author}</div>
-                    <div class="document-year">${doc.year}</div>
-                    <p>${doc.description}</p>
-                    <div class="document-footer">
-                        <span class="document-type">${doc.type}</span>
-                        <a href="${doc.file}" class="read-button">Ler</a>
-                    </div>
-                `;
-                hiddenDocuments.appendChild(docCard);
-            });
-            
+        
             // Filtros
             const filterButtons = document.querySelectorAll('.filter-button');
+            const documentCards = document.querySelectorAll('.document-card');
+        
             filterButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const filter = this.getAttribute('data-filter');
-                    const allCards = document.querySelectorAll('.document-card');
-                    
-                    allCards.forEach(card => {
-                        const type = card.querySelector('.document-type').textContent.toLowerCase();
-                        if (filter === 'all' || type === filter) {
-                            card.style.display = 'flex';
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
+              button.addEventListener('click', function() {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+        
+                const filter = this.getAttribute('data-filter');
+                documentCards.forEach(card => {
+                  const type = card.querySelector('.document-type').textContent.toLowerCase();
+                  if (filter === 'todos' ||
+                      (filter === 'livro'     && type === 'livro')   ||
+                      (filter === 'conto'     && type === 'conto')   ||
+                      (filter === 'poema'     && (type === 'poema' || type === 'poesia')) ||
+                      (filter === 'documento' && type === 'documento') ||
+                      (filter === 'mídia'     && type === 'mídia')) {
+                    card.style.display = 'flex';
+                  } else {
+                    card.style.display = 'none';
+                  }
                 });
+        
+                // always reveal the hidden grid when filtering
+                hiddenDocments.classList.add('expanded');
+                exploreButton.style.display  = 'none';
+                recolherButton.style.display = 'flex';
+              });
             });
-            
+        
+            // Busca
+            const searchInput  = document.querySelector('.search-input');
+            const searchButton = document.querySelector('.search-button');
+            function performSearch() {
+                const documentCards = document.querySelectorAll('.document-card');
+                const term = searchInput.value.toLowerCase();
+              
+                documentCards.forEach(card => {
+                  const title   = card.querySelector('h3')?.textContent        || '';
+                  const author  = card.querySelector('.document-author')?.textContent || '';
+                  const year    = card.querySelector('.document-year')?.textContent   || '';
+                  const desc    = card.querySelector('p')?.textContent         || '';
+                  const type    = card.querySelector('.document-type')?.textContent   || '';
+                  const fields  = [ title, author, year, desc, type ]
+                                    .join(' ').toLowerCase();
+              
+                  const code = card
+                    .querySelector('.document-code')
+                    ?.textContent
+                    .trim()
+                    .toLowerCase() || '';
+              
+                  const matches = fields.includes(term) || code.includes(term);
+                  card.style.display = matches ? 'flex' : 'none';
+                });
+              
+                // (optional) expand hidden section
+                hiddenDocuments.classList.add('expanded');
+                exploreButton.style.display  = 'none';
+                recolherButton.style.display = 'flex';
+              }
+              
+        
+            searchButton.addEventListener('click', performSearch);
+            searchInput.addEventListener('keyup', e => {
+              if (e.key === 'Enter') performSearch();
+            });
+        
             // Ordenação
             const sortSelect = document.querySelector('.sort-select');
             sortSelect.addEventListener('change', function() {
-                const option = this.value;
-                const container = document.querySelector('.documents-grid');
-                const cards = Array.from(container.querySelectorAll('.document-card'));
-                
-                cards.sort((a, b) => {
-                    switch(option) {
-                        case 'newest':
-                            return parseInt(b.querySelector('.document-year').textContent) - parseInt(a.querySelector('.document-year').textContent);
-                        case 'oldest':
-                            return parseInt(a.querySelector('.document-year').textContent) - parseInt(b.querySelector('.document-year').textContent);
-                        case 'title':
-                            return a.querySelector('h3').textContent.localeCompare(b.querySelector('h3').textContent);
-                        case 'author':
-                            return a.querySelector('.document-author').textContent.localeCompare(b.querySelector('.document-author').textContent);
-                        default:
-                            return 0;
-                    }
+              const option = this.value;
+              const allDocs = Array.from(documentCards);
+        
+              allDocs.sort((a,b) => {
+                if (option === 'Ordenar por Título') {
+                  return a.querySelector('h3').textContent.localeCompare(b.querySelector('h3').textContent);
+                } else if (option === 'Ordenar por Autor') {
+                  return a.querySelector('.document-author').textContent.localeCompare(b.querySelector('.document-author').textContent);
+                } else if (option === 'Ordenar por Data') {
+                  return parseInt(b.querySelector('.document-year').textContent) - parseInt(a.querySelector('.document-year').textContent);
+                } else if (option === 'Ordenar por Código') {
+                  return parseInt(a.querySelector('.document-code').textContent) - parseInt(b.querySelector('.document-code').textContent);
+                }
+                return 0;
+              });
+        
+              const visible = document.getElementById('visible-documents');
+              const hidden  = document.getElementById('hidden-documents');
+              visible.innerHTML = '';
+              hidden .innerHTML = '';
+        
+              allDocs.forEach((doc, i) => {
+                if (i < 9) visible.appendChild(doc);
+                else      hidden.appendChild(doc);
+              });
+            });
+        
+            // Password protection for media items
+            document.querySelectorAll('.password-button').forEach(button => {
+              button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const card = this.closest('.password-protected');
+                const pwd  = card.getAttribute('data-password');
+                const url  = this.getAttribute('data-video');
+                const entered = prompt('Este conteúdo é protegido. Por favor, digite a senha:');
+                if (entered === pwd) window.open(url, '_blank');
+                else if (entered !== null) alert('Senha incorreta. Acesso negado.');
+              });
+            });
+          });
+      
+        document.addEventListener('DOMContentLoaded', function() {
+            renderizarDocumentos(documentos);
+          // Botões de expandir e recolher
+          const exploreButton   = document.getElementById('explore-button');
+          const recolherButton  = document.getElementById('recolher-button');
+          const hiddenDocuments = document.getElementById('hidden-documents');
+      
+          // → Smooth expand/collapse via CSS class
+          exploreButton.addEventListener('click', function() {
+            hiddenDocuments.classList.add('expanded');
+            exploreButton.style.display  = 'none';
+            recolherButton.style.display = 'flex';
+          });
+      
+          recolherButton.addEventListener('click', function() {
+            hiddenDocuments.classList.remove('expanded');
+            exploreButton.style.display  = 'flex';
+            recolherButton.style.display = 'none';
+          });
+      
+          // Filtros
+          const filterButtons = document.querySelectorAll('.filter-button');
+         
+      
+          filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+              filterButtons.forEach(btn => btn.classList.remove('active'));
+              this.classList.add('active');
+      
+              const filter = this.getAttribute('data-filter');
+              documentCards.forEach(card => {
+                const type = card.querySelector('.document-type').textContent.toLowerCase();
+                if (filter === 'todos' ||
+                    (filter === 'livro'     && type === 'livro')   ||
+                    (filter === 'conto'     && type === 'conto')   ||
+                    (filter === 'poema'     && (type === 'poema' || type === 'poesia')) ||
+                    (filter === 'documento' && type === 'documento') ||
+                    (filter === 'mídia'     && type === 'mídia')) {
+                  card.style.display = 'flex';
+                } else {
+                  card.style.display = 'none';
+                }
+              });
+      
+              // always reveal the hidden grid when filtering
+              hiddenDocuments.classList.add('expanded');
+              exploreButton.style.display  = 'none';
+              recolherButton.style.display = 'flex';
+            });
+          });
+      
+          // Busca
+          const searchInput  = document.querySelector('.search-input');
+          const searchButton = document.querySelector('.search-button');
+      
+         // … earlier setup …
+
+         function performSearch() {
+            const documentCards = document.querySelectorAll('.document-card');
+            const term = searchInput.value.toLowerCase();
+          
+            documentCards.forEach(card => {
+              const title   = card.querySelector('h3')?.textContent        || '';
+              const author  = card.querySelector('.document-author')?.textContent || '';
+              const year    = card.querySelector('.document-year')?.textContent   || '';
+              const desc    = card.querySelector('p')?.textContent         || '';
+              const type    = card.querySelector('.document-type')?.textContent   || '';
+              const fields  = [ title, author, year, desc, type ]
+                                .join(' ').toLowerCase();
+          
+              const code = card
+                .querySelector('.document-code')
+                ?.textContent
+                .trim()
+                .toLowerCase() || '';
+          
+              const matches = fields.includes(term) || code.includes(term);
+              card.style.display = matches ? 'flex' : 'none';
+            });
+          
+            // (optional) expand hidden section
+            hiddenDocuments.classList.add('expanded');
+            exploreButton.style.display  = 'none';
+            recolherButton.style.display = 'flex';
+          }
+          
+  
+  // *** Leave these two lines untouched! ***
+  searchButton.addEventListener('click', performSearch);
+  searchInput.addEventListener('keyup', e => {
+    if (e.key === 'Enter') performSearch();
+  });
+  
+  // … rest of your code …
+  
+      
+          // Ordenação
+          const sortSelect = document.querySelector('.sort-select');
+          sortSelect.addEventListener('change', function() {
+            const option = this.value;
+            const allDocs = Array.from(documentCards);
+      
+            allDocs.sort((a,b) => {
+              if (option === 'Ordenar por Título') {
+                return a.querySelector('h3').textContent.localeCompare(b.querySelector('h3').textContent);
+              } else if (option === 'Ordenar por Autor') {
+                return a.querySelector('.document-author').textContent.localeCompare(b.querySelector('.document-author').textContent);
+              } else if (option === 'Ordenar por Data') {
+                return parseInt(b.querySelector('.document-year').textContent) - parseInt(a.querySelector('.document-year').textContent);
+              } else if (option === 'Ordenar por Código') {
+                return parseInt(a.querySelector('.document-code').textContent) - parseInt(b.querySelector('.document-code').textContent);
+              }
+              return 0;
+            });
+      
+            const visible = document.getElementById('visible-documents');
+            const hidden  = document.getElementById('hidden-documents');
+            visible.innerHTML = '';
+            hidden .innerHTML = '';
+      
+            allDocs.forEach((doc, i) => {
+              if (i < 9) visible.appendChild(doc);
+              else      hidden.appendChild(doc);
+            });
+          });
+      
+          // Password protection for media items
+          document.querySelectorAll('.password-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+              e.preventDefault();
+              const card = this.closest('.password-protected');
+              const pwd  = card.getAttribute('data-password');
+              const url  = this.getAttribute('data-video');
+              const entered = prompt('Este conteúdo é protegido. Por favor, digite a senha:');
+              if (entered === pwd) window.open(url, '_blank');
+              else if (entered !== null) alert('Senha incorreta. Acesso negado.');
+            });
+          });
+        });
+        
+      </script>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Botão de voltar ao topo
+            const backToTopButton = document.querySelector('.back-to-top');
+            
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    backToTopButton.classList.add('visible');
+                } else {
+                    backToTopButton.classList.remove('visible');
+                }
+            });
+            
+            backToTopButton.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
                 });
+            });
+            
+            // Funcionalidade de expandir e recolher documentos
+            const exploreButton = document.getElementById('explore-button');
+            const recolherButton = document.getElementById('recolher-button');
+            const hiddenDocuments = document.getElementById('hidden-documents');
+            let isExpanded = false;
+            
+            exploreButton.addEventListener('click', function() {
+                hiddenDocuments.classList.remove('hidden-documents');
+                exploreButton.style.display = 'none';
+                recolherButton.style.display = 'flex';
+                isExpanded = true;
+            });
+            
+            recolherButton.addEventListener('click', function() {
+                hiddenDocuments.classList.add('hidden-documents');
+                exploreButton.style.display = 'flex';
+                recolherButton.style.display = 'none';
+                isExpanded = false;
                 
-                cards.forEach(card => container.appendChild(card));
+                // Rolar para o topo da seção de acervo
+                document.getElementById('acervo').scrollIntoView({ behavior: 'smooth' });
             });
             
             // Funcionalidade de busca
@@ -2197,9 +2181,10 @@
                 
                 // Se estiver buscando por código, expandir a seção oculta
                 if (searchTerm.match(/^\d{3}$/)) {
-                    hiddenDocuments.classList.add('expanded');
+                    hiddenDocuments.classList.remove('hidden-documents');
                     exploreButton.style.display = 'none';
                     recolherButton.style.display = 'flex';
+                    isExpanded = true;
                 }
                 
                 allDocuments.forEach(function(doc) {
@@ -2207,32 +2192,243 @@
                     const title = doc.querySelector('h3').textContent.toLowerCase();
                     const author = doc.querySelector('.document-author') ? 
                                   doc.querySelector('.document-author').textContent.toLowerCase() : '';
-                    const description = doc.querySelector('p') ? doc.querySelector('p').textContent.toLowerCase() : '';
+                    const description = doc.querySelector('p').textContent.toLowerCase();
                     
                     if (code.includes(searchTerm) || 
                         title.includes(searchTerm) || 
                         author.includes(searchTerm) || 
                         description.includes(searchTerm)) {
                         doc.style.display = 'flex';
+                        
+                        // Adicionar animação ao encontrar resultados
                         doc.style.animation = 'none';
-                        void doc.offsetWidth;
+                        void doc.offsetWidth; // Trigger reflow
                         doc.style.animation = 'fadeIn 0.5s ease forwards';
                     } else {
                         doc.style.display = 'none';
                     }
                 });
-                
-                document.getElementById('acervo').scrollIntoView({ behavior: 'smooth' });
             });
             
-            // Busca ao pressionar Enter
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
+            // Adicionar rolagem suave para todos os links de navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Gerar linha do tempo com base nos documentos
+            function gerarLinhaDoTempo() {
+                const timelineTrack = document.querySelector('.timeline-track');
+                timelineTrack.innerHTML = '';
+                
+                // Ordenar documentos por ano
+                const docsPorAno = [...documentos].sort((a, b) => a.ano.localeCompare(b.ano));
+                
+                docsPorAno.forEach((doc, index) => {
+                    const timelineItem = document.createElement('div');
+                    timelineItem.className = 'timeline-item-horizontal';
+                    timelineItem.setAttribute('data-year', doc.ano);
+                    
+                    const timelineContent = `
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content-horizontal">
+                            <div class="document-code">${doc.codigo}</div>
+                            <div class="timeline-year-horizontal">${doc.ano}</div>
+                            <div class="timeline-text-horizontal">${doc.titulo}</div>
+                            <div class="timeline-author-horizontal">${doc.autor}</div>
+                            <div class="timeline-tag-horizontal">${doc.genero.charAt(0).toUpperCase() + doc.genero.slice(1)}</div>
+                            <a href="#acervo" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    `;
+                    
+                    timelineItem.innerHTML = timelineContent;
+                    timelineTrack.appendChild(timelineItem);
+                });
+                
+                return document.querySelectorAll('.timeline-item-horizontal');
+            }
+            
+            // Gerar a linha do tempo
+            const timelineItems = gerarLinhaDoTempo();
+            
+            // Funcionalidade de pop-up para a linha do tempo
+            timelineItems.forEach(item => {
+                const content = item.querySelector('.timeline-content-horizontal');
+                const title = content.querySelector('.timeline-text-horizontal').textContent;
+                const year = content.querySelector('.timeline-year-horizontal').textContent;
+                const author = content.querySelector('.timeline-author-horizontal').textContent;
+                const type = content.querySelector('.timeline-tag-horizontal').textContent;
+                const link = content.querySelector('a').getAttribute('href');
+                
+                // Remover o evento de popup separado, já que o conteúdo já aparece no hover
+                item.addEventListener('click', function() {
+                    // Navegar para a seção do acervo e destacar o item correspondente
+                    const acervoSection = document.getElementById('acervo');
+                    acervoSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Expandir a seção oculta se necessário
+                    if (hiddenDocuments.classList.contains('hidden-documents')) {
+                        hiddenDocuments.classList.remove('hidden-documents');
+                        exploreButton.style.display = 'none';
+                        recolherButton.style.display = 'flex';
+                        isExpanded = true;
+                    }
+                    
+                    // Buscar o documento correspondente no acervo
+                    const searchInput = document.querySelector('.search-input');
+                    searchInput.value = title;
                     searchButton.click();
+                    
+                    // Destacar o documento encontrado
+                    setTimeout(() => {
+                        const foundDoc = document.querySelector('.document-card h3, .document-card h3');
+                        if (foundDoc) {
+                            foundDoc.parentElement.style.animation = 'none';
+                            void foundDoc.parentElement.offsetWidth; // Trigger reflow
+                            foundDoc.parentElement.style.animation = 'pulse 1s ease 3';
+                        }
+                    }, 1000);
+                });
+            });
+            // Função para abrir vídeos do YouTube, com proteção por senha para vídeos marcados com P
+function openVideo(videoId, isProtected) {
+    if (isProtected) {
+        const password = prompt("Este vídeo é protegido. Por favor, digite a senha:");
+        if (password === "1856") {
+            window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+        } else {
+            alert("Senha incorreta. Acesso negado.");
+        }
+    } else {
+        window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+    }
+}
+            // Adicionar animação de pulse para destacar itens
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes pulse {
+                    0% { transform: scale(1); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+                    50% { transform: scale(1.05); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+                    100% { transform: scale(1); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Implementar avanço automático da linha do tempo
+            let currentHighlightIndex = 0;
+            const autoAdvanceInterval = 5000; // 5 segundos
+            let autoAdvanceTimer = null;
+            let isAutoScrolling = true; // Flag para controlar o estado do auto scrolling
+            
+            function startAutoAdvance() {
+                // Só iniciar se não houver um timer já rodando e se o auto scrolling estiver ativado
+                if (autoAdvanceTimer === null && isAutoScrolling) {
+                    // Remover highlight de todos os itens
+                    timelineItems.forEach(item => {
+                        item.classList.remove('highlight');
+                    });
+                    
+                    // Iniciar o timer para avançar automaticamente
+                    autoAdvanceTimer = setInterval(() => {
+                        // Remover highlight do item atual
+                        if (timelineItems[currentHighlightIndex]) {
+                            timelineItems[currentHighlightIndex].classList.remove('highlight');
+                        }
+                        
+                        // Avançar para o próximo item
+                        currentHighlightIndex = (currentHighlightIndex + 1) % timelineItems.length;
+                        
+                        // Adicionar highlight ao novo item atual
+                        if (timelineItems[currentHighlightIndex]) {
+                            timelineItems[currentHighlightIndex].classList.add('highlight');
+                            
+                            // Garantir que o item destacado esteja visível na viewport
+                            const itemRect = timelineItems[currentHighlightIndex].getBoundingClientRect();
+                            const trackRect = timelineTrack.getBoundingClientRect();
+                            
+                            if (itemRect.left < trackRect.left || itemRect.right > trackRect.right) {
+                                timelineItems[currentHighlightIndex].scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'nearest',
+                                    inline: 'center'
+                                });
+                            }
+                        }
+                    }, autoAdvanceInterval);
+                    
+                    // Destacar o primeiro item imediatamente
+                    if (timelineItems[currentHighlightIndex]) {
+                        timelineItems[currentHighlightIndex].classList.add('highlight');
+                    }
+                    
+                    console.log("Auto scrolling started");
+                }
+            }
+            
+            function stopAutoAdvance() {
+                if (autoAdvanceTimer !== null) {
+                    clearInterval(autoAdvanceTimer);
+                    autoAdvanceTimer = null;
+                    console.log("Auto scrolling stopped");
+                }
+            }
+            
+            // Iniciar o avanço automático quando a página carregar
+            startAutoAdvance();
+            
+            // Pausar o avanço automático quando o mouse estiver sobre a linha do tempo
+            const timelineContainer = document.querySelector('.horizontal-timeline');
+            timelineContainer.addEventListener('mouseenter', () => {
+                if (isAutoScrolling) {
+                    stopAutoAdvance();
                 }
             });
+            
+            // Retomar o avanço automático quando o mouse sair da linha do tempo
+            timelineContainer.addEventListener('mouseleave', () => {
+                if (isAutoScrolling) {
+                    startAutoAdvance();
+                }
+            });
+            
+            // Adicionar funcionalidade de toggle ao botão de auto scrolling
+            const autoScrollingButton = document.getElementById('auto-scrolling-button');
+            if (autoScrollingButton) {
+                autoScrollingButton.addEventListener('click', () => {
+                    isAutoScrolling = !isAutoScrolling;
+                    
+                    if (isAutoScrolling) {
+                        startAutoAdvance();
+                        autoScrollingButton.textContent = 'Auto Scrolling';
+                        autoScrollingButton.style.backgroundColor = 'var(--gold-color)';
+                        autoScrollingButton.style.color = 'var(--primary-color)';
+                    } else {
+                        stopAutoAdvance();
+                        autoScrollingButton.textContent = 'Auto Scrolling (Paused)';
+                        autoScrollingButton.style.backgroundColor = 'var(--primary-color)';
+                        autoScrollingButton.style.color = 'var(--gold-color)';
+                    }
+                    
+                    console.log("Auto scrolling toggled:", isAutoScrolling);
+                });
+            }
         });
-    </script>
+            
+        </script>
+    <script src="timeline-auto-scroll.js"></script>
+    <script src="navigation-controls.js"></script>
 </body>
 </html>
 
