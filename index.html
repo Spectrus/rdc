@@ -1582,7 +1582,7 @@ video-synopsis {
           {
               titulo: "Geração XUXA. O tempo passou",
               id: "D1dNMD7rd-U",
-              protegido: true,
+              protegido: false,
               codigo: "104",
               ano: "1985",
               sinopse: "No páteo da casa do José Álvaro Isabella, primas e amigas dançam coreografias do Show da XUXA"
@@ -1590,7 +1590,7 @@ video-synopsis {
           {
               titulo: "José Álvaro e Mari Carmem contam suas histórias",
               id: "04qJBryv53M",
-              protegido: true,
+              protegido: false,
               codigo: "105",
               ano: "2011",
               sinopse: "José Álvaro vai fazer curso em Madrid e numa excursão de ônibus, se conhecem. A partir de então tudo acontece."
@@ -1598,7 +1598,7 @@ video-synopsis {
           {
             titulo: "José Alvaro e Mari Carmem comemoram Bodas de Ouro",
             id: "2GDY20aWciM",
-            protegido: true,
+            protegido: false,
             codigo: "106",
             ano: "2010",
             sinopse: "Celebração das Bodas de Ouro, com retrospecto da cerimônia em Madrid e comemorações no páteo da casa em Lafaiete. "
@@ -1606,7 +1606,7 @@ video-synopsis {
           {
               titulo: "Recordações de Natal 1982 e 83– Fotos sem som",
               id: "CwUSWc4u6N0",
-              protegido: true,
+              protegido: false,
               codigo: "107",
               ano: "2011",
               sinopse: "Lindas festas de Natal com os inesquecíveis encontros da Tias. Tios, primas e primos e o Papai Noel. Dezenas de anos passados. "
@@ -1614,7 +1614,7 @@ video-synopsis {
           {
               titulo: "Aniversário Bella dois anos - Brasília",
               id: "WaeSjD2UZdE",
-              protegido: true,
+              protegido: false,
               codigo: "108",
               ano: "1982-1983",
               sinopse: "Lindas festas de Natal com os inesquecíveis encontros da Tias. Tios, primas e primos e o Papai Noel. Dezenas de anos passados."
@@ -1622,7 +1622,7 @@ video-synopsis {
           {
               titulo: "86 anos Pai – 50 anos Augusto",
               id: "mRn20jWdNd8",
-              protegido: true,
+              protegido: false,
               codigo: "109",
               ano: "1978",
               sinopse: "Na grande mesa de nossa sala de jantar comemoramos a data festiva. Cenas do irmão Augusto Álvaro."
@@ -1654,7 +1654,7 @@ video-synopsis {
     {
         titulo: "Assoc. Médica Lafaiete 1956 Dr. Pedro Paulo",
         id: "bqaObzM_STU",
-        protegido:  false,
+        protegido: false,
         codigo: "114"
     },
     {
@@ -1666,7 +1666,7 @@ video-synopsis {
     {
         titulo: "Viação Pássaro Branco	Homenagem a Antonio Eduardo Castanheira",
         id: "o3q5THVKjpE",
-        protegido:  false,
+        protegido: false,
         autor: "Viação Pássaro Branco",
         sinopse: "Homenagem da Viação Pássaro Branco, promovida por seus empregados, em 2010, ao cidadão que à frente da Empresa, celebrava 40 anos de serena e promissora Administração.",
         ano: "2010",
@@ -1675,7 +1675,7 @@ video-synopsis {
     {
         titulo: "Despedida nossa Casa Rua Melo Viana 75",
         id: "tC6wVpqTo2Y",
-        protegido:  true,
+        protegido: false,
         codigo: "117"
     },
     {
@@ -1699,7 +1699,7 @@ video-synopsis {
     {
         titulo: "Natal Família na Casa Tia Dulce",
         id: "WmiPzL3zfB4",
-        protegido: true,
+        protegido: false,
         codigo: "121"
     },
     {
@@ -1789,7 +1789,7 @@ video-synopsis {
     {
         titulo: "SEST SENAT Patos de Minas",
         id: "SVf5Mh3hIz8",
-        protegido: true,
+        protegido: false,
         codigo: "136"
     },
     
@@ -2302,18 +2302,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 1000);
                 });
             });
-            // Função para abrir vídeos do YouTube, com proteção por senha para vídeos marcados com P
+            // Função para abrir vídeos do YouTube, sem proteção por senha
 function openVideo(videoId, isProtected) {
-    if (isProtected) {
-        const password = prompt("Este vídeo é protegido. Por favor, digite a senha:");
-        if (password === "1856") {
-            window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
-        } else {
-            alert("Senha incorreta. Acesso negado.");
-        }
-    } else {
-        window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
-    }
+    // Remove password protection - all videos are now accessible
+    window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
 }
             // Adicionar animação de pulse para destacar itens
             const style = document.createElement('style');
