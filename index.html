@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biblioteca Digital Reinaldo Duarte Castanheira</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <link href="file_viewer.css" rel="stylesheet">
-    <link href="timeline-auto-scroll.css" rel="stylesheet">
-    <link href="timeline-fix.css" rel="stylesheet">
-    <link href="navigation-controls.css" rel="stylesheet">
 
     
     <style>
@@ -32,14 +28,59 @@
         }
         
         body {
-            font-family: 'Playfair Display', serif;
+            font-family: 'EB Garamond', serif;
             background-color: var(--background-color);
             color: var(--text-color);
             line-height: 1.6;
         }
         
-        /* Estilos da barra de navegação movidos para navigation-controls.css */
-        /* Estilos dos links da barra de navegação movidos para navigation-controls.css */
+        .nav-bar {
+            background-color: var(--header-bg);
+            padding: 1rem 0;
+            position: fixed;
+            top: -80px;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            transition: top 0.3s ease;
+        }
+        
+        .nav-bar.show {
+            top: 0;
+        }
+        
+        .hover-trigger {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 80px;
+            z-index: 1001;
+            background: transparent;
+            pointer-events: auto;
+        }
+        
+        .nav-bar a {
+            color: var(--header-text);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .nav-bar a:hover {
+            background-color: rgba(74, 44, 42, 0.1);
+            color: var(--gold-color);
+            text-decoration: underline;
+        }
         
         .container {
             max-width: 1200px;
@@ -88,22 +129,17 @@
             position: absolute;
             right: -20px;
             top: 10px;
-            background-color: var(--gold-color);
-            color: var(--primary-color);
             width: 100px;
             height: 100px;
             border-radius: 50%;
+            background: radial-gradient(circle, #d4b45f 60%, #b78c3b);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-weight: bold;
-            font-size: 1.1rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            overflow: hidden;
             transform: rotate(10deg);
             border: 2px dashed var(--primary-color);
-            background-image: radial-gradient(circle, #e6c87d, var(--gold-color));
-            text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
         }
         
         .stat-badge::before {
@@ -118,7 +154,19 @@
             opacity: 0.3;
         }
         
-        .stat-badge span {
+        .stat-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            position: absolute;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
+        }
+        
+        #stat-number {
             font-size: 1.8rem;
             line-height: 1;
             font-weight: 900;
@@ -178,7 +226,7 @@
             padding: 0.8rem 1rem;
             border: 1px solid #ddd;
             border-radius: 30px 0 0 30px;
-            font-family: 'Playfair Display', serif;
+            font-family: 'EB Garamond', serif;
             font-size: 1rem;
         }
         
@@ -190,7 +238,7 @@
             font-weight: bold;
             border-radius: 0 30px 30px 0;
             cursor: pointer;
-            font-family: 'Playfair Display', serif;
+            font-family: 'EB Garamond', serif;
             font-size: 1rem;
         }
         
@@ -202,11 +250,12 @@
             gap: 0.5rem;
         }
         
+        
         .filter-button {
             background-color: #fff;
             border: 1px solid var(--gold-color);
             padding: 0.5rem 1.5rem;
-            font-family: 'Playfair Display', serif;
+            font-family: 'EB Garamond', serif;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -231,7 +280,7 @@
         .sort-select {
             padding: 0.5rem;
             border: 1px solid #ddd;
-            font-family: 'Playfair Display', serif;
+            font-family: 'EB Garamond', serif;
         }
         
         .documents-grid {
@@ -326,7 +375,7 @@
             font-weight: bold;
             cursor: pointer;
             text-decoration: none;
-            font-family: 'Playfair Display', serif;
+            font-family: 'EB Garamond', serif;
             transition: all 0.3s ease;
         }
         
@@ -380,6 +429,107 @@
             font-size: 2rem;
             margin-bottom: 2rem;
             color: var(--primary-color);
+        }
+        
+        .horizontal-timeline {
+            position: relative;
+            overflow-x: auto;
+            padding: 2rem 0;
+        }
+        
+        .timeline-track {
+            display: flex;
+            gap: 2rem;
+            min-width: max-content;
+            padding: 0 1rem;
+        }
+        
+        .timeline-item-horizontal {
+            flex: 0 0 auto;
+            opacity: 0;
+            animation: slideInFromLeft 0.8s ease forwards;
+        }
+        
+        .timeline-content-horizontal {
+            background: #fff;
+            border: 2px solid var(--gold-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            width: 250px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .timeline-content-horizontal:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        
+        .timeline-year-horizontal {
+            background: var(--gold-color);
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .timeline-text-horizontal {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            flex-grow: 1;
+        }
+        
+        .timeline-author-horizontal {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .timeline-tag-horizontal {
+            background: var(--primary-color);
+            color: #fff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            align-self: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .timeline-button-horizontal {
+            background: var(--gold-color);
+            color: var(--primary-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-family: 'EB Garamond', serif;
+        }
+        
+        .timeline-button-horizontal:hover {
+            background: var(--primary-color);
+            color: var(--gold-color);
+        }
+        
+        @keyframes slideInFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
         
         /* Password protection styles */
@@ -680,11 +830,12 @@ video-synopsis {
     </style>
 </head>
 <body>
-    <div class="nav-bar">
-        <a href="#intro">Início</a>
+    <div class="hover-trigger"></div>
+    <nav class="nav-bar">
+        <a href="#inicio">Início</a>
         <a href="#timeline">Linha do Tempo</a>
         <a href="#acervo">Acervo</a>
-    </div>
+    </nav>
     
     <div class="container">
         <section id="intro" class="intro">
@@ -694,9 +845,11 @@ video-synopsis {
                     <div class="r-shadow"></div>
                 </div>
                 <h1>Biblioteca Digital Reinaldo Duarte Castanheira</h1>
-                <div class="stat-badge">
-                    <span>70+</span>
-                    Obras
+                <div class="stat-badge" id="stat-badge">
+                    <div class="stat-content" id="stat-content">
+                        <span id="stat-number">70+</span>
+                        <div id="stat-label">Obras</div>
+                    </div>
                 </div>
                 <div id="welcome-message" class="welcome-message"></div>
             </div>
@@ -729,7 +882,7 @@ video-synopsis {
                 }
                 
                 .r-letter {
-                    font-family: 'Playfair Display', serif;
+                    font-family: 'EB Garamond', serif;
                     font-size: 70px;
                     font-weight: 700;
                     color: var(--gold-color);
@@ -756,7 +909,7 @@ video-synopsis {
                     left: 0;
                     right: 0;
                     text-align: center;
-                    font-family: 'Playfair Display', serif;
+                    font-family: 'EB Garamond', serif;
                     font-size: 1.5rem;
                     font-weight: bold;
                     color: var(--primary-color);
@@ -846,6 +999,39 @@ video-synopsis {
                             }, 5000);
                         }
                     });
+                    
+                    // Funcionalidade de alternância da badge
+                    const statContent = document.getElementById('stat-content');
+                    const statNumber = document.getElementById('stat-number');
+                    const statLabel = document.getElementById('stat-label');
+
+                    let mostrandoAcessos = false;
+                    let totalAcessos = 100;
+
+                    function alternarTexto() {
+                        // Aplicar fade-out com leve deslocamento para a direita
+                        statContent.style.opacity = '0';
+                        statContent.style.transform = 'translateX(20px)';
+
+                        setTimeout(() => {
+                            if (mostrandoAcessos) {
+                                statNumber.textContent = '70+';
+                                statLabel.textContent = 'Obras';
+                            } else {
+                                statNumber.textContent = totalAcessos;
+                                statLabel.textContent = 'Acessos';
+                                totalAcessos += Math.floor(Math.random() * 4);
+                            }
+
+                            mostrandoAcessos = !mostrandoAcessos;
+
+                            // Aplicar fade-in e reposicionar de novo com movimento
+                            statContent.style.opacity = '1';
+                            statContent.style.transform = 'translateX(0)';
+                        }, 500); // tempo do fade-out antes de trocar
+                    }
+
+                    setInterval(alternarTexto, 5000); // troca a cada 5 segundos
                 });
             </script>
             
@@ -1118,13 +1304,7 @@ video-synopsis {
                     </div>
                     
                     <div class="timeline-item-horizontal" style="animation-delay: 2.6s;">
-                        <div class="timeline-content-horizontal">
-                            <div class="timeline-year-horizontal">2024</div>
-                            <div class="timeline-text-horizontal">Banana crescendo</div>
-                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
-                            <div class="timeline-tag-horizontal">Documento</div>
-                            <a href="Banana crescendo.pdf" class="timeline-button-horizontal">Ler obra</a>
-                        </div>
+                       
                     </div>
                     
                     <div class="timeline-item-horizontal" style="animation-delay: 2.7s;">
@@ -1136,83 +1316,6 @@ video-synopsis {
                             <a href="A Hist├│ria da Cacha├ºa - Pinga e Agua Ardente.pdf" class="timeline-button-horizontal">Ler obra</a>
                          
 
-                        </div>
-                    </div>
-                    <div class="document-card" style="animation-delay: 2.1s;">
-                        <div class="document-code">326</div>
-                        <h3>Primeira rodovia pavimentada do Brasil</h3>
-                        <div class="document-author">Fabio Lucas Carvalho</div>
-                        <div class="document-year">2025</div>
-                        <p>Uma obra prestigiada pelo Imperador Dom Pedro II ligando Petrópolis a Juiz de Fora.</p>
-                        <div class="document-footer">
-                            <span class="document-type">Documento</span>
-                            <a href="https://docs.google.com/document/d/1k3WlBGI-WN5BJSHP8FQ0f41d8DcyPayqiLLIhMnsDao/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
-                        </div>
-                    </div>
-                    <div class="document-card" style="animation-delay: 2.2s;">
-                        <div class="document-code">341</div>
-                        <h3>O Segredo da Vida</h3>
-                        <div class="document-author">Reinaldo Duarte Castanheira</div>
-                        <div class="document-year">2021</div>
-                        <p>Reflexões filosóficas sobre o sentido da vida e os segredos para uma existência plena e significativa.</p>
-                        <div class="document-footer">
-                            <span class="document-type">Conto</span>
-                            <a href="O segredo da vida.pdf" class="read-button">Ler</a>
-                        </div>
-                    </div>
-                    <div class="document-card" style="animation-delay: 2.3s;">
-                        <div class="document-code">342</div>
-                        <h3>Interior de nossa casa e vistas de Lafaiete, do passado</h3>
-                        <div class="document-author">João Pio Duarte Castanheira</div>
-                        <div class="document-year">1986</div>
-                        <p>Vídeo mostrando alguns móveis de nossa casa, sua fachada e um passeio pelo quintal, ainda coberto de vegetação (hoje repleto de construções).</p>
-                        <div class="document-footer">
-                            <span class="document-type">Mídia</span>
-                            <a href="#" class="read-button">Ver</a>
-                        </div>
-                    </div>
-                    <div class="document-card" style="animation-delay: 2.4s;">
-                        <div class="document-code">343</div>
-                        <h3>Meu primo Francisco Augusto Castanheira Manfrini</h3>
-                        <div class="document-author">Reinaldo Duarte Castanheira</div>
-                        <div class="document-year">2018</div>
-                        <p>Coletâneas de fotos de família, vídeo de 2018, expressiva mensagem de Tia Carmita, fotos dos casamentos Flávia e Wagner e Leonardo e Esther.</p>
-                        <div class="document-footer">
-                            <span class="document-type">Mídia</span>
-                            <a href="#" class="read-button">Ver</a>
-                        </div>
-                    </div>
-                    <div class="document-card" style="animation-delay: 2.5s;">
-                        <div class="document-code">344</div>
-                        <h3>Missão – Homenagem a Luiza Izabel Biagioni</h3>
-                        <div class="document-author">Pedro de Lima Belisário</div>
-                        <div class="document-year">2015</div>
-                        <p>Texto em homenagem a Luiza Izabel Biagioni, destacando sua missão de vida e contribuições para a comunidade.</p>
-                        <div class="document-footer">
-                            <span class="document-type">Livro</span>
-                            <a href="#" class="read-button">Ler</a>
-                        </div>
-                    </div>
-                    <div class="document-card" style="animation-delay: 2.6s;">
-                        <div class="document-code">345</div>
-                        <h3>Antologia em Prosa e Verso</h3>
-                        <div class="document-author">Reuber Lana Antoniazzi</div>
-                        <div class="document-year">2012</div>
-                        <p>A vida é feita de degraus como uma pirâmide que tem a pretensão de alcançar o infinito. É quando a Fênix sobrevoa Lafaiete através dos tempos e deixa o legado para o futuro.</p>
-                        <div class="document-footer">
-                            <span class="document-type">Antologia</span>
-                            <a href="#" class="read-button">Ler</a>
-                        </div>
-                    </div>
-                    <div class="document-card" style="animation-delay: 2.7s;">
-                        <div class="document-code">346</div>
-                        <h3>Primeira rodovia pavimentada do Brasil</h3>
-                        <div class="document-author">Fabio Lucas Carvalho</div>
-                        <div class="document-year">2025</div>
-                        <p>Uma obra prestigiada pelo Imperador Dom Pedro II ligando Petrópolis a Juiz de Fora.</p>
-                        <div class="document-footer">
-                            <span class="document-type">Documento</span>
-                            <a href="https://docs.google.com/document/d/1k3WlBGI-WN5BJSHP8FQ0f41d8DcyPayqiLLIhMnsDao/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
                         </div>
                     </div>
                 </div>
@@ -1275,30 +1378,6 @@ video-synopsis {
                 </div>
                 
                 <div class="document-card" style="animation-delay: 0.3s;">
-                    <div class="document-code">303</div>
-                    <h3>Nosso Casamento: Bet e Reinaldo</h3>
-                    <div class="document-author">Reinaldo Duarte Castanheira</div>
-                    <div class="document-year">1967</div>
-                    <p>Registro do enlace matrimonial realizado em 15 de julho de 1967, com algumas fotografias daqueles momentos especiais.</p>
-                    <div class="document-footer">
-                        <span class="document-type">Mídia</span>
-                        <a href="Nosso casamento 15 jul 1967.mpg" class="read-button">Ver</a>
-                    </div>
-                </div>
-                
-                <div class="document-card" style="animation-delay: 0.4s;">
-                    <div class="document-code">304</div>
-                    <h3>Fotos e slides produzidas 1973 – 1978</h3>
-                    <div class="document-author">Reinaldo Duarte Castanheira</div>
-                    <div class="document-year">1978</div>
-                    <p>Algumas fotos do período entre 1973 e 1978, documentando momentos familiares e sociais da época.</p>
-                    <div class="document-footer">
-                        <span class="document-type">Mídia</span>
-                        <a href="Fotos e Slides 1970 e anos seguintes.mpg" class="read-button">Ver</a>
-                    </div>
-                </div>
-                
-                <div class="document-card" style="animation-delay: 0.5s;">
                     <div class="document-code">305</div>
                     <h3>História da Medicina de Queluz a Lafaiete</h3>
                     <div class="document-author">José Álvaro Duarte Castanheira</div>
@@ -1310,7 +1389,7 @@ video-synopsis {
                     </div>
                 </div>
                 
-                <div class="document-card" style="animation-delay: 0.6s;">
+                <div class="document-card" style="animation-delay: 0.4s;">
                     <div class="document-code">306</div>
                     <h3>Amigos que ganhei de meu Pai</h3>
                     <div class="document-author">Reinaldo Duarte Castanheira</div>
@@ -1322,7 +1401,7 @@ video-synopsis {
                     </div>
                 </div>
                 
-                <div class="document-card" style="animation-delay: 0.7s;">
+                <div class="document-card" style="animation-delay: 0.5s;">
                     <div class="document-code">307</div>
                     <h3>A história da Cachaça - Pinga e Água Ardente</h3>
                     <div class="document-author">Youtube</div>
@@ -1334,19 +1413,7 @@ video-synopsis {
                     </div>
                 </div>
                 
-                <div class="document-card" style="animation-delay: 0.8s;">
-                    <div class="document-code">308</div>
-                    <h3>Flores da Austrália</h3>
-                    <div class="document-author">Reinaldo Duarte Castanheira</div>
-                    <div class="document-year">2017</div>
-                    <p>Lindo conjunto visual da flora australiana, destacando espécies exóticas e sua beleza natural única.</p>
-                    <div class="document-footer">
-                        <span class="document-type">Mídia</span>
-                        <a href="Flores_de_Australia.mp4" class="read-button">Ver</a>
-                    </div>
-                </div>
-                
-                <div class="document-card" style="animation-delay: 0.9s;">
+                <div class="document-card" style="animation-delay: 0.6s;">
                     <div class="document-code">309</div>
                     <h3>Queluzíadas</h3>
                     <div class="document-author">Alberto Libanio Rodrigues</div>
@@ -1364,7 +1431,7 @@ video-synopsis {
             
             <div class="documents-grid hidden-documents" id="hidden-documents">
                 <!-- Itens ocultos que serão exibidos ao clicar no botão "+" -->
-                <div class="document-card" style="animation-delay: 1.0s;">
+                <div class="document-card" style="animation-delay: 0.1s;">
                     <div class="document-code">310</div>
                     <h3>Carta de meu Bisavô para meu Avô</h3>
                     <div class="document-author">José Antonio Durães Castanheira (bisavô)</div>
@@ -1376,7 +1443,7 @@ video-synopsis {
                     </div>
                 </div>
                 
-                <div class="document-card" style="animation-delay: 1.1s;">
+                <div class="document-card" style="animation-delay: 0.2s;">
                     <div class="document-code">311</div>
                     <h3>As Melhores das Melhores</h3>
                     <div class="document-author">José Álvaro Duarte Castanheira</div>
@@ -1388,7 +1455,7 @@ video-synopsis {
                     </div>
                 </div>
                 
-                <div class="document-card" style="animation-delay: 1.2s;">
+                <div class="document-card" style="animation-delay: 0.3s;">
                     <div class="document-code">312</div>
                     <h3>Avenida Parque</h3>
                     <div class="document-author">Marina Biagioni Marques</div>
@@ -1400,7 +1467,7 @@ video-synopsis {
                     </div>
                 </div>
                 
-                <div class="document-card" style="animation-delay: 1.3s;">
+                <div class="document-card" style="animation-delay: 0.4s;">
                     <div class="document-code">313</div>
                     <h3>Certidão de Casamento Vovô com Vovó, em Portugal</h3>
                     <div class="document-author">Conservatória de Vila Nova de Gaia</div>
@@ -1412,7 +1479,7 @@ video-synopsis {
                     </div>
                 </div>
                 
-                <div class="document-card" style="animation-delay: 1.4s;">
+                <div class="document-card" style="animation-delay: 0.5s;">
                     <div class="document-code">314</div>
                     <h3>Crônicas, Religião e Psiquiatria</h3>
                     <div class="document-author">José Álvaro Duarte Castanheira</div>
@@ -1424,7 +1491,7 @@ video-synopsis {
                     </div>
                 </div>
                 
-                <div class="document-card" style="animation-delay: 1.5s;">
+                <div class="document-card" style="animation-delay: 0.6s;">
                     <div class="document-code">315</div>
                     <h3>Certidão de nascimento do Vovô Francisco Augusto</h3>
                     <div class="document-author">Cartório de Registro Civil em Carregal do Sal, em Portugal</div>
@@ -1436,7 +1503,7 @@ video-synopsis {
                     </div>
                 </div>
                 
-                <div class="document-card" style="animation-delay: 1.6s;">
+                <div class="document-card" style="animation-delay: 0.7s;">
                     <div class="document-code">316</div>
                     <h3>Eduardo Biagioni visita Lenita e Carmem FricheRecordações de Natal 1982 e 83"</h3>
                     <div class="document-author">Reinaldo Duarte Castanheira</div>
@@ -1448,19 +1515,9 @@ video-synopsis {
                     </div>
                 </div>
                 
-                <div class="document-card" style="animation-delay: 1.7s;">
-                    <div class="document-code">137</div>
-                    <h3>Felipe 2007 Vila da Criança</h3>
-                    <div class="document-author">Reinaldo Duarte Castanheira</div>
-                    <div class="document-year">2007</div>
-                    <p>Documentário sobre as atividades de Felipe na Vila da Criança em 2007, registrando momentos importantes de sua infância.</p>
-                    <div class="document-footer">
-                        <span class="document-type">Mídia</span>
-                        <a href="Felipe 2007 Vila da Crian├ºa.MPG" class="read-button">Ver</a>
-                    </div>
-                </div>
-                <div class="document-card" style="animation-delay: 1.8s;">
-                    <div class="document-code">138</div>
+                <!-- Documentos renumerados para evitar duplicação -->
+                <div class="document-card" style="animation-delay: 1.6s;">
+                    <div class="document-code">317</div>
                     <h3>Flores de Australia</h3>
                     <div class="document-author">Reinaldo Duarte Castanheira</div>
                     <div class="document-year">2017</div>
@@ -1470,8 +1527,9 @@ video-synopsis {
                         <a href="Flores de Australia.pdf" class="read-button">Ler</a>
                     </div>
                 </div>
-                <div class="document-card" style="animation-delay: 1.9s;">
-                    <div class="document-code">139</div>
+                
+                <div class="document-card" style="animation-delay: 1.7s;">
+                    <div class="document-code">318</div>
                     <h3>História da vinda do "Tio Antonio" de Portugal</h3>
                     <div class="document-author">Elisa Lima estimada prima - Lisboa</div>
                     <div class="document-year">1990</div>
@@ -1481,17 +1539,103 @@ video-synopsis {
                         <a href="Hist├│ria do Tio Antonio.pdf" class="read-button">Ler</a>
                     </div>
                 </div>
-                <div class="document-card" style="animation-delay: 2.0s;">
-                    <div class="document-code">140</div>
-                    <h3>Homenagem a meu Pai</h3>
-                    <div class="document-author">Reinaldo Duarte Castanheira</div>
-                    <div class="document-year">1974</div>
-                    <p>Texto que fiz (em 1974), em homenagem ao meu Pai, destacando um pouco de sua história, suas qualidades, ensinamentos e o legado deixado para a família</p>
+                
+                <div class="document-card" style="animation-delay: 1.8s;">
+                    <div class="document-code">319</div>
+                    <h3>Primeira rodovia pavimentada do Brasil</h3>
+                    <div class="document-author">Fabio Lucas Carvalho</div>
+                    <div class="document-year">2025</div>
+                    <p>Uma obra prestigiada pelo Imperador Dom Pedro II ligando Petrópolis a Juiz de Fora.</p>
                     <div class="document-footer">
-                        <span class="document-type">Conto</span>
-                        <a href="Homenagem ao meu Pai.docx.pdf" class="read-button">Ler</a>
+                        <span class="document-type">Documento</span>
+                        <a href="https://docs.google.com/document/d/1k3WlBGI-WN5BJSHP8FQ0f41d8DcyPayqiLLIhMnsDao/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
+                <div class="document-card" style="animation-delay: 1.9s;">
+                    <div class="document-code">320</div>
+                    <h3>O Segredo da Vida</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2021</div>
+                    <p>Reflexões filosóficas sobre o sentido da vida e os segredos para uma existência plena e significativa.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href="O segredo da vida.pdf" class="read-button">Ler</a>
+                    </div>
+                </div>
+                <div class="document-card" style="animation-delay: 2.0s;">
+                    <div class="document-code">321</div>
+                    <h3>Missão – Homenagem a Luiza Izabel Biagioni</h3>
+                    <div class="document-author">Pedro de Lima Belisário</div>
+                    <div class="document-year">2015</div>
+                    <p>Texto em homenagem a Luiza Izabel Biagioni, destacando sua missão de vida e contribuições para a comunidade.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Livro</span>
+                        <a href="#" class="read-button">Ler</a>
+                    </div>
+                </div>
+                <div class="document-card" style="animation-delay: 2.1s;">
+                    <div class="document-code">322</div>
+                    <h3>Antologia em Prosa e Verso</h3>
+                    <div class="document-author">Reuber Lana Antoniazzi</div>
+                    <div class="document-year">2012</div>
+                    <p>A vida é feita de degraus como uma pirâmide que tem a pretensão de alcançar o infinito. É quando a Fênix sobrevoa Lafaiete através dos tempos e deixa o legado para o futuro.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Antologia</span>
+                        <a href="#" class="read-button">Ler</a>
+                    </div>
+                </div>
+                <div class="document-card" style="animation-delay: 2.2s;">
+                    <div class="document-code">323</div>
+                    <h3>Primeira rodovia pavimentada do Brasil</h3>
+                    <div class="document-author">Fabio Lucas Carvalho</div>
+                    <div class="document-year">2025</div>
+                    <p>Uma obra prestigiada pelo Imperador Dom Pedro II ligando Petrópolis a Juiz de Fora.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Documento</span>
+                        <a href="https://docs.google.com/document/d/1k3WlBGI-WN5BJSHP8FQ0f41d8DcyPayqiLLIhMnsDao/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
+                    </div>
+                </div>
+            </div>
+            
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
             </div>
             <div id="videos-container" class="video-grid">
                 <!-- Vídeos serão renderizados aqui pelo JavaScript -->
@@ -1510,7 +1654,7 @@ video-synopsis {
     
     <footer class="footer">
         <p>Biblioteca Digital Pessoal de Reinaldo Duarte Castanheira &copy; 2024</p>
-        <p>Aquele que conta histórias e relembra os seus, celebra a vida. Um trabalho contínuo por Reinaldo e Felipe Castanheira</p>
+        <p>Quem conta suas histórias e relembra os seus, celebra a vida. Um trabalho contínuo por Reinaldo e Felipe Castanheira</p>
         <p>Contato: <a href="mailto:reinaldoduarte080@gmail.com ">reinaldoduarte080@gmail.com </a></p>
     </footer>
     <script src="password-protection.js"></script>
@@ -1925,6 +2069,78 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>`
         ));
 
+        // Adicionar documentos 140-145 após os vídeos para manter ordem numérica
+        const documentos140_145 = [
+            {
+                codigo: "140",
+                titulo: "Nosso Casamento: Bet e Reinaldo",
+                autor: "Reinaldo Duarte Castanheira",
+                ano: "1967",
+                descricao: "Registro do enlace matrimonial realizado em 15 de julho de 1967, com algumas fotografias daqueles momentos especiais.",
+                tipo: "Mídia",
+                link: "Nosso casamento 15 jul 1967.mpg"
+            },
+            {
+                codigo: "141",
+                titulo: "Fotos e slides produzidas 1973 – 1978",
+                autor: "Reinaldo Duarte Castanheira",
+                ano: "1978",
+                descricao: "Algumas fotos do período entre 1973 e 1978, documentando momentos familiares e sociais da época.",
+                tipo: "Mídia",
+                link: "Fotos e Slides 1970 e anos seguintes.mpg"
+            },
+            {
+                codigo: "142",
+                titulo: "Flores da Austrália",
+                autor: "Reinaldo Duarte Castanheira",
+                ano: "2017",
+                descricao: "Lindo conjunto visual da flora australiana, destacando espécies exóticas e sua beleza natural única.",
+                tipo: "Mídia",
+                link: "Flores_de_Australia.mp4"
+            },
+            {
+                codigo: "143",
+                titulo: "Felipe 2007 Vila da Criança",
+                autor: "Reinaldo Duarte Castanheira",
+                ano: "2007",
+                descricao: "Documentário sobre as atividades de Felipe na Vila da Criança em 2007, registrando momentos importantes de sua infância.",
+                tipo: "Mídia",
+                link: "Felipe 2007 Vila da Crian├ºa.MPG"
+            },
+            {
+                codigo: "144",
+                titulo: "Interior de nossa casa e vistas de Lafaiete, do passado",
+                autor: "João Pio Duarte Castanheira",
+                ano: "1986",
+                descricao: "Vídeo mostrando alguns móveis de nossa casa, sua fachada e um passeio pelo quintal, ainda coberto de vegetação (hoje repleto de construções).",
+                tipo: "Mídia",
+                link: "javascript:void(0)"
+            },
+            {
+                codigo: "145",
+                titulo: "Meu primo Francisco Augusto Castanheira Manfrini",
+                autor: "Reinaldo Duarte Castanheira",
+                ano: "2018",
+                descricao: "Coletâneas de fotos de família, vídeo de 2018, expressiva mensagem de Tia Carmita, fotos dos casamentos Flávia e Wagner e Leonardo e Esther.",
+                tipo: "Mídia",
+                link: "javascript:void(0)"
+            }
+        ];
+
+        documentos140_145.forEach(doc => hiddenDocuments.insertAdjacentHTML('beforeend',
+            `<div class="document-card">
+                <div class="document-code">${doc.codigo}</div>
+                <h3>${doc.titulo}</h3>
+                <div class="document-author">${doc.autor}</div>
+                <div class="document-year">${doc.ano}</div>
+                <p>${doc.descricao}</p>
+                <div class="document-footer">
+                    <span class="document-type">${doc.tipo}</span>
+                    <a href="${doc.link}" class="read-button">Ver</a>
+                </div>
+            </div>`
+        ));
+
             
             // → Smooth expand/collapse via CSS class
             exploreButton.addEventListener('click', function() {
@@ -1949,22 +2165,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.classList.add('active');
         
                 const filter = this.getAttribute('data-filter');
-                documentCards.forEach(card => {
+                // Filtrar os cards de acordo com o gênero
+                let filtered = Array.from(documentCards).filter(card => {
                   const type = card.querySelector('.document-type').textContent.toLowerCase();
-                  if (filter === 'todos' ||
-                      (filter === 'livro'     && type === 'livro')   ||
-                      (filter === 'conto'     && type === 'conto')   ||
-                      (filter === 'poema'     && (type === 'poema' || type === 'poesia')) ||
-                      (filter === 'documento' && type === 'documento') ||
-                      (filter === 'mídia'     && type === 'mídia')) {
-                    card.style.display = 'flex';
-                  } else {
-                    card.style.display = 'none';
-                  }
+                  if (filter === 'todos') return true;
+                  if (filter === 'livro'     && type === 'livro')   return true;
+                  if (filter === 'conto'     && type === 'conto')   return true;
+                  if (filter === 'poema'     && (type === 'poema' || type === 'poesia')) return true;
+                  if (filter === 'documento' && type === 'documento') return true;
+                  if (filter === 'mídia'     && type === 'mídia')   return true;
+                  return false;
                 });
         
-                // always reveal the hidden grid when filtering
-                hiddenDocments.classList.add('expanded');
+                // Esconder todos os cards primeiro
+                documentCards.forEach(card => card.style.display = 'none');
+        
+                // Selecionar as áreas visível e oculta
+                const visible = document.getElementById('visible-documents');
+                const hidden  = document.getElementById('hidden-documents');
+                visible.innerHTML = '';
+                hidden.innerHTML  = '';
+        
+                // Adicionar os 6 primeiros ao visível, o resto ao oculto
+                filtered.forEach((card, i) => {
+                  card.style.display = 'flex';
+                  if (i < 6) visible.appendChild(card);
+                  else       hidden.appendChild(card);
+                });
+        
+                // Sempre expandir a área oculta ao filtrar
+                hidden.classList.add('expanded');
                 exploreButton.style.display  = 'none';
                 recolherButton.style.display = 'flex';
               });
@@ -2082,22 +2312,36 @@ document.addEventListener('DOMContentLoaded', function() {
               this.classList.add('active');
       
               const filter = this.getAttribute('data-filter');
-              documentCards.forEach(card => {
+              // Filtrar os cards de acordo com o gênero
+              let filtered = Array.from(documentCards).filter(card => {
                 const type = card.querySelector('.document-type').textContent.toLowerCase();
-                if (filter === 'todos' ||
-                    (filter === 'livro'     && type === 'livro')   ||
-                    (filter === 'conto'     && type === 'conto')   ||
-                    (filter === 'poema'     && (type === 'poema' || type === 'poesia')) ||
-                    (filter === 'documento' && type === 'documento') ||
-                    (filter === 'mídia'     && type === 'mídia')) {
-                  card.style.display = 'flex';
-                } else {
-                  card.style.display = 'none';
-                }
+                if (filter === 'todos') return true;
+                if (filter === 'livro'     && type === 'livro')   return true;
+                if (filter === 'conto'     && type === 'conto')   return true;
+                if (filter === 'poema'     && (type === 'poema' || type === 'poesia')) return true;
+                if (filter === 'documento' && type === 'documento') return true;
+                if (filter === 'mídia'     && type === 'mídia')   return true;
+                return false;
               });
       
-              // always reveal the hidden grid when filtering
-              hiddenDocuments.classList.add('expanded');
+              // Esconder todos os cards primeiro
+              documentCards.forEach(card => card.style.display = 'none');
+      
+              // Selecionar as áreas visível e oculta
+              const visible = document.getElementById('visible-documents');
+              const hidden  = document.getElementById('hidden-documents');
+              visible.innerHTML = '';
+              hidden.innerHTML  = '';
+      
+              // Adicionar os 6 primeiros ao visível, o resto ao oculto
+              filtered.forEach((card, i) => {
+                card.style.display = 'flex';
+                if (i < 6) visible.appendChild(card);
+                else       hidden.appendChild(card);
+              });
+      
+              // Sempre expandir a área oculta ao filtrar
+              hidden.classList.add('expanded');
               exploreButton.style.display  = 'none';
               recolherButton.style.display = 'flex';
             });
@@ -2387,109 +2631,43 @@ function openVideo(videoId, isProtected) {
             `;
             document.head.appendChild(style);
             
-            // Implementar avanço automático da linha do tempo
-            let currentHighlightIndex = 0;
-            const autoAdvanceInterval = 5000; // 5 segundos
-            let autoAdvanceTimer = null;
-            let isAutoScrolling = true; // Flag para controlar o estado do auto scrolling
+        </script>
+    
+    <script>
+        // Controle do cabeçalho com hover - execução imediata
+        document.addEventListener('DOMContentLoaded', function() {
+            const hoverTrigger = document.querySelector('.hover-trigger');
+            const navBar = document.querySelector('.nav-bar');
             
-            function startAutoAdvance() {
-                // Só iniciar se não houver um timer já rodando e se o auto scrolling estiver ativado
-                if (autoAdvanceTimer === null && isAutoScrolling) {
-                    // Remover highlight de todos os itens
-                    timelineItems.forEach(item => {
-                        item.classList.remove('highlight');
-                    });
-                    
-                    // Iniciar o timer para avançar automaticamente
-                    autoAdvanceTimer = setInterval(() => {
-                        // Remover highlight do item atual
-                        if (timelineItems[currentHighlightIndex]) {
-                            timelineItems[currentHighlightIndex].classList.remove('highlight');
-                        }
-                        
-                        // Avançar para o próximo item
-                        currentHighlightIndex = (currentHighlightIndex + 1) % timelineItems.length;
-                        
-                        // Adicionar highlight ao novo item atual
-                        if (timelineItems[currentHighlightIndex]) {
-                            timelineItems[currentHighlightIndex].classList.add('highlight');
-                            
-                            // Garantir que o item destacado esteja visível na viewport
-                            const itemRect = timelineItems[currentHighlightIndex].getBoundingClientRect();
-                            const trackRect = timelineTrack.getBoundingClientRect();
-                            
-                            if (itemRect.left < trackRect.left || itemRect.right > trackRect.right) {
-                                timelineItems[currentHighlightIndex].scrollIntoView({
-                                    behavior: 'smooth',
-                                    block: 'nearest',
-                                    inline: 'center'
-                                });
-                            }
-                        }
-                    }, autoAdvanceInterval);
-                    
-                    // Destacar o primeiro item imediatamente
-                    if (timelineItems[currentHighlightIndex]) {
-                        timelineItems[currentHighlightIndex].classList.add('highlight');
-                    }
-                    
-                    console.log("Auto scrolling started");
-                }
-            }
-            
-            function stopAutoAdvance() {
-                if (autoAdvanceTimer !== null) {
-                    clearInterval(autoAdvanceTimer);
-                    autoAdvanceTimer = null;
-                    console.log("Auto scrolling stopped");
-                }
-            }
-            
-            // Iniciar o avanço automático quando a página carregar
-            startAutoAdvance();
-            
-            // Pausar o avanço automático quando o mouse estiver sobre a linha do tempo
-            const timelineContainer = document.querySelector('.horizontal-timeline');
-            timelineContainer.addEventListener('mouseenter', () => {
-                if (isAutoScrolling) {
-                    stopAutoAdvance();
-                }
-            });
-            
-            // Retomar o avanço automático quando o mouse sair da linha do tempo
-            timelineContainer.addEventListener('mouseleave', () => {
-                if (isAutoScrolling) {
-                    startAutoAdvance();
-                }
-            });
-            
-            // Adicionar funcionalidade de toggle ao botão de auto scrolling
-            const autoScrollingButton = document.getElementById('auto-scrolling-button');
-            if (autoScrollingButton) {
-                autoScrollingButton.addEventListener('click', () => {
-                    isAutoScrolling = !isAutoScrolling;
-                    
-                    if (isAutoScrolling) {
-                        startAutoAdvance();
-                        autoScrollingButton.textContent = 'Auto Scrolling';
-                        autoScrollingButton.style.backgroundColor = 'var(--gold-color)';
-                        autoScrollingButton.style.color = 'var(--primary-color)';
-                    } else {
-                        stopAutoAdvance();
-                        autoScrollingButton.textContent = 'Auto Scrolling (Paused)';
-                        autoScrollingButton.style.backgroundColor = 'var(--primary-color)';
-                        autoScrollingButton.style.color = 'var(--gold-color)';
-                    }
-                    
-                    console.log("Auto scrolling toggled:", isAutoScrolling);
+            if (hoverTrigger && navBar) {
+                console.log('Elementos encontrados, configurando hover...');
+                
+                hoverTrigger.addEventListener('mouseenter', function() {
+                    console.log('Mouse entrou no trigger');
+                    navBar.classList.add('show');
                 });
+                
+                navBar.addEventListener('mouseleave', function() {
+                    console.log('Mouse saiu da nav-bar');
+                    navBar.classList.remove('show');
+                });
+                
+                hoverTrigger.addEventListener('mouseleave', function() {
+                    console.log('Mouse saiu do trigger');
+                    setTimeout(() => {
+                        if (!navBar.matches(':hover')) {
+                            navBar.classList.remove('show');
+                        }
+                    }, 100);
+                });
+            } else {
+                console.log('Elementos não encontrados:', { hoverTrigger, navBar });
             }
         });
-            
-        </script>
-    <script src="timeline-auto-scroll.js"></script>
+
+        });
+    </script>
+    
     <script src="navigation-controls.js"></script>
 </body>
 </html>
-
