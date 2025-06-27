@@ -859,47 +859,46 @@ video-synopsis {
     opacity: 0;
     pointer-events: none;
     transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
-    z-index: 3000;
-  }
-  
-  .rect-scroll-btn.available {
-    pointer-events: auto;
-  }
-  
-  .rect-scroll-btn.available.visible {
+    z-index: 3002;
+}
+
+.rect-scroll-btn.available.visible {
     opacity: 1;
-  }
-  
-  .rect-scroll-btn span {
+    pointer-events: auto;
+}
+
+/* Remove .rect-scroll-btn.available { pointer-events: auto; } if present */
+
+.rect-scroll-btn span {
     width: 0;
     height: 0;
     border-left: 16px solid transparent;
     border-right: 16px solid transparent;
     transition: border-color 0.3s ease;
-  }
-  
-  /* seta para cima */
-  #back-to-top span {
+}
+
+/* seta para cima */
+#back-to-top span {
     border-bottom: 16px solid var(--primary-color);
     transform: translateY(-2px);
-  }
-  
-  /* seta para baixo */
-  #scroll-to-bottom span {
+}
+
+/* seta para baixo */
+#scroll-to-bottom span {
     border-top: 16px solid var(--primary-color);
     transform: translateY(2px);
-  }
-  
-  /* Hover - fundo marrom, seta dourada */
-  .rect-scroll-btn:hover {
+}
+
+/* Hover - fundo marrom, seta dourada */
+.rect-scroll-btn:hover {
     background-color: var(--primary-color);
-  }
-  #back-to-top:hover span {
+}
+#back-to-top:hover span {
     border-bottom-color: var(--gold-color);
-  }
-  #scroll-to-bottom:hover span {
+}
+#scroll-to-bottom:hover span {
     border-top-color: var(--gold-color);
-  }
+}
   
   
 
@@ -2658,45 +2657,56 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="document-footer"><span class="document-type">Mídia</span></div>
             </div>`
         ));
-
+        const mediaCovers = {
+            "118": "fumec_parte1.jpg",
+            "119": "fumec_parte2.jpg", 
+            "140": "casamento_bet_reinaldo.jpg",
+            "141": "slides_decada_70.jpg",
+            "142": "flores_australia.jpg",
+            "143": "felipe_vila_crianca.jpg"
+        };
         // Adicionar documentos 140-145 após os vídeos para manter ordem numérica
         const documentos140_145 = [
-            {
-                codigo: "140",
-                titulo: "Nosso Casamento: Bet e Reinaldo",
-                autor: "Reinaldo Duarte Castanheira",
-                ano: "1967",
-                descricao: "Registro do enlace matrimonial realizado em 15 de julho de 1967, com algumas fotografias daqueles momentos especiais.",
-                tipo: "Mídia",
-                link: "Nosso casamento 15 jul 1967.mpg"
-            },
-            {
-                codigo: "141",
-                titulo: "Fotos e slides produzidas 1973 – 1978",
-                autor: "Reinaldo Duarte Castanheira",
-                ano: "1978",
-                descricao: "Algumas fotos do período entre 1973 e 1978, documentando momentos familiares e sociais da época.",
-                tipo: "Mídia",
-                link: "https://drive.google.com/file/d/1GsUmNcHFRM2-nAbNyKgEC1gXoXo9F_M0/view?usp=sharing"
-            },
-            {
-                codigo: "142",
-                titulo: "Flores da Austrália",
-                autor: "Reinaldo Duarte Castanheira",
-                ano: "2017",
-                descricao: "Lindo conjunto visual da flora australiana, destacando espécies exóticas e sua beleza natural única.",
-                tipo: "Mídia",
-                link: "Flores_de_Australia.mp4"
-            },
-            {
-                codigo: "143",
-                titulo: "Felipe 2007 Vila da Criança",
-                autor: "Reinaldo Duarte Castanheira",
-                ano: "2007",
-                descricao: "Documentário sobre as atividades de Felipe na Vila da Criança em 2007, registrando momentos importantes de sua infância.",
-                tipo: "Mídia",
-                link: "https://drive.google.com/file/d/14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6/view?usp=sharing"
-            },
+        {
+            codigo: "140",
+            titulo: "Nosso Casamento: Bet e Reinaldo",
+            autor: "Reinaldo Duarte Castanheira",
+            ano: "1967",
+            descricao: "Registro do enlace matrimonial realizado em 15 de julho de 1967, com algumas fotografias daqueles momentos especiais.",
+            tipo: "Mídia",
+            link: "Nosso casamento 15 jul 1967.mpg",
+            capa: "Capa-1.jpg"
+        },
+        {
+            codigo: "141",
+            titulo: "Fotos e slides produzidas 1973 – 1978",
+            autor: "Reinaldo Duarte Castanheira",
+            ano: "1978",
+            descricao: "Algumas fotos do período entre 1973 e 1978, documentando momentos familiares e sociais da época.",
+            tipo: "Mídia",
+            link: "https://drive.google.com/file/d/1GsUmNcHFRM2-nAbNyKgEC1gXoXo9F_M0/view?usp=sharing",
+            capa: "Capa-3jpg"
+        },
+        {
+            codigo: "142",
+            titulo: "Flores da Austrália",
+            autor: "Reinaldo Duarte Castanheira",
+            ano: "2017",
+            descricao: "Lindo conjunto visual da flora australiana, destacando espécies exóticas e sua beleza natural única.",
+            tipo: "Mídia",
+            link: "Flores_de_Australia.mp4",
+            capa: "Capa-2.jpg"
+        },
+        {
+            codigo: "143",
+            titulo: "Felipe 2007 Vila da Criança",
+            autor: "Reinaldo Duarte Castanheira",
+            ano: "2007",
+            descricao: "Documentário sobre as atividades de Felipe na Vila da Criança em 2007, registrando momentos importantes de sua infância.",
+            tipo: "Mídia",
+            link: "https://drive.google.com/file/d/14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6/view?usp=sharing",
+            capa: "Capa-5.jpg"
+        },
             {
                 codigo: "144",
                 titulo: "Interior de nossa casa e vistas de Lafaiete do passado - Vídeo 1",
