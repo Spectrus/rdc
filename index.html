@@ -1142,6 +1142,73 @@ style="position:fixed;right:16px;bottom:16px;">
                     clear: both;
                     margin-top: 0.5rem;
                 }
+                
+                /* Media thumbnail styles */
+                .media-thumbnail-container {
+                    position: relative;
+                    width: 100%;
+                    height: 150px;
+                    margin-bottom: 1rem;
+                    cursor: pointer;
+                    border-radius: 5px;
+                    overflow: hidden;
+                }
+                
+                .media-thumbnail {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 5px;
+                    transition: transform 0.3s ease;
+                }
+                
+                .media-thumbnail-container:hover .media-thumbnail {
+                    transform: scale(1.05);
+                }
+                
+                .media-play-button {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 60px;
+                    height: 60px;
+                    background-color: rgba(212, 180, 95, 0.9);
+                    border-radius: 50%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    color: var(--primary-color);
+                    font-size: 1.8rem;
+                    font-weight: bold;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                }
+                
+                .media-thumbnail-container:hover .media-play-button {
+                    background-color: rgba(212, 180, 95, 1);
+                    transform: translate(-50%, -50%) scale(1.1);
+                    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+                }
+                
+                .media-card {
+                    border: 1px solid #e0e0e0;
+                    background-color: #fff;
+                    padding: 1.5rem;
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                    position: relative;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    opacity: 0;
+                    animation: fadeIn 0.5s ease forwards;
+                    margin-bottom: 0;
+                }
+                
+                .media-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                }
             </style>
             
             <script>
@@ -2685,7 +2752,7 @@ document.addEventListener('DOMContentLoaded', function() {
             descricao: "Algumas fotos do período entre 1973 e 1978, documentando momentos familiares e sociais da época.",
             tipo: "Mídia",
             link: "https://drive.google.com/file/d/1GsUmNcHFRM2-nAbNyKgEC1gXoXo9F_M0/view?usp=sharing",
-            capa: "Capa-3jpg"
+            capa: "Capa-3.jpg"
         },
         {
             codigo: "142",
@@ -2719,19 +2786,32 @@ document.addEventListener('DOMContentLoaded', function() {
           
         ];
 
-        documentos140_145.forEach(doc => hiddenDocuments.insertAdjacentHTML('beforeend',
-            `<div class="document-card">
-                <div class="document-code">${doc.codigo}</div>
-                <h3>${doc.titulo}</h3>
-                <div class="document-author">${doc.autor}</div>
-                <div class="document-year">${doc.ano}</div>
-                <p>${doc.descricao}</p>
-                <div class="document-footer">
-                    <span class="document-type">${doc.tipo}</span>
-                    <a href="${doc.link}" class="read-button">Ver</a>
-                </div>
-            </div>`
-        ));
+        documentos140_145.forEach(doc => {
+            let imageHTML = '';
+            if (doc.capa) {
+                imageHTML = `
+                    <div class="media-thumbnail-container" onclick="window.open('${doc.link}', '${doc.link.includes('http') ? '_blank' : '_self'}')">
+                        <img src="${doc.capa}" alt="${doc.titulo}" class="media-thumbnail">
+                        <div class="media-play-button">▶</div>
+                    </div>
+                `;
+            }
+            
+            hiddenDocuments.insertAdjacentHTML('beforeend',
+                `<div class="document-card ${doc.tipo === 'Mídia' ? 'media-card' : ''}">
+                    <div class="document-code">${doc.codigo}</div>
+                    ${imageHTML}
+                    <h3>${doc.titulo}</h3>
+                    <div class="document-author">${doc.autor}</div>
+                    <div class="document-year">${doc.ano}</div>
+                    <p>${doc.descricao}</p>
+                    <div class="document-footer">
+                        <span class="document-type">${doc.tipo}</span>
+                        <a href="${doc.link}" class="read-button" ${doc.link.includes('http') ? 'target="_blank"' : ''}>Ver</a>
+                    </div>
+                </div>`
+            );
+        });
 
             
             // → Smooth expand/collapse via CSS class
