@@ -35,52 +35,69 @@
         }
         
         .nav-bar {
-            background-color: var(--header-bg);
-            padding: 1rem 0;
             position: fixed;
-            top: -80px;
+            top: -100px; /* fully hidden */
             left: 0;
             right: 0;
             width: 100%;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 2000;
+            background-color: var(--header-bg);
+            box-shadow: 0 2px 5px rgba(74,44,42,0.07);
             display: flex;
             justify-content: center;
-            gap: 2rem;
-            transition: top 0.3s ease;
+            align-items: center;
+            padding: 1.1rem 0;
+            gap: 0.05rem;
+            font-weight: bold;
+            color: var(--header-text);
+            transition: top 0.3s cubic-bezier(.4,0,.2,1), opacity 0.2s, box-shadow 0.2s;
+            opacity: 0;
+            pointer-events: none;
         }
         
-        .nav-bar.show {
+        .nav-bar.revealed {
             top: 0;
-        }
-        
-        .hover-trigger {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            width: 100%;
-            height: 80px;
-            z-index: 1001;
-            background: transparent;
-            pointer-events: auto;
         }
         
         .nav-bar a {
             color: var(--header-text);
-            text-decoration: none;
             font-weight: bold;
-            font-size: 1.1rem;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
+            font-size: 1.25rem;
+            padding: 0.8rem 1.7rem;
+            background: none;
+            border: none;
+            text-decoration: none;
+            border-radius: 0;
+            margin: 0;
+            transition: text-decoration 0.2s;
         }
         
-        .nav-bar a:hover {
-            background-color: rgba(74, 44, 42, 0.1);
-            color: var(--gold-color);
+        .nav-bar a:hover, .nav-bar a:focus {
             text-decoration: underline;
+            background: none;
+            color: var(--header-text);
         }
+
+        .nav-hover-trigger {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 80px;
+            width: 100%;
+            z-index: 3001;
+            background: transparent;
+            cursor: pointer;
+        }
+        
+        /* Show nav-bar when hovering trigger or nav itself */
+        .nav-hover-trigger:hover + .nav-bar,
+        .nav-bar:hover {
+            top: 0;
+            opacity: 1;
+            pointer-events: auto;
+            box-shadow: 0 2px 5px rgba(74,44,42,0.07);
+        }
+          
         
         .container {
             max-width: 1200px;
@@ -568,10 +585,12 @@
             .nav-bar {
                 flex-direction: column;
                 align-items: center;
+                gap: 1rem;
+                padding: 1.2rem 0;
             }
-        
             .nav-bar a {
-                margin: 0.5rem 0;
+                font-size: 1.1rem;
+                padding: 0.8rem 1.2rem;
             }
         
             .intro h1 {
@@ -611,8 +630,8 @@
         
         /* when expanded… */
         #hidden-documents.expanded {
-            max-height: 10000px;  /* large enough for all cards */
-            opacity:     1;
+            max-height: none;
+            opacity: 1;
         }
         /* …your existing .read-button rules… */
 
@@ -826,16 +845,160 @@ video-synopsis {
     margin-bottom: 1rem;
     color: var(--gold-color);
 }
+.rect-scroll-btn {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background-color: var(--gold-color); /* fundo padrão */
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+    z-index: 3000;
+  }
+  
+  .rect-scroll-btn.available {
+    pointer-events: auto;
+  }
+  
+  .rect-scroll-btn.available.visible {
+    opacity: 1;
+  }
+  
+  .rect-scroll-btn span {
+    width: 0;
+    height: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+  
+  /* seta para cima */
+  #back-to-top span {
+    border-bottom: 16px solid var(--primary-color);
+    transform: translateY(-2px);
+  }
+  
+  /* seta para baixo */
+  #scroll-to-bottom span {
+    border-top: 16px solid var(--primary-color);
+    transform: translateY(2px);
+  }
+  
+  /* Hover - fundo marrom, seta dourada */
+  .rect-scroll-btn:hover {
+    background-color: var(--primary-color);
+  }
+  #back-to-top:hover span {
+    border-bottom-color: var(--gold-color);
+  }
+  #scroll-to-bottom:hover span {
+    border-top-color: var(--gold-color);
+  }
+  
+  
 
     </style>
 </head>
 <body>
-    <div class="hover-trigger"></div>
+    <div class="nav-hover-trigger"></div>
     <nav class="nav-bar">
-        <a href="#inicio">Início</a>
+        <a href="#inicio" id="inicio-btn">Início</a>
         <a href="#timeline">Linha do Tempo</a>
         <a href="#acervo">Acervo</a>
     </nav>
+    <div class="hover-trigger"></div>
+
+   <!-- Back to Top -->
+<button id="back-to-top" class="rect-scroll-btn" title="Voltar ao topo"
+style="position:fixed; right:16px; top:16px;">
+  <span></span>
+</button>
+
+<!-- Scroll to Bottom -->
+<button id="scroll-to-bottom" class="rect-scroll-btn" title="Ir para o final"
+style="position:fixed;right:16px;bottom:16px;">
+  <span></span>
+</button>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const backToTop = document.getElementById('back-to-top');
+      const scrollToBottom = document.getElementById('scroll-to-bottom');
+      
+      function updateScrollButtons() {
+        const scrollY = window.scrollY || window.pageYOffset;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Only show back-to-top button when not at the top (scrolled down more than 100px)
+        if (scrollY > 100) {
+          backToTop.classList.add('available');
+        } else {
+          backToTop.classList.remove('available');
+        }
+        
+        // Only show scroll-to-bottom button when not at the bottom (more than 100px from bottom)
+        if (scrollY + windowHeight < documentHeight - 100) {
+          scrollToBottom.classList.add('available');
+        } else {
+          scrollToBottom.classList.remove('available');
+        }
+      }
+      
+      // Handle hover effects
+      function handleMouseMove(e) {
+        const y = e.clientY;
+        const windowHeight = window.innerHeight;
+        
+        // Show back-to-top button on hover near top, but only if it's available
+        if (y < 80 && backToTop.classList.contains('available')) {
+          backToTop.classList.add('visible');
+        } else {
+          backToTop.classList.remove('visible');
+        }
+        
+        // Show scroll-to-bottom button on hover near bottom, but only if it's available
+        if (y > windowHeight - 80 && scrollToBottom.classList.contains('available')) {
+          scrollToBottom.classList.add('visible');
+        } else {
+          scrollToBottom.classList.remove('visible');
+        }
+      }
+      
+      // Update on scroll
+      window.addEventListener('scroll', updateScrollButtons);
+      
+      // Update on mouse move for hover
+      document.addEventListener('mousemove', handleMouseMove);
+      
+      // Update on page load
+      updateScrollButtons();
+      
+      backToTop.onclick = function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+      scrollToBottom.onclick = function() {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      };
+    });
+    </script>
+
+    <script>
+    // Smooth scroll for 'Início' button
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('inicio-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+    </script>
     
     <div class="container">
         <section id="intro" class="intro">
@@ -1053,7 +1216,21 @@ video-synopsis {
         
             <div class="horizontal-timeline">
                 <div class="timeline-track">
+                    <!-- Documentos organizados cronologicamente com todos os itens do acervo -->
+                    
+                    <!-- 1856 - Certidão de nascimento do Vovô Francisco Augusto -->
                     <div class="timeline-item-horizontal" style="animation-delay: 0.1s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1856</div>
+                            <div class="timeline-text-horizontal">Certidão de nascimento do Vovô Francisco Augusto</div>
+                            <div class="timeline-author-horizontal">Cartório de Registro Civil em Carregal do Sal, Portugal</div>
+                            <div class="timeline-tag-horizontal">Documento</div>
+                            <a href="https://drive.google.com/file/d/1GJRgEZP_LdsiAzjv17dbkss5Sq67CWtF/view?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 1878 - Carta de meu Bisavô para meu Avô -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.2s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">1878</div>
                             <div class="timeline-text-horizontal">Carta de meu bisavô José Antonio Duraes Castanheira</div>
@@ -1063,7 +1240,8 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 0.2s;">
+                    <!-- 1900 - O Livro da Vovó Magdalena -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.3s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">1900</div>
                             <div class="timeline-text-horizontal">O Livro da Vovó Magdalena</div>
@@ -1073,7 +1251,8 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 0.3s;">
+                    <!-- 1910 - Se -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.4s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">1910</div>
                             <div class="timeline-text-horizontal">Se</div>
@@ -1083,47 +1262,151 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 0.4s;">
+                    <!-- 1956 - Associação Médica de Lafaiete -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.45s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1956</div>
+                            <div class="timeline-text-horizontal">Associação Médica de Lafaiete</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('bqaObzM_STU', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 1967 - Nosso casamento 15 julho 1967 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.5s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">1967</div>
                             <div class="timeline-text-horizontal">Nosso casamento 15 julho 1967</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
-                            <div class="timeline-tag-horizontal">Documento</div>
+                            <div class="timeline-tag-horizontal">Mídia</div>
                             <a href="Nosso casamento 15 jul 1967.mpg" class="timeline-button-horizontal">Ver obra</a>
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 0.5s;">
+                    <!-- 1978 - Fotos e slides 1973-78 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.6s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">1978</div>
                             <div class="timeline-text-horizontal">Fotos e slides 1973-78</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
-                            <div class="timeline-tag-horizontal">Documento</div>
+                            <div class="timeline-tag-horizontal">Mídia</div>
                             <a href="https://drive.google.com/file/d/1GsUmNcHFRM2-nAbNyKgEC1gXoXo9F_M0/view?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 0.6s;">
+                    <!-- 1978 - Aniversário Bella dois anos - Brasília -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.7s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1978</div>
+                            <div class="timeline-text-horizontal">Aniversário Bella dois anos - Brasília</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('WaeSjD2UZdE', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 1979 - Lembranças de Lugares -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.8s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1979</div>
+                            <div class="timeline-text-horizontal">Lembranças de Lugares</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('V9zv1ltttXU', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 1982-1983 - Recordações de Natal -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 0.9s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1982-1983</div>
+                            <div class="timeline-text-horizontal">Recordações de Natal 1982 e 83</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('CwUSWc4u6N0', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 1983 - Missa campal em Lafaiete -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.0s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1983</div>
+                            <div class="timeline-text-horizontal">Missa campal em Lafaiete</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('_AWfyiFmlZE', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 1985 - Picinic na Fazenda Castanheira -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.1s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1985</div>
+                            <div class="timeline-text-horizontal">Picinic na Fazenda Castanheira</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('TfojYU3qad0', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 1985 - Picnic no Quintal da Casa de nosso Pai -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.2s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1985</div>
+                            <div class="timeline-text-horizontal">Picnic no Quintal da Casa de nosso Pai</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('-OCvEII3Xyg', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 1985 - Geração XUXA. O tempo passou -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.3s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1985</div>
+                            <div class="timeline-text-horizontal">Geração XUXA. O tempo passou</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('D1dNMD7rd-U', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 1985 - Natal na Casa da Tia Dulce -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.4s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1985</div>
+                            <div class="timeline-text-horizontal">Natal na Casa da Tia Dulce</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('WmiPzL3zfB4', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 1986 - Imagens de nossa casa e de Lafaiete -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.5s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">1986</div>
                             <div class="timeline-text-horizontal">Imagens de nossa casa e de Lafaiete</div>
                             <div class="timeline-author-horizontal">João Pio Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Mídia</div>
-                            <a href="Lafaiete do passado nossa casa e cidade (2).mpg" class="timeline-button-horizontal">Ver obra</a>
+                            <a href="https://drive.google.com/file/d/1e7rCsMQDHj4mrSK_QIDICteMrvBbuVvS/view?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 0.7s;">
+                    <!-- 1990 - História do Tio Antonio -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.6s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">1990</div>
                             <div class="timeline-text-horizontal">História do Tio Antonio</div>
-                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
-                            <div class="timeline-tag-horizontal">Documento</div>
+                            <div class="timeline-author-horizontal">Elisa Lima estimada prima - Lisboa</div>
+                            <div class="timeline-tag-horizontal">Conto</div>
                             <a href="História do Tio Antonio.pdf" class="timeline-button-horizontal">Ler obra</a>
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 0.8s;">
+                    <!-- 1995 - Docum fotos Castanheira em Portugal -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.7s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">1995</div>
                             <div class="timeline-text-horizontal">Docum fotos Castanheira em Portugal</div>
@@ -1133,7 +1416,30 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 0.9s;">
+                    <!-- 1997 - Despedida de nossa casa Rua Melo Viana, 75 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.8s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1997</div>
+                            <div class="timeline-text-horizontal">Despedida de nossa casa Rua Melo Viana, 75</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('tC6wVpqTo2Y', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 1998 - Aniversário de 50 anos do João Pio -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.9s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1998</div>
+                            <div class="timeline-text-horizontal">Aniversário de 50 anos do João Pio</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('TXCPfzG4AD0', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2000 - Queluzíadas -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.0s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2000</div>
                             <div class="timeline-text-horizontal">Queluzíadas</div>
@@ -1143,7 +1449,63 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 1.0s;">
+                    <!-- 2000 - FUMEC 30 anos de formados - Parte 1 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.1s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2000</div>
+                            <div class="timeline-text-horizontal">FUMEC 30 anos de formados - Parte 1</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="https://drive.google.com/file/d/1rMHV5lU2aGBGLImUNwOcv8-c9xXsaNvn/view?usp=drive_link" class="timeline-button-horizontal" target="_blank">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2000 - FUMEC 30 anos de formados - Parte 2 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.2s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2000</div>
+                            <div class="timeline-text-horizontal">FUMEC 30 anos de formados - Parte 2</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="https://drive.google.com/file/d/1rULjsWBnNOJgjBElxeS2vujsl751jo_t/view?usp=sharing" class="timeline-button-horizontal" target="_blank">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2001 - Professora Didi Ramos -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.3s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2001</div>
+                            <div class="timeline-text-horizontal">Professora Didi Ramos</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('HmjuEzKMmoY', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2001 - Professora Odete Costa -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.4s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2001</div>
+                            <div class="timeline-text-horizontal">Professora Odete Costa</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('ryxRnbQK728', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2001 - Professora Dona Raquel -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.5s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2001</div>
+                            <div class="timeline-text-horizontal">Professora Dona Raquel</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('tUURcIUgbRY', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2002 - Avenida Parque -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.6s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2002</div>
                             <div class="timeline-text-horizontal">Avenida Parque</div>
@@ -1153,7 +1515,30 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 1.1s;">
+                    <!-- 2003 - Minhas Primas Castanheira Friche -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.7s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2003</div>
+                            <div class="timeline-text-horizontal">Minhas Primas Castanheira Friche</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('53XbKmx2LQo', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2003 - Meus 60 anos – 7 de julho 2003 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.8s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2003</div>
+                            <div class="timeline-text-horizontal">Meus 60 anos – 7 de julho 2003</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('heMYPYkfEyg', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2005 - História da Medicina de Queluz a Lafaiete -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 2.9s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2005</div>
                             <div class="timeline-text-horizontal">História da Medicina de Queluz a Lafaiete</div>
@@ -1163,7 +1548,8 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 1.2s;">
+                    <!-- 2007 - Felipe 2007 Vila da Criança -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 3.0s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2007</div>
                             <div class="timeline-text-horizontal">Felipe 2007 Vila da Criança</div>
@@ -1173,7 +1559,30 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 1.3s;">
+                    <!-- 2007 - Dr Ary Belisário – Parte 1 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 3.1s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2007</div>
+                            <div class="timeline-text-horizontal">Dr Ary Belisário – Parte 1</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('MWwodGr86FM', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2007 - Dr Ary Belisário – Parte 2 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 3.2s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2007</div>
+                            <div class="timeline-text-horizontal">Dr Ary Belisário – Parte 2</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('Evk4YtiqW9w', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2008 - As Melhores das Melhores -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 3.3s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2008</div>
                             <div class="timeline-text-horizontal">As Melhores das Melhores</div>
@@ -1183,7 +1592,8 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 1.4s;">
+                    <!-- 2010 - Crônicas, Religião e Psiquiatria -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 3.4s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2010</div>
                             <div class="timeline-text-horizontal">Crônicas, Religião e Psiquiatria</div>
@@ -1193,7 +1603,118 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 1.5s;">
+                    <!-- 2010 - FUMEC 40 anos de formados - Parte 1 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 3.5s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2010</div>
+                            <div class="timeline-text-horizontal">FUMEC 40 anos de formados - Parte 1</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('pyTHG4CRWG8', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2010 - FUMEC 40 anos de formados - Parte 2 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 3.6s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2010</div>
+                            <div class="timeline-text-horizontal">FUMEC 40 anos de formados - Parte 2</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('8uweco9C2F8', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2010 - FUMEC – Solenidade no Auditório da FUMEC -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 3.7s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2010</div>
+                            <div class="timeline-text-horizontal">FUMEC – Solenidade no Auditório da FUMEC</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('kAlTIJZTq1c', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2010 - FUMEC – Três Depoimentos -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 3.8s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2010</div>
+                            <div class="timeline-text-horizontal">FUMEC – Três Depoimentos</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('QiJlTOvM4bU', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2010 - FUMEC – Dois Depoimentos -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 3.9s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2010</div>
+                            <div class="timeline-text-horizontal">FUMEC – Dois Depoimentos</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('TBsjIp2XWjA', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2010 - Viação Pássaro Branco - Homenagem ao Antonio Eduardo Castanheira -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 4.0s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2010</div>
+                            <div class="timeline-text-horizontal">Viação Pássaro Branco - Homenagem ao Antonio Eduardo Castanheira</div>
+                            <div class="timeline-author-horizontal">Viação Pássaro Branco</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('o3q5THVKjpE', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2010 - Dona Avelina = Parte 1 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 4.1s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2010</div>
+                            <div class="timeline-text-horizontal">Dona Avelina = Parte 1</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('GglxnXBYs5E', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2010 - Dona Avelina - Final -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 4.2s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2010</div>
+                            <div class="timeline-text-horizontal">Dona Avelina - Final</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('Hdb-hTM03ds', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2010 - José Alvaro e Mari Carmem comemoram Bodas de Ouro -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 4.3s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2010</div>
+                            <div class="timeline-text-horizontal">José Alvaro e Mari Carmem comemoram Bodas de Ouro</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('2GDY20aWciM', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2011 - José Álvaro e Mari Carmem contam suas histórias -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 4.4s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2011</div>
+                            <div class="timeline-text-horizontal">José Álvaro e Mari Carmem contam suas histórias</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('04qJBryv53M', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2012 - Monsenhor Moreira -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 4.5s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2012</div>
                             <div class="timeline-text-horizontal">Monsenhor Moreira - Uma vida a serviço do Reino de Deus</div>
@@ -1203,7 +1724,8 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 1.6s;">
+                    <!-- 2015 - Missão - Homenagem a Luiza Biagioni -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 4.6s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2015</div>
                             <div class="timeline-text-horizontal">Missão - Homenagem a Luiza Biagioni</div>
@@ -1213,27 +1735,96 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 1.7s;">
+                    <!-- 2015 - Geraldo Zebral -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 4.7s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2015</div>
+                            <div class="timeline-text-horizontal">Geraldo Zebral</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('yYN8vIgaGTM', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2017 - Flores de Australia -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 4.8s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2017</div>
                             <div class="timeline-text-horizontal">Flores de Australia</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
-                            <div class="timeline-tag-horizontal">Mídia</div>
-                            <a href="Flores_de_Australia.mp4" class="timeline-button-horizontal">Ver obra</a>
+                            <div class="timeline-tag-horizontal">Livro</div>
+                            <a href="Flores de Australia.pdf" class="timeline-button-horizontal">Ler obra</a>
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 1.8s;">
+                    <!-- 2017 - Procissão Semana Santa Salamanca – 1 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 4.9s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2017</div>
+                            <div class="timeline-text-horizontal">Procissão Semana Santa Salamanca – 1</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('du84A_ryPRA', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2017 - Procissão Semana Santa Salamanca – 2 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 5.0s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2017</div>
+                            <div class="timeline-text-horizontal">Procissão Semana Santa Salamanca – 2</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('ijdR6F4SwHI', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2017 - Procissão Semana Santa Salamanca – 3 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 5.1s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2017</div>
+                            <div class="timeline-text-horizontal">Procissão Semana Santa Salamanca – 3</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('4TM2HK6kH4c', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2017 - Procissão Semana Santa Salamanca – 4 -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 5.2s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2017</div>
+                            <div class="timeline-text-horizontal">Procissão Semana Santa Salamanca – 4</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('Gx9I3X6y5a8', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2018 - Eduardo Biagioni visita Lenita e Carmem -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 5.3s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2018</div>
-                            <div class="timeline-text-horizontal">Eduardo Biagioni visita Lenita e Carmem</div>
+                            <div class="timeline-text-horizontal">Eduardo Biagioni visita Lenita e Carmem Friche</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Documento</div>
                             <a href="https://docs.google.com/presentation/d/1MPyNPu-Wu3mRFmZJ_naUFQb4XMFVVLyZ6ODI9M2IX9A/edit?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 1.9s;">
+                    <!-- 2018 - A história da Cachaça -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 5.4s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2018</div>
+                            <div class="timeline-text-horizontal">A história da Cachaça - Pinga e Água Ardente</div>
+                            <div class="timeline-author-horizontal">Youtube</div>
+                            <div class="timeline-tag-horizontal">Conto</div>
+                            <a href="A História da Cachaça - Pinga e Agua Ardente.pdf" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2020 - Antologia Lafaiete em Prosa e Verso -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 5.5s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2020</div>
                             <div class="timeline-text-horizontal">Antologia Lafaiete em Prosa e Verso</div>
@@ -1243,17 +1834,52 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 2.0s;">
+                    <!-- 2020 - Luiza Izabel Biagioni – Uma mulher iluminada -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 5.6s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2020</div>
+                            <div class="timeline-text-horizontal">Luiza Izabel Biagioni – Uma mulher iluminada</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('2YJyskkDJLc', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2021 - O Segredo da Vida -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 5.7s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2021</div>
-                            <div class="timeline-text-horizontal">O segredo da vida</div>
+                            <div class="timeline-text-horizontal">O Segredo da Vida</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Conto</div>
                             <a href="O segredo da vida.pdf" class="timeline-button-horizontal">Ler obra</a>
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 2.1s;">
+                    <!-- 2021 - Família Duarte -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 5.8s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2021</div>
+                            <div class="timeline-text-horizontal">Família Duarte</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
+                            <div class="timeline-tag-horizontal">Vídeo</div>
+                            <a href="javascript:void(0)" onclick="openVideo('8i8Hi4KFzu8', false)" class="timeline-button-horizontal">Ver vídeo</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2021 - Certidão de Casamento Vovô com Vovó -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 5.9s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2021</div>
+                            <div class="timeline-text-horizontal">Certidão de Casamento Vovô com Vovó, em Portugal</div>
+                            <div class="timeline-author-horizontal">Conservatória de Vila Nova de Gaia</div>
+                            <div class="timeline-tag-horizontal">Documento</div>
+                            <a href="https://drive.google.com/file/d/1lVI5bC4QIkjwKZiVF00JSDlpLM2flZUL/view?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 2022 - Uma mulher de fibra chamada Regina Coeli -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 6.0s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2022</div>
                             <div class="timeline-text-horizontal">Uma mulher de fibra chamada Regina Coeli</div>
@@ -1263,7 +1889,8 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 2.2s;">
+                    <!-- 2023 - Primo Francisco Augusto -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 6.1s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2023</div>
                             <div class="timeline-text-horizontal">Primo Francisco Augusto</div>
@@ -1273,7 +1900,8 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 2.3s;">
+                    <!-- 2023 - A Herança dos Castanheiras -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 6.2s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2023</div>
                             <div class="timeline-text-horizontal">A Herança dos Castanheiras</div>
@@ -1283,7 +1911,8 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 2.4s;">
+                    <!-- 2024 - Amigos que ganhei de meu Pai -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 6.3s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2024</div>
                             <div class="timeline-text-horizontal">Amigos que ganhei de meu Pai</div>
@@ -1293,7 +1922,8 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 2.5s;">
+                    <!-- 2024 - Homenagem ao meu Pai -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 6.4s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2024</div>
                             <div class="timeline-text-horizontal">Homenagem ao meu Pai</div>
@@ -1303,21 +1933,17 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <div class="timeline-item-horizontal" style="animation-delay: 2.6s;">
-                       
-                    </div>
-                    
-                    <div class="timeline-item-horizontal" style="animation-delay: 2.7s;">
+                    <!-- 2025 - Primeira rodovia pavimentada do Brasil -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 6.5s;">
                         <div class="timeline-content-horizontal">
-                            <div class="timeline-year-horizontal">2024</div>
-                            <div class="timeline-text-horizontal">A história da Cachaça - Pinga e Água Ardente</div>
-                            <div class="timeline-author-horizontal">Youtube</div>
-                            <div class="timeline-tag-horizontal">Conto</div>
-                            <a href="A História da Cachaça - Pinga e Agua Ardente.pdf" class="timeline-button-horizontal">Ler obra</a>
-                         
-
+                            <div class="timeline-year-horizontal">2025</div>
+                            <div class="timeline-text-horizontal">Primeira rodovia pavimentada do Brasil</div>
+                            <div class="timeline-author-horizontal">Fabio Lucas Carvalho</div>
+                            <div class="timeline-tag-horizontal">Documento</div>
+                            <a href="https://docs.google.com/document/d/1k3WIBGl-WN5BJSHP8FQ0f41d8DcyPaygiLLIhMnsDao/edit?usp=sharing" class="timeline-button-horizontal">Ler obra</a>
                         </div>
                     </div>
+                    
                 </div>
             </div>
         </section>
@@ -1548,7 +2174,7 @@ video-synopsis {
                     <p>Uma obra prestigiada pelo Imperador Dom Pedro II ligando Petrópolis a Juiz de Fora.</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="https://docs.google.com/document/d/1k3WlBGI-WN5BJSHP8FQ0f41d8DcyPayqiLLIhMnsDao/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
+                        <a href="https://docs.google.com/document/d/1k3WIBGl-WN5BJSHP8FQ0f41d8DcyPaygiLLIhMnsDao/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 <div class="document-card" style="animation-delay: 1.9s;">
@@ -2073,12 +2699,12 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             {
                 codigo: "144",
-                titulo: "Interior de nossa casa e vistas de Lafaiete, do passado",
+                titulo: "Interior de nossa casa e vistas de Lafaiete do passado - Vídeo 1",
                 autor: "João Pio Duarte Castanheira",
                 ano: "1986",
                 descricao: "Vídeo mostrando alguns móveis de nossa casa, sua fachada e um passeio pelo quintal, ainda coberto de vegetação (hoje repleto de construções).",
                 tipo: "Mídia",
-                link: "javascript:void(0)"
+                link: "https://drive.google.com/file/d/1e7rCsMQDHj4mrSK_QIDICteMrvBbuVvS/view?usp=sharing"
             },
           
         ];
