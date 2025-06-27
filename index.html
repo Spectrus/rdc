@@ -2790,16 +2790,16 @@ document.addEventListener('DOMContentLoaded', function() {
             let imageHTML = '';
             if (doc.capa) {
                 imageHTML = `
-                    <div class="media-thumbnail-container" onclick="window.open('${doc.link}', '${doc.link.includes('http') ? '_blank' : '_self'}')">
-                        <img src="${doc.capa}" alt="${doc.titulo}" class="media-thumbnail">
-                        <div class="media-play-button">▶</div>
+                    <div class="media-thumbnail-container" style="position: relative; width: 100%; padding-top: 56.25%; background: #f9f9f9; margin-bottom: 1rem; border-radius: 5px; overflow: hidden;">
+                        <img src="${doc.capa}" alt="${doc.titulo}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: #fff;" />
+                        <div class="media-play-button" tabindex="0" aria-label="Abrir mídia" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background-color: rgba(212, 180, 95, 0.9); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--primary-color); font-size: 1.8rem; font-weight: bold; transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: pointer;">▶</div>
                     </div>
                 `;
             }
             
             hiddenDocuments.insertAdjacentHTML('beforeend',
-                `<div class="document-card ${doc.tipo === 'Mídia' ? 'media-card' : ''}">
-                    <div class="document-code">${doc.codigo}</div>
+                `<div class="document-card ${doc.tipo === 'Mídia' ? 'media-card' : ''}" style="position: relative;">
+                    <div class="document-code" style="position: absolute; top: 10px; left: 10px; background-color: var(--gold-color); color: var(--primary-color); padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border-radius: 3px; z-index: 2;">${doc.codigo}</div>
                     ${imageHTML}
                     <h3>${doc.titulo}</h3>
                     <div class="document-author">${doc.autor}</div>
@@ -2807,7 +2807,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p>${doc.descricao}</p>
                     <div class="document-footer">
                         <span class="document-type">${doc.tipo}</span>
-                        <a href="${doc.link}" class="read-button" ${doc.link.includes('http') ? 'target="_blank"' : ''}>Ver</a>
+                        <a href="${doc.link}" class="read-button" ${doc.link.includes('http') ? 'target=\"_blank\"' : ''}>Ver</a>
                     </div>
                 </div>`
             );
