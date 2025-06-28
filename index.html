@@ -2833,7 +2833,7 @@ document.addEventListener('DOMContentLoaded', function() {
                
                 <div class="video-thumbnail">
                     <a href="${v.link ? v.link : 'javascript:void(0)'}" onclick="${v.link ? '' : `return openVideo('${v.id}', ${v.protegido});`}" target="_blank" rel="noopener noreferrer">
-                        <img src="${v.link ? 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_movie_x16.png' : `https://img.youtube.com/vi/${v.id}/mqdefault.jpg`}" alt="${v.titulo}">
+                        <img src="${v.capa ? v.capa : (v.link ? 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_movie_x16.png' : `https://img.youtube.com/vi/${v.id}/mqdefault.jpg`)}" alt="${v.titulo}">
                         <div class="play-button">▶</div>
                         ${v.protegido ? '<div class="protected-badge">P</div>' : ''}
                     </a>
