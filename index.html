@@ -27,18 +27,18 @@
             scroll-behavior: smooth;
         }
         
+        /* Website fade-in effect */
         body {
             font-family: 'EB Garamond', serif;
             background-color: var(--background-color);
             color: var(--text-color);
             line-height: 1.6;
             padding-top: 40px; /* Increased from 20px to account for larger hover area */
-            opacity: 0; /* Start invisible for fade-in effect */
-            animation: fadeInPage 1.5s ease-in-out forwards; /* Fade in animation */
+            opacity: 0;
+            animation: websiteFadeIn 1.2s ease-out forwards;
         }
         
-        /* Fade-in animation for the entire page */
-        @keyframes fadeInPage {
+        @keyframes websiteFadeIn {
             from {
                 opacity: 0;
                 transform: translateY(20px);
@@ -47,6 +47,182 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+        
+        /* Staggered fade-in for main sections */
+        .intro {
+            opacity: 0;
+            animation: sectionFadeIn 0.8s ease-out 0.3s forwards;
+        }
+        
+        .timeline-section {
+            opacity: 0;
+            animation: sectionFadeIn 0.8s ease-out 0.5s forwards;
+        }
+        
+        #acervo {
+            opacity: 0;
+            animation: sectionFadeIn 0.8s ease-out 0.7s forwards;
+        }
+        
+        .footer {
+            opacity: 0;
+            animation: sectionFadeIn 0.8s ease-out 0.9s forwards;
+        }
+        
+        @keyframes sectionFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .nav-bar {
+            background-color: var(--header-bg);
+            padding: 0 0 0 0;
+            position: absolute;
+            top: -75px; /* Adjusted for new position context */
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            transition: top 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 75px; /* Reduced header height */
+            align-items: center;
+            padding-top: 6px;
+            padding-bottom: 6px;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* When hovered, reveal and expand the nav-bar */
+        .nav-hover-trigger:hover + .nav-bar,
+        .nav-bar:hover {
+            top: 0;
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .nav-bar a {
+            color: var(--header-text);
+            text-decoration: none;
+            font-weight: 900;
+            font-size: 1.3rem;
+            letter-spacing: 0.025em;
+            padding: 1.25rem 2.9rem;
+            border-radius: 13px;
+            transition: color 0.15s cubic-bezier(0.4,0,0.2,1), text-decoration-color 0.15s cubic-bezier(0.4,0,0.2,1);
+        }
+        
+        .nav-bar a:hover {
+            color: #2a1817; /* Even darker brown for strong contrast */
+            text-decoration: underline;
+            text-decoration-color: #2a1817; /* Underline matches text color */
+            text-underline-offset: 3px;
+            transition: color 0.15s cubic-bezier(0.4,0,0.2,1), text-decoration-color 0.15s cubic-bezier(0.4,0,0.2,1);
+        }
+        
+        /* Add a hover trigger area at the top */
+        .nav-hover-trigger {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 33px; /* Fine-tuned hover trigger area */
+            width: 100%;
+            z-index: 101;
+            background: transparent;
+        }
+        
+        .nav-hover-trigger:hover + .nav-bar,
+        .nav-bar:hover {
+            top: 0;
+        }
+        
+        /* Hamburger menu styles */
+        .hamburger-menu {
+            display: none;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+            background: var(--header-bg);
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .hamburger-menu .hamburger-line {
+            width: 25px;
+            height: 3px;
+            background-color: var(--header-text);
+            margin: 5px 0;
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+        
+        .hamburger-menu.active .hamburger-line:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+        
+        .hamburger-menu.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .hamburger-menu.active .hamburger-line:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+        
+        /* Mobile navigation styles */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Digital Reinaldo Duarte Castanheira</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    
+    <style>
+        :root {
+            --primary-color: #4a2c2a;
+            --secondary-color: #d4b483;
+            --gold-color: #d4b45f;
+            --background-color: #f5f5f5;
+            --text-color: #333;
+            --card-bg: #fff;
+            --card-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            --header-bg: #d4b45f;
+            --header-text: #4a2c2a;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'EB Garamond', serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-top: 40px; /* Increased from 20px to account for larger hover area */
         }
         
         .nav-bar {
@@ -2435,1101 +2611,10 @@ video-synopsis {
         <p>Quem conta suas histórias e relembra os seus, celebra a vida. Um trabalho contínuo por Reinaldo e Felipe Castanheira</p>
         <p>Contato: <a href="mailto:reinaldoduarte080@gmail.com ">reinaldoduarte080@gmail.com </a></p>
     </footer>
-    <script src="password-protection.js"></script>
    
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Password protection removed - site is now freely accessible
-            
-            // Enhanced fade-in effect
-            document.body.style.opacity = '0';
-            document.body.style.transform = 'translateY(20px)';
-            
-            // Trigger fade-in after a brief delay
-            setTimeout(() => {
-                document.body.style.transition = 'opacity 1.5s ease-in-out, transform 1.5s ease-in-out';
-                document.body.style.opacity = '1';
-                document.body.style.transform = 'translateY(0)';
-            }, 100);
-        });
-          const mediaCovers = {
-            "118": "Capa-8.jpg",
-            "119": "Capa-9.jpg", 
-          
-        };
-          const videos = [
-          {
-              titulo: "Picinic na Fazenda Castanheira",
-              id: "TfojYU3qad0",
-              protegido: false,
-              codigo: "101",
-              ano: "1985",
-              sinopse: "Fomos, doze meninos e meninas, passear na cachoeira do Rio Paraopeba, na Fazenda de meu Pai. Que bela recordação. "
-          },
-          {
-              titulo: "Picnic no Quintal da Casa de nosso Pai",
-              id: "-OCvEII3Xyg",
-              protegido: false,
-              codigo: "102",
-              ano: "1985",
-              sinopse: "Outra vez, num grupo de 14 meninos e meninas fazer um inesquecível Picnic na região onde hoje é o Bairro Colibri."
-          },
-          {
-              titulo: "Lembranças de Lugares",
-              id: "V9zv1ltttXU",
-              protegido: false,
-              codigo: "103",
-              ano: "1979",
-              sinopse: "Lugares onde por, incontáveis vezes, passeava com meu Pai e Juquinha Congonhas, Alto do Maranhão, Fazenda Castanheira terminando sempre em São Brás do Suassuí"
-          },
-          {
-              titulo: "Geração XUXA. O tempo passou",
-              id: "D1dNMD7rd-U",
-              protegido: false,
-              codigo: "104",
-              ano: "1985",
-              sinopse: "No páteo da casa do José Álvaro Isabella, primas e amigas dançam coreografias do Show da XUXA"
-          },
-          {
-              titulo: "José Álvaro e Mari Carmem contam suas histórias",
-              id: "04qJBryv53M",
-              protegido: false,
-              codigo: "105",
-              ano: "2011",
-              sinopse: "José Álvaro vai fazer curso em Madrid e numa excursão de ônibus, se conhecem. A partir de então tudo acontece."
-          },
-          {
-            titulo: "José Alvaro e Mari Carmem comemoram Bodas de Ouro",
-            id: "2GDY20aWciM",
-            protegido: false,
-            codigo: "106",
-            ano: "2010",
-            sinopse: "Celebração das Bodas de Ouro, com retrospecto da cerimônia em Madrid e comemorações no páteo da casa em Lafaiete. "
-        },
-          {
-              titulo: "Recordações de Natal 1982 e 83",
-              id: "CwUSWc4u6N0",
-              protegido: false,
-              codigo: "107",
-              ano: "1982-1983",
-              sinopse: "Lindas festas de Natal com os inesquecíveis encontros da Tias. Tios, primas e primos e o Papai Noel. Dezenas de anos passados. "
-          },
-          {
-              titulo: "Aniversário Bella dois anos - Brasília",
-              id: "WaeSjD2UZdE",
-              protegido: false,
-              codigo: "108",
-              ano: "1978",
-              sinopse: "Brasília – em nosso apartamento da SQS 107 com a presença de vizinhos e amigos. Tema: festa junina."
-          },
-          {
-              titulo: "86 anos Pai – 50 anos Augusto",
-              id: "mRn20jWdNd8",
-              protegido: false,
-              codigo: "109",
-              ano: "1978",
-              sinopse: "Na grande mesa de nossa sala de jantar comemoramos a data festiva. Cenas do irmão Augusto Álvaro."
-          },
-    {
-        titulo: "Dona Avelina = Parte 1",
-        id: "GglxnXBYs5E",
-        protegido: false,
-        codigo: "110",
-        ano: "2010",
-        autor: "RDC",
-        sinopse: "Professora Avelina conversa na sala de sua casa, contando um pouco de momentos e aventuras vividas."
-    },
-    {
-        titulo: "Dona Avelina - Final",
-        id: "Hdb-hTM03ds",
-        protegido: false,
-        codigo: "111",
-        ano: "2010",
-        sinopse: "Sempre atuante nas áreas de educação e cultura."
-    },
-    {
-        titulo: "Professora Didi Ramos",
-        id: "HmjuEzKMmoY",
-        protegido: false,
-        codigo: "112",
-        ano: "2001",
-        autor: "",
-        sinopse: "Precursora dos cursos de Jardim de Infância na cidade. Muito admirada e respeitada. Atuou como artista em peças de teatro."
-    },
-    {
-        titulo: "Família Duarte",
-        id: "8i8Hi4KFzu8",
-        protegido: false,
-        codigo: "113",
-        ano: "2021",
-        autor: "",
-        sinopse: "Este vídeo conta um pouco de história da Família DUARTE, de minha Mãe Maria: Pai, Mãe, irmãs e irmãos. Destaque especial a figura marcante de seu Tio Cônego João Pio."
-    },
-    {
-        titulo: "Associação Médica de Lafaiete",
-        id: "bqaObzM_STU",
-        protegido: false,
-        codigo: "114",
-        ano: "1956",
-        autor: "",
-        sinopse: "Imagens da reunião que criou a Associação Médica de Conselheiro Lafaiete no ano de 1956 sob o comando do Dr Pedro Paulo Sales Dias."
-    },
-    {
-        titulo: "Geraldo Zebral",
-        id: "yYN8vIgaGTM",
-        protegido: false,
-        codigo: "115",
-        ano: "2015",
-        autor: "",
-        sinopse: "Entrevista com o estimado e popular homem público - Geraldo de Assis Zebral  - que teve sua presença gravada na história da cidade: cinemas, futebol e área assistencial."
-    },
-    {
-        titulo: "Viação Pássaro Branco - Homenagem ao Antonio Eduardo Castanheira",
-        id: "o3q5THVKjpE",
-        protegido: false,
-        codigo: "116",
-        ano: "2010",
-        autor: "Viação Pássaro Branco",
-        sinopse: "Homenagem da Viação Pássaro Branco, promovida por seus empregados, em 2010, ao cidadão que à frente da Empresa, celebrava 40 anos de serena e promissora Administração."
-    },
-    {
-        titulo: "Despedida de nossa casa Rua Melo Viana, 75",
-        id: "tC6wVpqTo2Y",
-        protegido: false,
-        codigo: "117",
-        ano: "1997",
-        autor: "RDC",
-        sinopse: "Com um almoço, que coincide com o aniversário do José Augusto -  63 anos, fizemos a despedida da casa que nascemos e fomos criados."
-    },
-    {
-        titulo: "FUMEC 30 anos de formados - Parte 1",
-        link: "https://drive.google.com/file/d/1rMHV5lU2aGBGLImUNwOcv8-c9xXsaNvn/view?usp=drive_link",
-        protegido: false,
-        codigo: "118",
-        ano: "2000",
-        autor: "Reinaldo Duarte Castanheira",
-        sinopse: "Encontro da Turma, com seus familiares, no Sitio do Mauro Ângelo. Crianças e meninos de ontem, Papais e Vovós de hoje. Uma visita a um tempo feliz que passou.",
-        capa: "Capa-8.jpg"
-    },
-    {
-        titulo: "FUMEC 30 anos de formados - Parte 2",
-        link: "https://drive.google.com/file/d/1rULjsWBnNOJgjBElxeS2vujsl751jo_t/view?usp=sharing",
-        protegido: false,
-        codigo: "119",
-        ano: "2000",
-        autor: "Reinaldo Duarte Castanheira",
-        sinopse: "Rever quantos amigos e colegas, suas famílias e filhos. Muitas lembranças guardadas em nossas recordações.",
-        capa: "Capa-9.jpg"
-    },
-    {
-        titulo: "FUMEC 40 anos de formados - Parte 1",
-        id: "pyTHG4CRWG8",
-        protegido: false,
-        codigo: "120",
-        ano: "2010",
-        autor: "",
-        sinopse: "Mais uma vez um re- encontro festivo de colegas e famílias com momentos de queridas recordações."
-    },
-    {
-        titulo: "FUMEC 40 anos de formados - Parte 2",
-        id: "8uweco9C2F8",
-        protegido: false,
-        codigo: "121",
-        ano: "2010",
-        autor: "",
-        sinopse: "Rever os colegas, com emoção, num divertido encontro de amigos que, nem sempre estiveram juntos, mas sempre ligados no coração."
-    },
-    {
-        titulo: "FUMEC – Solenidade no Auditório da FUMEC",
-        id: "kAlTIJZTq1c",
-        protegido: false,
-        codigo: "122",
-        ano: "2010",
-        autor: "",
-        sinopse: "A Diretoria da FUMEC fez uma solenidade homenageando nos alunos da primeira Turma formada a 50 anos."
-    },
-    {
-        titulo: "FUMEC – Três Depoimentos",
-        id: "QiJlTOvM4bU",
-        protegido: false,
-        codigo: "123",
-        ano: "2010",
-        autor: "",
-        sinopse: "Professores Admardo Terra Caldeira, Jouve Camisassa e Hélio Lopes que participaram da criação da FUMEC"
-    },
-    {
-        titulo: "FUMEC – Dois Depoimentos",
-        id: "TBsjIp2XWjA",
-        protegido: false,
-        codigo: "124",
-        ano: "2010",
-        autor: "",
-        sinopse: "Depoimento de Jarbas Teixeira, dedicado e destacado aluno da primeira turma e Moacir Moreno, aluno que aplicou muito de seu tempo de escola na FUMEC para diligenciar providências para tornar possível o reconhecimento da Escola pelo Conselho Federal de Administração."
-    },
-    {
-        titulo: "Natal na Casa da Tia Dulce",
-        id: "WmiPzL3zfB4",
-        protegido: false,
-        codigo: "125",
-        ano: "1985",
-        autor: "",
-        sinopse: "Por um erro de publicação no Youtube, vamos assistir seis minutos de emoções sem som"
-    },
-    {
-        titulo: "Professora Odete Costa",
-        id: "ryxRnbQK728",
-        protegido: false,
-        codigo: "126",
-        ano: "2001",
-        autor: "",
-        sinopse: "Pessoa estimada, professora do Grupo Escolar Domingos Bebiano, onde lecionou por 32 anos, tendo exercido também o cargo de Diretora."
-    },
-    {
-        titulo: "Professora Dona Raquel",
-        id: "tUURcIUgbRY",
-        protegido: false,
-        codigo: "127",
-        ano: "2001",
-        autor: "",
-        sinopse: "Professora do Grupo Escolar Domingos Bebiano tendo também lecionado nos colégios Nazaré e Monsenhor Horta."
-    },
-    {
-        titulo: "Aniversário de 50 anos do João Pio",
-        id: "TXCPfzG4AD0",
-        protegido: false,
-        codigo: "128",
-        ano: "1998",
-        autor: "",
-        sinopse: "Almoço comemorativo dos 50 anos do João Pio, com expressivo número de amigos e familiares, numa demonstração de carinho com o aniversariante."
-    },
-    {
-        titulo: "Missa campal em Lafaiete",
-        id: "_AWfyiFmlZE",
-        protegido: false,
-        codigo: "129",
-        ano: "1983",
-        autor: "",
-        sinopse: "Uma missa festiva celebrada na parte posterior da Igreja N.Sa. da Conceição, presidida pelo arcebispo Dom Oscar de Oliveira,  com a participação de grande número de fieis e festival de bandas de música."
-    },
-    {
-        titulo: "Minhas Primas Castanheira Friche",
-        id: "53XbKmx2LQo",
-        protegido: false,
-        codigo: "130",
-        ano: "2003",
-        autor: "",
-        sinopse: "Uma singela homenagem que fiz, momentos com as Primas Mariinha, Cecília, Carmem e Lenita, trazendo emoções. Tem também uma mensagem da Tia Carmita"
-    },
-    {
-        titulo: "Luiza Izabel Biagioni – Uma mulher iluminada",
-        id: "2YJyskkDJLc",
-        protegido: false,
-        codigo: "131",
-        ano: "2020",
-        autor: "Reinaldo Duarte Castanheira ",
-        sinopse: "Luiza conta um pouco de sua história. Uma mulher que viveu para servir ao próximo."
-    },
-    {
-        titulo: "Meus 60 anos – 7 de julho 2003",
-        id: "heMYPYkfEyg",
-        protegido: false,
-        codigo: "132",
-        ano: "2003",
-        autor: "Reinaldo Duarte Castanheira",
-        sinopse: "Festa surpresa - almoço comemorativo com mais de 200 convidados presentes. Irmãos, tios, primas, amigos  Momentos de grandes emoções."
-    },
-    {
-        titulo: "Procissão Semana Santa Salamanca – 1",
-        id: "du84A_ryPRA",
-        protegido: false,
-        codigo: "133",
-        ano: "2017",
-        autor: "Reinaldo Duarte Castanheira",
-        sinopse: "Parte da procissão filmada da varanda do apartamento que me hospedava. Cerimônia emocionante."
-    },
-    {
-        titulo: "Procissão Semana Santa Salamanca – 2",
-        id: "ijdR6F4SwHI",
-        protegido: false,
-        codigo: "134",
-        ano: "2017",
-        autor: "Reinaldo Duarte Castanheira",
-        sinopse: "Parte da procissão filmada da varanda do apartamento que me hospedava. Cerimônia emocionante."
-    },
-    {
-        titulo: "Procissão Semana Santa Salamanca – 3",
-        id: "4TM2HK6kH4c",
-        protegido: false,
-        codigo: "135",
-        ano: "2017",
-        autor: "Reildo Duarte Castanheira",
-        sinopse: "Parte da procissão filmada da varanda do apartamento que me hospedava. Cerimônia emocionante."
-    },
-    {
-        titulo: "Procissão Semana Santa Salamanca – 4",
-        id: "Gx9I3X6y5a8",
-        protegido: false,
-        codigo: "136",
-        ano: "2017",
-        autor: "Reinaldo Duarte Castanheira",
-        sinopse: "Parte da procissão filmada da varanda do apartamento que me hospedava. Cerimônia emocionante."
-    },
-    {
-        titulo: "Dr Ary Belisário – Parte 1",
-        id: "MWwodGr86FM",
-        protegido: false,
-        codigo: "137",
-        ano: "2007",
-        autor: "Reinaldo DuartE Castanheira",
-        sinopse: "Importante e destacado homem público, engenheiro que implantou, implementou e dirigiu a Cia Siderúrgica Nacional em Lafaiete e Casa de Pedra."
-    },
-    {
-        titulo: "Dr Ary Belisário – Parte 2",
-        id: "Evk4YtiqW9w",
-        protegido: false,
-        codigo: "138",
-        ano: "2007",
-        autor: "",
-        sinopse: "Constituiu expressiva família, muito estimada na sociedade. O vídeo foi produzido pela filha Mônica com o irmão Pedrinho, comemorando o centenário de seu nascimento."
-    },
-    {
-        titulo: "Passeio aéreo sobre Lafaiete",
-        id: "unupxsXrAkc",
-        protegido: false,
-        codigo: "139",
-        ano: "2018",
-        autor: "Rodrigo Queiroz Castanheira",
-        sinopse: "Imagens colhidas por um drone, registrando o estágio de uma época, mostrando o desenvolvimento de parte da área central da cidade."
-
-
-        
-    },
-
-];
-
-
-
-// Função para renderizar a seção de vídeos
-
-// Inicializar a seção de vídeos quando o DOM estiver carregado
-document.addEventListener('DOMContentLoaded', function() {
-    renderizarVideos();
-    
-    // Add event listener to update all video links to use password protection
-    setTimeout(() => {
-        const videoLinks = document.querySelectorAll('.video-thumbnail a');
-        videoLinks.forEach(link => {
-            if (link.hasAttribute('target') && link.getAttribute('href').includes('youtube.com/watch?v=')) {
-                const videoId = link.getAttribute('href').split('v=')[1];
-                const isProtected = link.querySelector('.protected-badge') !== null;
-                
-                link.setAttribute('href', 'javascript:void(0)');
-                link.removeAttribute('target');
-                link.setAttribute('onclick', `openVideo('${videoId}', ${isProtected})`);
-                console.log(`Updated video link for ID: ${videoId}, Protected: ${isProtected}`);
-            }
-        });
-    }, 1000); // Small delay to ensure all videos are rendered
-});
-
-        document.addEventListener('DOMContentLoaded', function() {
-           
-
-            // Botões de expandir e recolher
-            const exploreButton   = document.getElementById('explore-button');
-            const recolherButton  = document.getElementById('recolher-button');
-            const hiddenDocuments = document.getElementById('hidden-documents');
-            videos.forEach(v => hiddenDocuments.insertAdjacentHTML('beforeend',
-            `<div class="document-card video-card">
-                <div class="document-code">${v.codigo}</div>
-                <h3>${v.titulo}</h3>
-                <div class="document-author">${v.autor || 'Reinaldo Duarte Castanheira'}</div>
-               
-                <div class="video-thumbnail">
-                    <a href="${v.link ? v.link : 'javascript:void(0)'}" onclick="${v.link ? '' : `return openVideo('${v.id}', ${v.protegido});`}" target="_blank" rel="noopener noreferrer">
-                        <img src="${v.capa ? v.capa : (v.link ? 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_movie_x16.png' : `https://img.youtube.com/vi/${v.id}/mqdefault.jpg`)}" alt="${v.titulo}">
-                        <div class="play-button">▶</div>
-                        ${v.protegido ? '<div class="protected-badge">P</div>' : ''}
-                    </a>
-                </div>
-                 <div class="document-year">${v.ano}</div>
-                ${v.sinopse ? `<div class="video-synopsis">${v.sinopse}</div>` : ''}
-                <div class="document-footer"><span class="document-type">Mídia</span></div>
-            </div>`
-        ));
-        const mediaCovers = {
-          
-            "140": "casamento_bet_reinaldo.jpg",
-            "141": "slides_decada_70.jpg",
-            "142": "flores_australia.jpg",
-            "143": "felipe_vila_crianca.jpg"
-        };
-        // Adicionar documentos 140-145 após os vídeos para manter ordem numérica
-        const documentos140_145 = [
-            {
-                codigo: "140",
-                titulo: "Nosso Casamento: Bet e Reinaldo",
-                autor: "Reinaldo Duarte Castanheira",
-                ano: "1967",
-                descricao: "Registro do enlace matrimonial realizado em 15 de julho de 1967, com algumas fotografias daqueles momentos especiais.",
-                tipo: "Mídia",
-                link: "https://drive.google.com/file/d/1sUbxDHZnAZWETuE1hYhN1sKZ2Rb4W1jq/view?usp=sharing",
-                capa: "Capa-1.jpg"
-            },
-            {
-                codigo: "141",
-                titulo: "Fotos e slides produzidas 1973 – 1978",
-                autor: "Reinaldo Duarte Castanheira",
-                ano: "1978",
-                descricao: "Algumas fotos do período entre 1973 e 1978, documentando momentos familiares e sociais da época.",
-                tipo: "Mídia",
-                link: "https://drive.google.com/file/d/1GsUmNcHFRM2-nAbNyKgEC1gXoXo9F_M0/view?usp=sharing",
-                capa: "Capa-3.jpg"
-            },
-            {
-                codigo: "142",
-                titulo: "Flores da Austrália",
-                autor: "Reinaldo Duarte Castanheira",
-                ano: "2017",
-                descricao: "Lindo conjunto visual da flora australiana, destacando espécies exóticas e sua beleza natural única.",
-                tipo: "Mídia",
-                link: "Flores_de_Australia.mp4",
-                capa: "Capa-2.jpg"
-            },
-            {
-                codigo: "143",
-                titulo: "Felipe 2007 Vila da Criança",
-                autor: "Reinaldo Duarte Castanheira",
-                ano: "2007",
-                descricao: "Documentário sobre as atividades de Felipe na Vila da Criança em 2007, registrando momentos importantes de sua infância.",
-                tipo: "Mídia",
-                link: "https://drive.google.com/file/d/14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6/view?usp=sharing",
-                capa: "Capa-5.jpg"
-            },
-            {
-                codigo: "144",
-                titulo: "Interior de nossa casa e vistas de Lafaiete do passado - Vídeo 1",
-                autor: "João Pio Duarte Castanheira",
-                ano: "1986",
-                descricao: "Vídeo mostrando alguns móveis de nossa casa, sua fachada e um passeio pelo quintal, ainda coberto de vegetação (hoje repleto de construções).",
-                tipo: "Mídia",
-                link: "https://drive.google.com/file/d/1e7rCsMQDHj4mrSK_QIDICteMrvBbuVvS/view?usp=sharing",
-                capa: "Capa-4.jpg"
-            },
-            {
-                codigo: "145",
-                titulo: "Interior de nossa casa e vistas de Lafaiete do passado - Vídeo 2",
-                autor: "João Pio Duarte Castanheira",
-                ano: "1986",
-                descricao: "Vídeo mostrando alguns móveis de nossa casa, sua fachada e um passeio pelo quintal, ainda coberto de vegetação (hoje repleto de construções).",
-                tipo: "Mídia",
-                link: "https://drive.google.com/file/d/1e7rCsMQDHj4mrSK_QIDICteMrvBbuVvS/view?usp=sharing",
-                capa: "Capa-7.jpg"
-            }
-        ];
-
-        documentos140_145.forEach(doc => {
-            let imageHTML = '';
-            if (doc.capa) {
-                imageHTML = `
-                    <div class="video-thumbnail">
-                        <a href="${doc.link}" target="_blank" rel="noopener noreferrer">
-                            <img src="${doc.capa}" alt="${doc.titulo}">
-                            <div class="play-button">▶</div>
-                        </a>
-                    </div>
-                `;
-            }
-            hiddenDocuments.insertAdjacentHTML('beforeend',
-                `<div class="document-card video-card">
-                    <div class="document-code">${doc.codigo}</div>
-                    <h3>${doc.titulo}</h3>
-                    <div class="document-author">${doc.autor}</div>
-                    ${imageHTML}
-                    <div class="document-year">${doc.ano}</div>
-                    <div class="video-synopsis">${doc.descricao}</div>
-                    <div class="document-footer">
-                        <span class="document-type">Mídia</span>
-                    </div>
-                </div>`
-            );
-        });
-
-            
-            // → Smooth expand/collapse via CSS class
-            exploreButton.addEventListener('click', function() {
-              hiddenDocuments.classList.add('expanded');
-              exploreButton.style.display  = 'none';
-              recolherButton.style.display = 'flex';
-            });
-        
-            recolherButton.addEventListener('click', function() {
-              hiddenDocuments.classList.remove('expanded');
-              exploreButton.style.display  = 'flex';
-              recolherButton.style.display = 'none';
-            });
-        
-            // Filtros
-            const filterButtons = document.querySelectorAll('.filter-button');
-            const documentCards = document.querySelectorAll('.document-card');
-        
-            filterButtons.forEach(button => {
-              button.addEventListener('click', function() {
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-        
-                const filter = this.getAttribute('data-filter');
-                // Filtrar os cards de acordo com o gênero
-                let filtered = Array.from(documentCards).filter(card => {
-                  const type = card.querySelector('.document-type').textContent.toLowerCase();
-                  if (filter === 'todos') return true;
-                  if (filter === 'livro'     && type === 'livro')   return true;
-                  if (filter === 'conto'     && type === 'conto')   return true;
-                  if (filter === 'poema'     && (type === 'poema' || type === 'poesia')) return true;
-                  if (filter === 'documento' && type === 'documento') return true;
-                  if (filter === 'mídia'     && type === 'mídia')   return true;
-                  return false;
-                });
-        
-                // Esconder todos os cards primeiro
-                documentCards.forEach(card => card.style.display = 'none');
-        
-                // Selecionar as áreas visível e oculta
-                const visible = document.getElementById('visible-documents');
-                const hidden  = document.getElementById('hidden-documents');
-                visible.innerHTML = '';
-                hidden.innerHTML  = '';
-        
-                // Adicionar os 6 primeiros ao visível, o resto ao oculto
-                filtered.forEach((card, i) => {
-                  card.style.display = 'flex';
-                  if (i < 6) visible.appendChild(card);
-                  else       hidden.appendChild(card);
-                });
-        
-                // Sempre expandir a área oculta ao filtrar
-                hidden.classList.add('expanded');
-                exploreButton.style.display  = 'none';
-                recolherButton.style.display = 'flex';
-              });
-            });
-        
-            // Busca
-            const searchInput  = document.querySelector('.search-input');
-            const searchButton = document.querySelector('.search-button');
-            function performSearch() {
-                const documentCards = document.querySelectorAll('.document-card');
-                const term = searchInput.value.toLowerCase();
-              
-                documentCards.forEach(card => {
-                  const title   = card.querySelector('h3')?.textContent        || '';
-                  const author  = card.querySelector('.document-author')?.textContent || '';
-                  const year    = card.querySelector('.document-year')?.textContent   || '';
-                  const desc    = card.querySelector('p')?.textContent         || '';
-                  const type    = card.querySelector('.document-type')?.textContent   || '';
-                  const fields  = [ title, author, year, desc, type ]
-                                    .join(' ').toLowerCase();
-              
-                  const code = card
-                    .querySelector('.document-code')
-                    ?.textContent
-                    .trim()
-                    .toLowerCase() || '';
-              
-                  const matches = fields.includes(term) || code.includes(term);
-                  card.style.display = matches ? 'flex' : 'none';
-                });
-              
-                // (optional) expand hidden section
-                hiddenDocuments.classList.add('expanded');
-                exploreButton.style.display  = 'none';
-                recolherButton.style.display = 'flex';
-              }
-              
-        
-            searchButton.addEventListener('click', performSearch);
-            searchInput.addEventListener('keyup', e => {
-              if (e.key === 'Enter') performSearch();
-            });
-        
-            // Ordenação
-            const sortSelect = document.querySelector('.sort-select');
-            sortSelect.addEventListener('change', function() {
-              const option = this.value;
-              const allDocs = Array.from(documentCards);
-        
-              allDocs.sort((a,b) => {
-                if (option === 'Ordenar por Título') {
-                  return a.querySelector('h3').textContent.localeCompare(b.querySelector('h3').textContent);
-                } else if (option === 'Ordenar por Autor') {
-                  return a.querySelector('.document-author').textContent.localeCompare(b.querySelector('.document-author').textContent);
-                } else if (option === 'Ordenar por Data') {
-                  return parseInt(b.querySelector('.document-year').textContent) - parseInt(a.querySelector('.document-year').textContent);
-                } else if (option === 'Ordenar por Código') {
-                  return parseInt(a.querySelector('.document-code').textContent) - parseInt(b.querySelector('.document-code').textContent);
-                }
-                return 0;
-              });
-        
-              const visible = document.getElementById('visible-documents');
-              const hidden  = document.getElementById('hidden-documents');
-              visible.innerHTML = '';
-              hidden .innerHTML = '';
-        
-              allDocs.forEach((doc, i) => {
-                if (i < 9) visible.appendChild(doc);
-                else      hidden.appendChild(doc);
-              });
-            });
-        
-            // Password protection for media items
-            document.querySelectorAll('.password-button').forEach(button => {
-              button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const card = this.closest('.password-protected');
-                const pwd  = card.getAttribute('data-password');
-                const url  = this.getAttribute('data-video');
-                const entered = prompt('Este conteúdo é protegido. Por favor, digite a senha:');
-                if (entered === pwd) window.open(url, '_blank');
-                else if (entered !== null) alert('Senha incorreta. Acesso negado.');
-              });
-            });
-          });
-      
-        document.addEventListener('DOMContentLoaded', function() {
-            renderizarDocumentos(documentos);
-          // Botões de expandir e recolher
-          const exploreButton   = document.getElementById('explore-button');
-          const recolherButton  = document.getElementById('recolher-button');
-          const hiddenDocuments = document.getElementById('hidden-documents');
-      
-          // → Smooth expand/collapse via CSS class
-          exploreButton.addEventListener('click', function() {
-            hiddenDocuments.classList.add('expanded');
-            exploreButton.style.display  = 'none';
-            recolherButton.style.display = 'flex';
-          });
-      
-          recolherButton.addEventListener('click', function() {
-            hiddenDocuments.classList.remove('expanded');
-            exploreButton.style.display  = 'flex';
-            recolherButton.style.display = 'none';
-          });
-      
-          // Filtros
-          const filterButtons = document.querySelectorAll('.filter-button');
-         
-      
-          filterButtons.forEach(button => {
-            button.addEventListener('click', function() {
-              filterButtons.forEach(btn => btn.classList.remove('active'));
-              this.classList.add('active');
-      
-              const filter = this.getAttribute('data-filter');
-              // Filtrar os cards de acordo com o gênero
-              let filtered = Array.from(documentCards).filter(card => {
-                const type = card.querySelector('.document-type').textContent.toLowerCase();
-                if (filter === 'todos') return true;
-                if (filter === 'livro'     && type === 'livro')   return true;
-                if (filter === 'conto'     && type === 'conto')   return true;
-                if (filter === 'poema'     && (type === 'poema' || type === 'poesia')) return true;
-                if (filter === 'documento' && type === 'documento') return true;
-                if (filter === 'mídia'     && type === 'mídia')   return true;
-                return false;
-              });
-      
-              // Esconder todos os cards primeiro
-              documentCards.forEach(card => card.style.display = 'none');
-      
-              // Selecionar as áreas visível e oculta
-              const visible = document.getElementById('visible-documents');
-              const hidden  = document.getElementById('hidden-documents');
-              visible.innerHTML = '';
-              hidden.innerHTML  = '';
-      
-              // Adicionar os 6 primeiros ao visível, o resto ao oculto
-              filtered.forEach((card, i) => {
-                card.style.display = 'flex';
-                if (i < 6) visible.appendChild(card);
-                else       hidden.appendChild(card);
-              });
-      
-              // Sempre expandir a área oculta ao filtrar
-              hidden.classList.add('expanded');
-              exploreButton.style.display  = 'none';
-              recolherButton.style.display = 'flex';
-            });
-          });
-      
-          // Busca
-          const searchInput  = document.querySelector('.search-input');
-          const searchButton = document.querySelector('.search-button');
-      
-         // … earlier setup …
-
-         function performSearch() {
-            const documentCards = document.querySelectorAll('.document-card');
-            const term = searchInput.value.toLowerCase();
-          
-            documentCards.forEach(card => {
-              const title   = card.querySelector('h3')?.textContent        || '';
-              const author  = card.querySelector('.document-author')?.textContent || '';
-              const year    = card.querySelector('.document-year')?.textContent   || '';
-              const desc    = card.querySelector('p')?.textContent         || '';
-              const type    = card.querySelector('.document-type')?.textContent   || '';
-              const fields  = [ title, author, year, desc, type ]
-                                .join(' ').toLowerCase();
-          
-              const code = card
-                .querySelector('.document-code')
-                ?.textContent
-                .trim()
-                .toLowerCase() || '';
-          
-              const matches = fields.includes(term) || code.includes(term);
-              card.style.display = matches ? 'flex' : 'none';
-            });
-          
-            // (optional) expand hidden section
-            hiddenDocuments.classList.add('expanded');
-            exploreButton.style.display  = 'none';
-            recolherButton.style.display = 'flex';
-          }
-          
-  
-  // *** Leave these two lines untouched! ***
-  searchButton.addEventListener('click', performSearch);
-  searchInput.addEventListener('keyup', e => {
-    if (e.key === 'Enter') performSearch();
-  });
-  
-  // … rest of your code …
-  
-      
-          // Ordenação
-          const sortSelect = document.querySelector('.sort-select');
-          sortSelect.addEventListener('change', function() {
-            const option = this.value;
-            const allDocs = Array.from(documentCards);
-      
-            allDocs.sort((a,b) => {
-              if (option === 'Ordenar por Título') {
-                return a.querySelector('h3').textContent.localeCompare(b.querySelector('h3').textContent);
-              } else if (option === 'Ordenar por Autor') {
-                return a.querySelector('.document-author').textContent.localeCompare(b.querySelector('.document-author').textContent);
-              } else if (option === 'Ordenar por Data') {
-                return parseInt(b.querySelector('.document-year').textContent) - parseInt(a.querySelector('.document-year').textContent);
-              } else if (option === 'Ordenar por Código') {
-                return parseInt(a.querySelector('.document-code').textContent) - parseInt(b.querySelector('.document-code').textContent);
-              }
-              return 0;
-            });
-      
-            const visible = document.getElementById('visible-documents');
-            const hidden  = document.getElementById('hidden-documents');
-            visible.innerHTML = '';
-            hidden .innerHTML = '';
-      
-            allDocs.forEach((doc, i) => {
-              if (i < 9) visible.appendChild(doc);
-              else      hidden.appendChild(doc);
-            });
-          });
-      
-          // Password protection for media items
-          document.querySelectorAll('.password-button').forEach(button => {
-            button.addEventListener('click', function(e) {
-              e.preventDefault();
-              const card = this.closest('.password-protected');
-              const pwd  = card.getAttribute('data-password');
-              const url  = this.getAttribute('data-video');
-              const entered = prompt('Este conteúdo é protegido. Por favor, digite a senha:');
-              if (entered === pwd) window.open(url, '_blank');
-              else if (entered !== null) alert('Senha incorreta. Acesso negado.');
-            });
-          });
-        });
-        
-      </script>
-      <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Botão de voltar ao topo
-            const backToTopButton = document.querySelector('.back-to-top');
-            
-            window.addEventListener('scroll', function() {
-                if (window.pageYOffset > 300) {
-                    backToTopButton.classList.add('visible');
-                } else {
-                    backToTopButton.classList.remove('visible');
-                }
-            });
-            
-            backToTopButton.addEventListener('click', function() {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            });
-            
-            // Funcionalidade de expandir e recolher documentos
-            const exploreButton = document.getElementById('explore-button');
-            const recolherButton = document.getElementById('recolher-button');
-            const hiddenDocuments = document.getElementById('hidden-documents');
-            let isExpanded = false;
-            
-            exploreButton.addEventListener('click', function() {
-                hiddenDocuments.classList.remove('hidden-documents');
-                exploreButton.style.display = 'none';
-                recolherButton.style.display = 'flex';
-                isExpanded = true;
-            });
-            
-            recolherButton.addEventListener('click', function() {
-                hiddenDocuments.classList.add('hidden-documents');
-                exploreButton.style.display = 'flex';
-                recolherButton.style.display = 'none';
-                isExpanded = false;
-                
-                // Rolar para o topo da seção de acervo
-                document.getElementById('acervo').scrollIntoView({ behavior: 'smooth' });
-            });
-            
-            // Funcionalidade de busca
-            const searchButton = document.querySelector('.search-button');
-            const searchInput = document.querySelector('.search-input');
-            
-            searchButton.addEventListener('click', function() {
-                const searchTerm = searchInput.value.toLowerCase();
-                if (searchTerm.trim() === '') {
-                    return;
-                }
-                
-                const allDocuments = document.querySelectorAll('.document-card');
-                
-                // Se estiver buscando por código, expandir a seção oculta
-                if (searchTerm.match(/^\d{3}$/)) {
-                    hiddenDocuments.classList.remove('hidden-documents');
-                    exploreButton.style.display = 'none';
-                    recolherButton.style.display = 'flex';
-                    isExpanded = true;
-                }
-                
-                allDocuments.forEach(function(doc) {
-                    const code = doc.querySelector('.document-code').textContent;
-                    const title = doc.querySelector('h3').textContent.toLowerCase();
-                    const author = doc.querySelector('.document-author') ? 
-                                  doc.querySelector('.document-author').textContent.toLowerCase() : '';
-                    const description = doc.querySelector('p').textContent.toLowerCase();
-                    
-                    if (code.includes(searchTerm) || 
-                        title.includes(searchTerm) || 
-                        author.includes(searchTerm) || 
-                        description.includes(searchTerm)) {
-                        doc.style.display = 'flex';
-                        
-                        // Adicionar animação ao encontrar resultados
-                        doc.style.animation = 'none';
-                        void doc.offsetWidth; // Trigger reflow
-                        doc.style.animation = 'fadeIn 0.5s ease forwards';
-                    } else {
-                        doc.style.display = 'none';
-                    }
-                });
-            });
-            
-            // Adicionar rolagem suave para todos os links de navegação
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    
-                    const targetId = this.getAttribute('href');
-                    if (targetId === '#') return;
-                    
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                        window.scrollTo({
-                            top: targetElement.offsetTop - 80,
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-            });
-            
-            // Gerar linha do tempo com base nos documentos
-            function gerarLinhaDoTempo() {
-                const timelineTrack = document.querySelector('.timeline-track');
-                timelineTrack.innerHTML = '';
-                
-                // Ordenar documentos por ano
-                const docsPorAno = [...documentos].sort((a, b) => a.ano.localeCompare(b.ano));
-                
-                docsPorAno.forEach((doc, index) => {
-                    const timelineItem = document.createElement('div');
-                    timelineItem.className = 'timeline-item-horizontal';
-                    timelineItem.setAttribute('data-year', doc.ano);
-                    
-                    const timelineContent = `
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content-horizontal">
-                            <div class="document-code">${doc.codigo}</div>
-                            <div class="timeline-year-horizontal">${doc.ano}</div>
-                            <div class="timeline-text-horizontal">${doc.titulo}</div>
-                            <div class="timeline-author-horizontal">${doc.autor}</div>
-                            <div class="timeline-tag-horizontal">${doc.genero.charAt(0).toUpperCase() + doc.genero.slice(1)}</div>
-                            <a href="#acervo" class="timeline-button-horizontal">Ler obra</a>
-                        </div>
-                    `;
-                    
-                    timelineItem.innerHTML = timelineContent;
-                    timelineTrack.appendChild(timelineItem);
-                });
-                
-                return document.querySelectorAll('.timeline-item-horizontal');
-            }
-            
-            // Gerar a linha do tempo
-            const timelineItems = gerarLinhaDoTempo();
-            
-            // Funcionalidade de pop-up para a linha do tempo
-            timelineItems.forEach(item => {
-                const content = item.querySelector('.timeline-content-horizontal');
-                const title = content.querySelector('.timeline-text-horizontal').textContent;
-                const year = content.querySelector('.timeline-year-horizontal').textContent;
-                const author = content.querySelector('.timeline-author-horizontal').textContent;
-                const type = content.querySelector('.timeline-tag-horizontal').textContent;
-                const link = content.querySelector('a').getAttribute('href');
-                
-                // Remover o evento de popup separado, já que o conteúdo já aparece no hover
-                item.addEventListener('click', function() {
-                    // Navegar para a seção do acervo e destacar o item correspondente
-                    const acervoSection = document.getElementById('acervo');
-                    acervoSection.scrollIntoView({ behavior: 'smooth' });
-                    
-                    // Expandir a seção oculta se necessário
-                    if (hiddenDocuments.classList.contains('hidden-documents')) {
-                        hiddenDocuments.classList.remove('hidden-documents');
-                        exploreButton.style.display = 'none';
-                        recolherButton.style.display = 'flex';
-                        isExpanded = true;
-                    }
-                    
-                    // Buscar o documento correspondente no acervo
-                    const searchInput = document.querySelector('.search-input');
-                    searchInput.value = title;
-                    searchButton.click();
-                    
-                    // Destacar o documento encontrado
-                    setTimeout(() => {
-                        const foundDoc = document.querySelector('.document-card h3, .document-card h3');
-                        if (foundDoc) {
-                            foundDoc.parentElement.style.animation = 'none';
-                            void foundDoc.parentElement.offsetWidth; // Trigger reflow
-                            foundDoc.parentElement.style.animation = 'pulse 1s ease 3';
-                        }
-                    }, 1000);
-                });
-            });
-            // Função para abrir vídeos do YouTube, sem proteção por senha
-function openVideo(videoId, isProtected) {
-    // Remove password protection - all videos are now accessible
-    window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
-}
-            // Adicionar animação de pulse para destacar itens
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes pulse {
-                    0% { transform: scale(1); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-                    50% { transform: scale(1.05); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
-                    100% { transform: scale(1); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-                }
-            `;
-            document.head.appendChild(style);
-            
-        </script>
-    
-    <script>
-        // Controle do cabeçalho com hover - execução imediata
-        document.addEventListener('DOMContentLoaded', function() {
-            const hoverTrigger = document.querySelector('.hover-trigger');
-            const navBar = document.querySelector('.nav-bar');
-            
-            if (hoverTrigger && navBar) {
-                console.log('Elementos encontrados, configurando hover...');
-                
-                hoverTrigger.addEventListener('mouseenter', function() {
-                    console.log('Mouse entrou no trigger');
-                    navBar.classList.add('show');
-                });
-                
-                navBar.addEventListener('mouseleave', function() {
-                    console.log('Mouse saiu da nav-bar');
-                    navBar.classList.remove('show');
-                });
-                
-                hoverTrigger.addEventListener('mouseleave', function() {
-                    console.log('Mouse saiu do trigger');
-                    setTimeout(() => {
-                        if (!navBar.matches(':hover')) {
-                            navBar.classList.remove('show');
-                        }
-                    }, 100);
-                });
-            } else {
-                console.log('Elementos não encontrados:', { hoverTrigger, navBar });
-            }
-        });
-
-        });
-    </script>
-    
-    <script src="navigation-controls.js"></script>
-    
-    <!-- Hamburger Menu JavaScript -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const hamburgerMenu = document.getElementById('hamburger-menu');
-            const mobileNav = document.getElementById('mobile-nav');
-            const mobileNavLinks = mobileNav.querySelectorAll('a');
-            
-            // Toggle mobile menu
-            hamburgerMenu.addEventListener('click', function() {
-                hamburgerMenu.classList.toggle('active');
-                mobileNav.classList.toggle('active');
-                
-                // Prevent body scroll when menu is open
-                if (mobileNav.classList.contains('active')) {
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    document.body.style.overflow = '';
-                }
-            });
-            
-            // Close mobile menu when clicking on a link
-            mobileNavLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    hamburgerMenu.classList.remove('active');
-                    mobileNav.classList.remove('active');
-                    document.body.style.overflow = '';
-                });
-            });
-            
-            // Close mobile menu when clicking outside
-            mobileNav.addEventListener('click', function(e) {
-                if (e.target === mobileNav) {
-                    hamburgerMenu.classList.remove('active');
-                    mobileNav.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
-            
-            // Close mobile menu on window resize (if screen becomes larger)
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
-                    hamburgerMenu.classList.remove('active');
-                    mobileNav.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
         });
     </script>
 </body>
