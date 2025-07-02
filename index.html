@@ -33,6 +33,17 @@
             color: var(--text-color);
             line-height: 1.6;
             padding-top: 40px; /* Increased from 20px to account for larger hover area */
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
         
         .nav-bar {
@@ -646,16 +657,7 @@
             }
         }
         
-        /* Password protection styles */
-        .password-protected .read-button {
-            position: relative;
-        }
-        
-        .password-protected .read-button::after {
-            content: '🔒';
-            font-size: 0.8rem;
-            margin-left: 5px;
-        }
+        /* Password protection removed */
         
         .footer {
             background-color: var(--primary-color);
@@ -867,21 +869,7 @@
     transform: translate(-50%, -50%) scale(1.1);
 }
 
-.protected-badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: var(--primary-color);
-    color: #fff;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    font-size: 0.8rem;
-}
+/* Protected badge removed - all content is now publicly accessible */
 
 @media (max-width: 768px) {
     .nav-bar {
@@ -1339,16 +1327,14 @@ video-synopsis {
                     const welcomeMessage = document.getElementById('welcome-message');
                     
                     passwordR.addEventListener('click', function() {
-                        const password = prompt('Digite a senha:');
-                        if (password === '24042003') {
-                            welcomeMessage.textContent = 'Bem-Vindo Reinaldão!';
-                            welcomeMessage.classList.add('show');
-                            
-                            // Hide the message after 5 seconds
-                            setTimeout(function() {
-                                welcomeMessage.classList.remove('show');
-                            }, 5000);
-                        }
+                        // Password protection removed - welcome message always shows
+                        welcomeMessage.textContent = 'Bem-Vindo!';
+                        welcomeMessage.classList.add('show');
+                        
+                        // Hide the message after 5 seconds
+                        setTimeout(function() {
+                            welcomeMessage.classList.remove('show');
+                        }, 5000);
                     });
                     
                     // Funcionalidade de alternância da badge
@@ -1387,7 +1373,7 @@ video-synopsis {
             </script>
             
             <p>Acervo de Histórias, Contos, Fotos, Livros e Vídeos que resolvi guardar em arquivos digitais. Assim fazendo, tenho condições de preservar os guardados, evitando que caiam no esquecimento, nos sebos e/ou descarte nos lixos. Com este propósito possibilito que outras pessoas possam apreciar e revisitar quantos momentos que guardei.</p>
-            <p>Alguns arquivos de livre acesso e outros que, dado o conteúdo privado – restrito a grupos específicos.</p>
+            <p>Todos os arquivos estão agora de livre acesso para apreciação e revisitação dos momentos históricos preservados.</p>
             
             <div class="historical-photo">
                 <img src="historical_couple.jpg" alt="Foto histórica da cidade">
@@ -2399,6 +2385,29 @@ video-synopsis {
                         <a href="Monsenhor Moreira - Uma vida a servi├ºo do Reino de Deus.pdf autora_ Luiza Izabel Biagioni.pdf" class="read-button">Ler</a>
                     </div>
                 </div>
+                <div class="document-card" style="animation-delay: 2.2s;">
+                    <div class="document-code">324</div>
+                    <h3>Diploma concedido a Reinaldo Duarte Castanheira</h3>
+                    <div class="document-author">ACLCL </div>
+                    <div class="document-year">2021</div>
+                    <p>Diploma da Ordem dos Construtores do Progresso de Conselheiro Lafaiete</p>
+                    <div class="document-footer">
+                        <span class="document-type">Documento</span>
+                        <a href="https://drive.google.com/file/d/1p7ExGzkHrSUf6ekhRYUO6yaenOIUqT2B/view?usp=sharing" class="read-button">Ler</a>
+                    </div>
+                </div>
+                <div class="document-card" style="animation-delay: 2.2s;">
+                    <div class="document-code">325</div>
+                    <h3>Jornal da Cultura homenageia Reinaldo Duarte Castanheira</h3>
+                    <div class="document-author">Jornal Correio</div>
+                    <div class="document-year">2021</div>
+                    <p>Reportagem de página da Cultura, com sucinto currículo e destaque para as publicações feitas no Canal do Youtube.
+                        </p>
+                    <div class="document-footer">
+                        <span class="document-type">Documento</span>
+                        <a href="https://drive.google.com/file/d/1g6pH_pzgGB7MMMTtNT3lBqW9NrTLuytp/view?usp=sharing" class="read-button">Ler</a>
+                    </div>
+                </div>
             </div>
    
             <div id="videos-container" class="video-grid">
@@ -2421,23 +2430,12 @@ video-synopsis {
         <p>Quem conta suas histórias e relembra os seus, celebra a vida. Um trabalho contínuo por Reinaldo e Felipe Castanheira</p>
         <p>Contato: <a href="mailto:reinaldoduarte080@gmail.com ">reinaldoduarte080@gmail.com </a></p>
     </footer>
-    <script src="password-protection.js"></script>
+    <!-- Password protection removed -->
    
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const correctPassword = "194348"; // your password here
-            const entered = sessionStorage.getItem("authorized");
-        
-            if (entered !== "true") {
-              const attempt = prompt("Digite a senha para acessar a biblioteca:");
-        
-              if (attempt === correctPassword) {
-                sessionStorage.setItem("authorized", "true");
-              } else {
-                document.body.innerHTML = "<h1 style='text-align:center; padding-top: 20vh;'>Acesso negado.</h1>";
-              }
-            }
-          });
+            // Password protection removed - site is now publicly accessible
+        });
           const mediaCovers = {
             "118": "Capa-8.jpg",
             "119": "Capa-9.jpg", 
@@ -2790,7 +2788,17 @@ video-synopsis {
 
         
     },
-
+    {
+        titulo: "Felipe Sampaio Castanheira ao piano",
+        id: "0FHsxbc6d1E",
+        protegido: false,
+        codigo: "140",
+        ano: "2021",
+        autor: "Reinaldo Duarte Castanheira",
+        sinopse: "Participando no Recital 2021 da Professora Sabrina Esteves"
+    },
+    
+    
 ];
 
 
@@ -2807,7 +2815,7 @@ document.addEventListener('DOMContentLoaded', function() {
         videoLinks.forEach(link => {
             if (link.hasAttribute('target') && link.getAttribute('href').includes('youtube.com/watch?v=')) {
                 const videoId = link.getAttribute('href').split('v=')[1];
-                const isProtected = link.querySelector('.protected-badge') !== null;
+                const isProtected = false; // Password protection removed
                 
                 link.setAttribute('href', 'javascript:void(0)');
                 link.removeAttribute('target');
@@ -2835,7 +2843,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <a href="${v.link ? v.link : 'javascript:void(0)'}" onclick="${v.link ? '' : `openVideo('${v.id}', ${v.protegido});`}" target="_blank" rel="noopener noreferrer">
                         <img src="${v.capa ? v.capa : (v.link ? 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_movie_x16.png' : `https://img.youtube.com/vi/${v.id}/mqdefault.jpg`)}" alt="${v.titulo}">
                         <div class="play-button">▶</div>
-                        ${v.protegido ? '<div class="protected-badge">P</div>' : ''}
+                        <!-- Protected badge removed -->
                     </a>
                 </div>
                  <div class="document-year">${v.ano}</div>
@@ -2853,7 +2861,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Adicionar documentos 140-145 após os vídeos para manter ordem numérica
         const documentos140_145 = [
             {
-                codigo: "140",
+                codigo: "141",
                 titulo: "Nosso Casamento: Bet e Reinaldo",
                 autor: "Reinaldo Duarte Castanheira",
                 ano: "1967",
@@ -2863,7 +2871,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 capa: "Capa-1.jpg"
             },
             {
-                codigo: "141",
+                codigo: "142",
                 titulo: "Fotos e slides produzidas 1973 – 1978",
                 autor: "Reinaldo Duarte Castanheira",
                 ano: "1978",
@@ -2873,7 +2881,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 capa: "Capa-3.jpg"
             },
             {
-                codigo: "142",
+                codigo: "143",
                 titulo: "Flores da Austrália",
                 autor: "Reinaldo Duarte Castanheira",
                 ano: "2017",
@@ -2883,7 +2891,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 capa: "Capa-2.jpg"
             },
             {
-                codigo: "143",
+                codigo: "144",
                 titulo: "Felipe 2007 Vila da Criança",
                 autor: "Reinaldo Duarte Castanheira",
                 ano: "2007",
@@ -2893,7 +2901,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 capa: "Capa-5.jpg"
             },
             {
-                codigo: "144",
+                codigo: "145",
                 titulo: "Interior de nossa casa e vistas de Lafaiete do passado - Vídeo 1",
                 autor: "João Pio Duarte Castanheira",
                 ano: "1986",
@@ -2903,7 +2911,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 capa: "Capa-4.jpg"
             },
             {
-                codigo: "145",
+                codigo: "146",
                 titulo: "Interior de nossa casa e vistas de Lafaiete do passado - Vídeo 2",
                 autor: "João Pio Duarte Castanheira",
                 ano: "1986",
@@ -3222,18 +3230,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
           });
       
-          // Password protection for media items
-          document.querySelectorAll('.password-button').forEach(button => {
-            button.addEventListener('click', function(e) {
-              e.preventDefault();
-              const card = this.closest('.password-protected');
-              const pwd  = card.getAttribute('data-password');
-              const url  = this.getAttribute('data-video');
-              const entered = prompt('Este conteúdo é protegido. Por favor, digite a senha:');
-              if (entered === pwd) window.open(url, '_blank');
-              else if (entered !== null) alert('Senha incorreta. Acesso negado.');
-            });
-          });
+          // Password protection removed - all content is now publicly accessible
         });
         
       </script>
