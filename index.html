@@ -957,7 +957,7 @@ video-synopsis {
     width: 55px;
     height: 55px;
     border-radius: 50%;
-    background-color: var(--gold-color); /* fundo padrão */
+    background-color: var(--gold-color);
     border: none;
     display: flex;
     justify-content: center;
@@ -966,16 +966,27 @@ video-synopsis {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     opacity: 0;
     pointer-events: none;
-    transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
     z-index: 3002;
+    position: fixed;
 }
 
-.rect-scroll-btn.available.visible {
+.rect-scroll-btn.visible {
     opacity: 1;
+    pointer-events: auto;
+    transform: scale(1.1);
+}
+
+/* Make buttons more visible when they can be used */
+.rect-scroll-btn.can-show {
+    opacity: 0.7;
     pointer-events: auto;
 }
 
-/* Remove .rect-scroll-btn.available { pointer-events: auto; } if present */
+.rect-scroll-btn.can-show:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
 
 .rect-scroll-btn span {
     width: 0;
@@ -1056,35 +1067,37 @@ video-synopsis {
         const windowHeight = window.innerHeight;
         const documentHeight = document.documentElement.scrollHeight;
         
-        // Only show back-to-top button when not at the top (scrolled down more than 100px)
+        // Top button visible when page is not on top
         if (scrollY > 100) {
-          backToTop.classList.add('available');
+          backToTop.classList.add('can-show');
         } else {
-          backToTop.classList.remove('available');
+          backToTop.classList.remove('can-show');
+          backToTop.classList.remove('visible');
         }
         
-        // Only show scroll-to-bottom button when not at the bottom (more than 100px from bottom)
+        // Bottom button visible when page not on bottom
         if (scrollY + windowHeight < documentHeight - 100) {
-          scrollToBottom.classList.add('available');
+          scrollToBottom.classList.add('can-show');
         } else {
-          scrollToBottom.classList.remove('available');
+          scrollToBottom.classList.remove('can-show');
+          scrollToBottom.classList.remove('visible');
         }
       }
       
-      // Handle hover effects
+      // Show buttons on hover at screen edges
       function handleMouseMove(e) {
         const y = e.clientY;
         const windowHeight = window.innerHeight;
         
-        // Show back-to-top button on hover near top, but only if it's available
-        if (y < 80 && backToTop.classList.contains('available')) {
+        // Show back-to-top button when hovering at top of screen (if it can show)
+        if (y < 100 && backToTop.classList.contains('can-show')) {
           backToTop.classList.add('visible');
         } else {
           backToTop.classList.remove('visible');
         }
         
-        // Show scroll-to-bottom button on hover near bottom, but only if it's available
-        if (y > windowHeight - 80 && scrollToBottom.classList.contains('available')) {
+        // Show scroll-to-bottom button when hovering at bottom of screen (if it can show)
+        if (y > windowHeight - 100 && scrollToBottom.classList.contains('can-show')) {
           scrollToBottom.classList.add('visible');
         } else {
           scrollToBottom.classList.remove('visible');
@@ -1097,15 +1110,20 @@ video-synopsis {
       // Update on mouse move for hover
       document.addEventListener('mousemove', handleMouseMove);
       
+      // Update on window resize
+      window.addEventListener('resize', updateScrollButtons);
+      
       // Update on page load
       updateScrollButtons();
       
-      backToTop.onclick = function() {
+      // Click handlers
+      backToTop.addEventListener('click', function() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-      scrollToBottom.onclick = function() {
+      });
+      
+      scrollToBottom.addEventListener('click', function() {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-      };
+      });
     });
     </script>
 
@@ -2117,7 +2135,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">A Herança dos Castanheiras</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Documento</div>
-                            <a href="A Herança dos Castanheiras.docx.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="https://docs.google.com/document/d/18ao4PhN-X0Lh79Rj5VqJJrNXt0C1SJsSUlyvH7O6zXo/edit?usp=sharing" class="timeline-button-horizontal">Ler obra</a>
                         </div>
                     </div>
                     
@@ -2476,7 +2494,7 @@ video-synopsis {
                     <p>Documento sobre a herança cultural e familiar dos Castanheiras, preservando a história e tradições da família.</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="A Herança dos Castanheiras.docx.pdf" class="read-button">Ler</a>
+                        <a href="https://docs.google.com/document/d/18ao4PhN-X0Lh79Rj5VqJJrNXt0C1SJsSUlyvH7O6zXo/edit?usp=sharing" class="read-button">Ler</a>
                     </div>
                 </div>
                 
@@ -2485,7 +2503,7 @@ video-synopsis {
                     <h3>Homenagem ao meu Pai</h3>
                     <div class="document-author">Reinaldo Duarte Castanheira</div>
                     <div class="document-year">2024</div>
-                    <p>Texto em homenagem ao pai, destacando sua história, qualidades, ensinamentos e o legado deixado para a família.</p>
+                    <p>Texto escrito em 1972 homenageando meu Pai, destacando sua história, qualidades, ensinamentos e o legado dado a sua família</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
                         <a href="Homenagem ao meu Pai.docx.pdf" class="read-button">Ler</a>
@@ -2812,7 +2830,7 @@ video-synopsis {
         codigo: "133",
         ano: "2017",
         autor: "Reinaldo Duarte Castanheira",
-        sinopse: "Parte da procissão filmada da varanda do apartamento que me hospedava. Cerimônia emocionante."
+        sinopse: "Parte da procissão filmada da varanda do apartamento que me hospedava. Cerimônia emocionante com a Bet."
     },
     {
         titulo: "Procissão Semana Santa Salamanca – 2",
@@ -2821,7 +2839,7 @@ video-synopsis {
         codigo: "134",
         ano: "2017",
         autor: "Reinaldo Duarte Castanheira",
-        sinopse: "Parte da procissão filmada da varanda do apartamento que me hospedava. Cerimônia emocionante."
+        sinopse: "Parte da procissão filmada da varanda do apartamento que me hospedava. Cerimônia emocionante com a Bet."
     },
     {
         titulo: "Procissão Semana Santa Salamanca – 3",
@@ -2830,7 +2848,7 @@ video-synopsis {
         codigo: "135",
         ano: "2017",
         autor: "Reildo Duarte Castanheira",
-        sinopse: "Parte da procissão filmada da varanda do apartamento que me hospedava. Cerimônia emocionante."
+        sinopse: "Parte da procissão filmada da varanda do apartamento que me hospedava. Cerimônia emocionante com a Bet.."
     },
     {
         titulo: "Procissão Semana Santa Salamanca – 4",
@@ -2839,7 +2857,7 @@ video-synopsis {
         codigo: "136",
         ano: "2017",
         autor: "Reinaldo Duarte Castanheira",
-        sinopse: "Parte da procissão filmada da varanda do apartamento que me hospedava. Cerimônia emocionante."
+        sinopse: "Parte da procissão filmada da varanda do apartamento que me hospedava. Cerimônia emocionante com a Bet."
     },
     {
         titulo: "Dr Ary Belisário – Parte 1",
