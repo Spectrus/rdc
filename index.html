@@ -979,7 +979,7 @@ video-synopsis {
 
 /* Make buttons more visible when they can be used */
 .rect-scroll-btn.can-show {
-    opacity: 0.7;
+    opacity: 0.8;
     pointer-events: auto;
 }
 
@@ -1058,72 +1058,54 @@ video-synopsis {
     </button>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const backToTop = document.getElementById('back-to-top');
       const scrollToBottom = document.getElementById('scroll-to-bottom');
-      
-      function updateScrollButtons() {
-        const scrollY = window.scrollY || window.pageYOffset;
-        const windowHeight = window.innerHeight;
-        const documentHeight = document.documentElement.scrollHeight;
-        
-        // Top button visible when page is not on top
-        if (scrollY > 100) {
-          backToTop.classList.add('can-show');
-        } else {
-          backToTop.classList.remove('can-show');
-          backToTop.classList.remove('visible');
-        }
-        
-        // Bottom button visible when page not on bottom
-        if (scrollY + windowHeight < documentHeight - 100) {
-          scrollToBottom.classList.add('can-show');
-        } else {
-          scrollToBottom.classList.remove('can-show');
-          scrollToBottom.classList.remove('visible');
-        }
+
+      function updateScrollState() {
+        const scrollY = window.scrollY;
+        const windowH = window.innerHeight;
+        const docH = document.documentElement.scrollHeight;
+
+        // Mark whether buttons *can* be shown
+        backToTop.dataset.enabled = scrollY > 50 ? 'true' : 'false';
+        scrollToBottom.dataset.enabled = (scrollY + windowH < docH - 50) ? 'true' : 'false';
       }
-      
-      // Show buttons on hover at screen edges
+
       function handleMouseMove(e) {
         const y = e.clientY;
-        const windowHeight = window.innerHeight;
-        
-        // Show back-to-top button when hovering at top of screen (if it can show)
-        if (y < 100 && backToTop.classList.contains('can-show')) {
+        const screenH = window.innerHeight;
+
+        const topZone = screenH * 0.25;    // top 25%
+        const bottomZone = screenH * 0.75; // bottom 25%
+
+        if (y < topZone && backToTop.dataset.enabled === 'true') {
           backToTop.classList.add('visible');
         } else {
           backToTop.classList.remove('visible');
         }
-        
-        // Show scroll-to-bottom button when hovering at bottom of screen (if it can show)
-        if (y > windowHeight - 100 && scrollToBottom.classList.contains('can-show')) {
+
+        if (y > bottomZone && scrollToBottom.dataset.enabled === 'true') {
           scrollToBottom.classList.add('visible');
         } else {
           scrollToBottom.classList.remove('visible');
         }
       }
-      
-      // Update on scroll
-      window.addEventListener('scroll', updateScrollButtons);
-      
-      // Update on mouse move for hover
+
+      // Watch scrolling + resizing
+      window.addEventListener('scroll', updateScrollState);
+      window.addEventListener('resize', updateScrollState);
       document.addEventListener('mousemove', handleMouseMove);
-      
-      // Update on window resize
-      window.addEventListener('resize', updateScrollButtons);
-      
-      // Update on page load
-      updateScrollButtons();
-      
-      // Click handlers
-      backToTop.addEventListener('click', function() {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-      
-      scrollToBottom.addEventListener('click', function() {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-      });
+
+      // Buttons scroll behavior
+      backToTop.addEventListener('click', () =>
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      );
+      scrollToBottom.addEventListener('click', () =>
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      );
+
+      updateScrollState(); // on load
     });
     </script>
 
@@ -1599,15 +1581,7 @@ video-synopsis {
                     </div>
                     
                     <!-- 1995 - Docum fotos Castanheira em Portugal -->
-                    <div class="timeline-item-horizontal" style="animation-delay: 1.7s;">
-                        <div class="timeline-content-horizontal">
-                            <div class="timeline-year-horizontal">1995</div>
-                            <div class="timeline-text-horizontal">Docum fotos Castanheira em Portugal</div>
-                            <div class="timeline-author-horizontal">Família Castanheira</div>
-                            <div class="timeline-tag-horizontal">Documento</div>
-                            <a href="Docum fotos Castanheira em Portugal.pdf" class="timeline-button-horizontal">Ler obra</a>
-                        </div>
-                    </div>
+                   
                     
                     <!-- 1997 - Despedida de nossa casa Rua Melo Viana, 75 -->
                     <div class="timeline-item-horizontal" style="animation-delay: 1.8s;">
