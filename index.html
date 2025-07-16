@@ -556,6 +556,484 @@
             color: var(--primary-color);
         }
         
+        .curator-button {
+            background-color: var(--gold-color);
+            color: var(--primary-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            font-family: 'EB Garamond', serif;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .curator-button:hover {
+            background-color: var(--primary-color);
+            color: var(--gold-color);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        
+        .curator-button:active {
+            transform: translateY(0) scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        /* Modern Video Popup Window Styles */
+        .video-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: transparent;
+            display: none;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            /* Ensure popup stays fixed on screen */
+            will-change: opacity;
+        }
+        
+        .video-popup.active {
+            opacity: 1;
+        }
+        
+        .video-popup.active.maximized {
+            z-index: 99999 !important;
+        }
+        
+        .video-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 800px;
+            height: 500px;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-radius: 16px;
+            box-shadow: 
+                0 32px 64px rgba(0, 0, 0, 0.2),
+                0 8px 16px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            resize: both;
+            min-width: 500px;
+            min-height: 350px;
+            pointer-events: auto;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(212, 180, 95, 0.3);
+            z-index: 10001;
+            transform-origin: center center;
+            /* Ensure window stays fixed on screen */
+            will-change: transform;
+        }
+        
+        .video-popup.active .video-window {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .video-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #3a1f1d 100%);
+            color: var(--gold-color);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            user-select: none;
+            font-family: 'EB Garamond', serif;
+            font-weight: bold;
+            position: relative;
+            border-bottom: 1px solid rgba(212, 180, 95, 0.2);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .video-header:hover {
+            background: linear-gradient(135deg, #3a1f1d 0%, var(--primary-color) 100%);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .video-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold-color) 0%, #b78c3b 50%, var(--gold-color) 100%);
+        }
+        
+        .video-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Soundwave animation */
+        .soundwave {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .soundwave-bar {
+            width: 3px;
+            background: var(--gold-color);
+            border-radius: 2px;
+            animation: soundwave-pulse 1s ease-in-out infinite;
+        }
+        
+        .soundwave-bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+        .soundwave-bar:nth-child(2) { height: 12px; animation-delay: 0.1s; }
+        .soundwave-bar:nth-child(3) { height: 16px; animation-delay: 0.2s; }
+        .soundwave-bar:nth-child(4) { height: 20px; animation-delay: 0.3s; }
+        .soundwave-bar:nth-child(5) { height: 16px; animation-delay: 0.4s; }
+        .soundwave-bar:nth-child(6) { height: 12px; animation-delay: 0.5s; }
+        .soundwave-bar:nth-child(7) { height: 8px; animation-delay: 0.6s; }
+        
+        @keyframes soundwave-pulse {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.5); }
+        }
+        
+        /* Title animation states - works in all window states */
+        .video-title.fade-out-right {
+            animation: fadeOutRight 0.5s ease forwards !important;
+        }
+        
+        .video-title.fade-in-left {
+            animation: fadeInLeft 0.5s ease forwards !important;
+        }
+        
+        .soundwave.fade-in {
+            opacity: 1 !important;
+        }
+        
+        .soundwave.fade-out {
+            opacity: 0 !important;
+        }
+        
+        .soundwave.flatten {
+            animation: flatten 0.5s ease forwards !important;
+        }
+        
+        /* Ensure animations work in maximized state */
+        .video-window.maximized .video-title.fade-out-right {
+            animation: fadeOutRight 0.5s ease forwards !important;
+        }
+        
+        .video-window.maximized .video-title.fade-in-left {
+            animation: fadeInLeft 0.5s ease forwards !important;
+        }
+        
+        .video-window.maximized .soundwave.fade-in {
+            opacity: 1 !important;
+        }
+        
+        .video-window.maximized .soundwave.fade-out {
+            opacity: 0 !important;
+        }
+        
+        .video-window.maximized .soundwave.flatten {
+            animation: flatten 0.5s ease forwards !important;
+        }
+        
+        @keyframes fadeOutRight {
+            to {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+        
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes flatten {
+            to {
+                transform: translate(-50%, -50%) scaleY(0.3);
+            }
+        }
+        
+        /* .video-title::before {
+            content: '🎬';
+            font-size: 1.1rem;
+        } */
+        
+        .video-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .video-controls button {
+            background: rgba(212, 180, 95, 0.1);
+            border: 1px solid rgba(212, 180, 95, 0.3);
+            color: var(--gold-color);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            font-weight: 500;
+        }
+        
+        .video-controls button:hover {
+            background: rgba(212, 180, 95, 0.2);
+            border-color: rgba(212, 180, 95, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .video-controls button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .close-btn:hover {
+            background: linear-gradient(135deg, #ff4444 0%, #cc3333 100%) !important;
+            color: white !important;
+            border-color: #ff4444 !important;
+        }
+        
+        .minimize-btn:hover {
+            background: rgba(255, 193, 7, 0.2) !important;
+            border-color: #ffc107 !important;
+        }
+        
+        .maximize-btn:hover {
+            background: rgba(40, 167, 69, 0.2) !important;
+            border-color: #28a745 !important;
+        }
+        
+        .video-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .video-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(212, 180, 95, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .video-content video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 0 0 16px 16px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .resize-handle {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, var(--gold-color) 0%, #b78c3b 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.7;
+            z-index: 10001;
+        }
+        
+        /* Edge resize handles for lateral resizing */
+        .resize-edge {
+            position: absolute;
+            background: transparent;
+            transition: all 0.2s ease;
+            z-index: 10000;
+        }
+        
+        .resize-edge:hover {
+            background: rgba(212, 180, 95, 0.2);
+        }
+        
+        .resize-edge-n {
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            cursor: n-resize;
+        }
+        
+        .resize-edge-s {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            cursor: s-resize;
+        }
+        
+        .resize-edge-e {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 8px;
+            cursor: e-resize;
+        }
+        
+        .resize-edge-w {
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 8px;
+            cursor: w-resize;
+        }
+        
+        .video-window:hover .resize-handle {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .resize-handle:hover {
+            transform: scale(1.4);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, #b78c3b 0%, var(--gold-color) 100%);
+        }
+        
+        .resize-handle:active {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .resize-handle-nw {
+            top: -8px;
+            left: -8px;
+            cursor: nw-resize;
+        }
+        
+        .resize-handle-ne {
+            top: -8px;
+            right: -8px;
+            cursor: ne-resize;
+        }
+        
+        .resize-handle-sw {
+            bottom: -8px;
+            left: -8px;
+            cursor: sw-resize;
+        }
+        
+        .resize-handle-se {
+            bottom: -8px;
+            right: -8px;
+            cursor: se-resize;
+        }
+        
+        .video-window.maximized {
+            width: 100vw !important;
+            height: 100vh !important;
+            top: 0 !important;
+            left: 0 !important;
+            transform: none !important;
+            border-radius: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100000 !important;
+        }
+        
+        .video-window.maximized .video-content video {
+            border-radius: 0;
+            object-fit: cover;
+        }
+        
+        .video-window.maximized .video-content {
+            border-radius: 0;
+        }
+        
+        .video-window.minimized {
+            width: 400px !important;
+            height: 250px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Smooth animations for window states */
+        .video-window.transitioning {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Ensure site remains fully interactive when video is open */
+        body.video-open {
+            overflow: auto !important;
+        }
+        
+        /* Allow all site elements to be interactive */
+        .video-popup ~ * {
+            pointer-events: auto;
+        }
+        
+        /* Only the video window should capture pointer events */
+        .video-window {
+            pointer-events: auto;
+        }
+        
+        /* Ensure the popup background doesn't block interactions */
+        .video-popup.active {
+            pointer-events: none;
+        }
+        
+        /* Modern scrollbar for video window */
+        .video-window::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .video-window::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+        
+        .video-window::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--gold-color) 0%, #b78c3b 100%);
+            border-radius: 4px;
+        }
+        
+        .video-window::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #b78c3b 0%, var(--gold-color) 100%);
+        }
+        
         .horizontal-timeline {
             position: relative;
             overflow-x: auto;
@@ -629,17 +1107,22 @@
         }
         
         .timeline-button-horizontal {
-            background: var(--gold-color);
-            color: var(--primary-color);
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            text-align: center;
-            transition: all 0.3s ease;
-            font-family: 'EB Garamond', serif;
-        }
+    background: var(--gold-color);
+    color: var(--primary-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.3s ease;
+    font-family: 'EB Garamond', serif;
+    width: 100%;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
         
         .timeline-button-horizontal:hover {
             background: var(--primary-color);
@@ -1385,7 +1868,7 @@ video-synopsis {
             <h2 class="timeline-title">Linha do Tempo </h2>
             
             <div style="text-align: center; margin-bottom: 15px;">
-               
+                <button class="curator-button" id="curator-button">Palavras do Curador</button>
             </div>
         
             <div class="horizontal-timeline">
@@ -1410,7 +1893,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Carta de meu bisavô José Antonio Duraes Castanheira</div>
                             <div class="timeline-author-horizontal">Francisco Augusto Durães Castanheira</div>
                             <div class="timeline-tag-horizontal">Documento</div>
-                            <a href="Carta de 1878 do Bisavô  para Vovô por Elisa Lima.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Carta de 1878 do Bisavô  para Vovô por Elisa Lima.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -1421,7 +1904,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">O Livro da Vovó Magdalena</div>
                             <div class="timeline-author-horizontal">Maria Magdalena Moura Costa Castanheira</div>
                             <div class="timeline-tag-horizontal">Livro</div>
-                            <a href="O Livro da Vovó Magdalena.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="O Livro da Vovó Magdalena.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -1432,7 +1915,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Se</div>
                             <div class="timeline-author-horizontal">Rudyard Kipling</div>
                             <div class="timeline-tag-horizontal">Poema</div>
-                            <a href="Se.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Se.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -1587,7 +2070,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">História do Tio Antonio</div>
                             <div class="timeline-author-horizontal">Elisa Lima estimada prima - Lisboa</div>
                             <div class="timeline-tag-horizontal">Conto</div>
-                            <a href="História do Tio Antonio.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="História do Tio Antonio.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -1623,7 +2106,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Queluzíadas</div>
                             <div class="timeline-author-horizontal">Alberto Libanio Rodrigues</div>
                             <div class="timeline-tag-horizontal">Livro</div>
-                            <a href="Queluzíadas .pdf autor - Alberto Libanio Rodrigues.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Queluzíadas .pdf autor - Alberto Libanio Rodrigues.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -1689,7 +2172,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Avenida Parque</div>
                             <div class="timeline-author-horizontal">Marina Biagioni Marques</div>
                             <div class="timeline-tag-horizontal">Livro</div>
-                            <a href="Avenida Parque Completo.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Avenida Parque Completo.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -1722,7 +2205,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">História da Medicina de Queluz a Lafaiete</div>
                             <div class="timeline-author-horizontal">José Álvaro Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Livro</div>
-                            <a href="História da Medicina de Queluz a Lafaiete.pdf autor José Álvaro Duarte Castanheira.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="História da Medicina de Queluz a Lafaiete.pdf autor José Álvaro Duarte Castanheira.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -1766,7 +2249,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">As Melhores das Melhores</div>
                             <div class="timeline-author-horizontal">José Álvaro Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Livro</div>
-                            <a href="As melhores das melhores JA.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="As melhores das melhores JA.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -1777,7 +2260,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Crônicas, Religião e Psiquiatria</div>
                             <div class="timeline-author-horizontal">José Álvaro Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Livro</div>
-                            <a href="CrÔö£Ôöñnicas_ReligiÔö£├║o_e_Psiquiatria.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="CrÔö£Ôöñnicas_ReligiÔö£├║o_e_Psiquiatria.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -1898,7 +2381,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Monsenhor Moreira - Uma vida a serviço do Reino de Deus</div>
                             <div class="timeline-author-horizontal">Luiza Izabel Biagioni</div>
                             <div class="timeline-tag-horizontal">Livro</div>
-                            <a href="Monsenhor Moreira - Uma vida a servi├ºo do Reino de Deus.pdf autora_ Luiza Izabel Biagioni.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Monsenhor Moreira - Uma vida a servi├ºo do Reino de Deus.pdf autora_ Luiza Izabel Biagioni.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -1920,7 +2403,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Missão - Homenagem a Luiza Biagioni</div>
                             <div class="timeline-author-horizontal">Pedro de Lima Belisário</div>
                             <div class="timeline-tag-horizontal">Livro</div>
-                            <a href="Miss├úo - Homenagem a Luiza Biagioni.pdf autor Pedro de Lima Belis├írio.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Miss├úo - Homenagem a Luiza Biagioni.pdf autor Pedro de Lima Belis├írio.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -1942,7 +2425,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Flores de Australia</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Livro</div>
-                            <a href="Flores de Australia.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Flores de Australia.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -2019,7 +2502,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Antologia Lafaiete em Prosa e Verso</div>
                             <div class="timeline-author-horizontal">Reuber Lana Antoniazzi</div>
                             <div class="timeline-tag-horizontal">Antologia</div>
-                            <a href="Antologia Lafaiete em Prosa e Verso.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Antologia Lafaiete em Prosa e Verso.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -2041,7 +2524,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">O Segredo da Vida</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Conto</div>
-                            <a href="O segredo da vida.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="O segredo da vida.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -2118,7 +2601,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Uma mulher de fibra chamada Regina Coeli</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Biografia</div>
-                            <a href="Uma mulher de fibra chamada Regina Coeli.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Uma mulher de fibra chamada Regina Coeli.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -2142,7 +2625,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Amigos que ganhei de meu Pai</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Conto</div>
-                            <a href="Amigos que ganhei de meu Pai.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Amigos que ganhei de meu Pai.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -2153,7 +2636,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Homenagem ao meu Pai</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Documento</div>
-                            <a href="Homenagem ao meu Pai.docx.pdf" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="Homenagem ao meu Pai.docx.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -2171,6 +2654,47 @@ video-synopsis {
                 </div>
             </div>
         </section>
+        
+        <!-- Video Popup Window -->
+        <div id="video-popup" class="video-popup">
+            <div class="video-window">
+                <div class="video-header">
+                    <div class="video-title" id="video-title">
+                    Palavras do Curador
+                    <div class="soundwave" id="soundwave">
+                        <div class="soundwave-bar"></div>
+                        <div class="soundwave-bar"></div>
+                        <div class="soundwave-bar"></div>
+                        <div class="soundwave-bar"></div>
+                        <div class="soundwave-bar"></div>
+                        <div class="soundwave-bar"></div>
+                        <div class="soundwave-bar"></div>
+                    </div>
+                </div>
+                    <div class="video-controls">
+                        <button class="minimize-btn" id="minimize-btn">─</button>
+                        <button class="maximize-btn" id="maximize-btn">□</button>
+                        <button class="close-btn" id="close-btn">×</button>
+                    </div>
+                </div>
+                <div class="video-content">
+                    <video id="curator-video" controls>
+                        <source src="Curador.mp4" type="video/mp4">
+                        Seu navegador não suporta o elemento de vídeo.
+                    </video>
+                </div>
+                <div class="resize-handle resize-handle-nw"></div>
+                <div class="resize-handle resize-handle-ne"></div>
+                <div class="resize-handle resize-handle-sw"></div>
+                <div class="resize-handle resize-handle-se"></div>
+                
+                <!-- Edge resize handles for lateral resizing -->
+                <div class="resize-edge resize-edge-n"></div>
+                <div class="resize-edge resize-edge-s"></div>
+                <div class="resize-edge resize-edge-e"></div>
+                <div class="resize-edge resize-edge-w"></div>
+            </div>
+        </div>
         
         <section id="acervo">
             <h2 class="acervo-title">Acervo</h2>
@@ -2211,7 +2735,7 @@ video-synopsis {
                     <p>Memórias, contos e histórias registradas, de forma manuscrita, por minha Avó. Preserva tradições e valores de forma pessoal e crítica.</p>
                     <div class="document-footer">
                         <span class="document-type">Livro</span>
-                        <a href="O Livro da Vovó Magdalena.pdf" class="read-button">Ler</a>
+                        <a href="O Livro da Vovó Magdalena.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2223,7 +2747,7 @@ video-synopsis {
                     <p>Poema inspirador sobre virtudes e qualidades humanas, traduzido e preservado como parte importante de meu acervo literário.</p>
                     <div class="document-footer">
                         <span class="document-type">Poema</span>
-                        <a href="Se.pdf" class="read-button">Ler</a>
+                        <a href="Se.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2235,7 +2759,7 @@ video-synopsis {
                     <p>Narrativa histórica sobre o desenvolvimento da medicina na região, desde o período em que a cidade se chamava Queluz até Conselheiro Lafaiete.</p>
                     <div class="document-footer">
                         <span class="document-type">Livro</span>
-                        <a href="História da Medicina de Queluz a Lafaiete.pdf autor José Álvaro Duarte Castanheira.pdf" class="read-button">Ler</a>
+                        <a href="História da Medicina de Queluz a Lafaiete.pdf autor José Álvaro Duarte Castanheira.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2247,7 +2771,7 @@ video-synopsis {
                     <p>Narrativa pessoal sobre amizades que herdei de meu Pai, destacando valores de amizade, carinho e sabedoria transmitidos entre gerações.</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="Amigos que ganhei de meu Pai.pdf" class="read-button">Ler</a>
+                        <a href="Amigos que ganhei de meu Pai.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2259,7 +2783,7 @@ video-synopsis {
                     <p>Lenda da história da cachaça no Brasil, sua produção artesanal e importância cultural na sociedade brasileira.</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="https://docs.google.com/document/d/1KxWtuRCEYjzgt7S59QuqvvfpVhDjDo5xSggH0A2d51M/edit?usp=sharing" class="read-button">Ler</a>
+                        <a href="https://docs.google.com/document/d/1KxWtuRCEYjzgt7S59QuqvvfpVhDjDo5xSggH0A2d51M/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2271,7 +2795,7 @@ video-synopsis {
                     <p>Obra literária  que retrata a história e Cultura de Queluz em estilo épico preservando a memória da Cidade</p>
                     <div class="document-footer">
                         <span class="document-type">Livro</span>
-                        <a href="Queluzíadas .pdf autor - Alberto Libanio Rodrigues.pdf" class="read-button">Ler</a>
+                        <a href="Queluzíadas .pdf autor - Alberto Libanio Rodrigues.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
             </div>
@@ -2289,7 +2813,7 @@ video-synopsis {
                     <p>Carta saudosa. Onze meses depois que o filho veio para o Brasil. Destaque especial para o texto da última página "E tu abrace esta carta, como se abraçasses a mim". Versão comentada pela querida prima Elisa Lima.</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="Carta de 1878 do Bisavô  para Vovô por Elisa Lima.pdf" class="read-button">Ler</a>
+                        <a href="Carta de 1878 do Bisavô  para Vovô por Elisa Lima.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2301,7 +2825,7 @@ video-synopsis {
                     <p>Coletânea de frases, histórias selecionadas pelo autor como as mais significativas de sua carreira</p>
                     <div class="document-footer">
                         <span class="document-type">Livro</span>
-                        <a href="As melhores das melhores JA.pdf" class="read-button">Ler</a>
+                        <a href="As melhores das melhores JA.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2313,7 +2837,7 @@ video-synopsis {
                     <p>Obra que retrata a história e importância da Avenida Parque para a cidade, destacando seu papel no desenvolvimento urbano e social.</p>
                     <div class="document-footer">
                         <span class="document-type">Livro</span>
-                        <a href="Avenida Parque Completo.pdf" class="read-button">Ler</a>
+                        <a href="Avenida Parque Completo.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2325,7 +2849,7 @@ video-synopsis {
                     <p>Documento expedido em 30 de novembro de 2021, para compor meu processo de cidadania portuguesa, em andamento na Conservatória de Lisboa.</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="https://drive.google.com/file/d/1lVI5bC4QIkjwKZiVF00JSDlpLM2flZUL/view?usp=sharing" class="read-button">Ler</a>
+                        <a href="https://drive.google.com/file/d/1lVI5bC4QIkjwKZiVF00JSDlpLM2flZUL/view?usp=sharing" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2337,7 +2861,7 @@ video-synopsis {
                     <p>Coletânea de crônicas que exploram as interseções entre religiosidade e saúde mental, baseadas na experiência profissional do autor.</p>
                     <div class="document-footer">
                         <span class="document-type">Livro</span>
-                        <a href="CrÔö£Ôöñnicas_ReligiÔö£├║o_e_Psiquiatria.pdf" class="read-button">Ler</a>
+                        <a href="CrÔö£Ôöñnicas_ReligiÔö£├║o_e_Psiquiatria.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2349,7 +2873,7 @@ video-synopsis {
                     <p>Cópia da Certidão expedida em 12 de maio de 1923, a pedido. O documento declara o nascimento do Vovô em 13 de fevereiro de 1856.</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href=" https://drive.google.com/file/d/1GJRgEZP_LdsiAzjv17dbkss5Sq67CWtF/view?usp=sharing " class="read-button">Ler</a>
+                        <a href=" https://drive.google.com/file/d/1GJRgEZP_LdsiAzjv17dbkss5Sq67CWtF/view?usp=sharing " class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2375,7 +2899,7 @@ video-synopsis {
                     <p>Antonio Durães Castanheira, irmão de meu avô Francisco Augusto, veio de Portugal por volta do ano de 1900. Com ele veio um amigo e vizinho lá de Fiais da Telha. Seguiram para Ponte Nova.</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="História do Tio Antonio.pdf" class="read-button">Ler</a>
+                        <a href="História do Tio Antonio.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2398,7 +2922,7 @@ video-synopsis {
                     <p>Reflexões filosóficas sobre o sentido da vida e os segredos para uma existência plena e significativa.</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="O segredo da vida.pdf" class="read-button">Ler</a>
+                        <a href="O segredo da vida.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 <div class="document-card" style="animation-delay: 2.0s;">
@@ -2409,7 +2933,7 @@ video-synopsis {
                     <p>Texto em homenagem a Luiza Izabel Biagioni, destacando sua missão de vida e contribuições para a comunidade.</p>
                     <div class="document-footer">
                         <span class="document-type">Livro</span>
-                        <a href="Miss├úo - Homenagem a Luiza Biagioni.pdf autor Pedro de Lima Belis├írio.pdf" class="read-button">Ler</a>
+                        <a href="Miss├úo - Homenagem a Luiza Biagioni.pdf autor Pedro de Lima Belis├írio.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 <div class="document-card" style="animation-delay: 2.1s;">
@@ -2420,7 +2944,7 @@ video-synopsis {
                     <p>A vida é feita de degraus como uma pirâmide que tem a pretensão de alcançar o infinito. É quando a Fênix sobrevoa Lafaiete através dos tempos e deixa o legado para o futuro.</p>
                     <div class="document-footer">
                         <span class="document-type">Antologia</span>
-                        <a href="Antologia Lafaiete em Prosa e Verso.pdf" class="read-button">Ler</a>
+                        <a href="Antologia Lafaiete em Prosa e Verso.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 <div class="document-card" style="animation-delay: 2.2s;">
@@ -2431,7 +2955,7 @@ video-synopsis {
                     <p>Biografia de Monsenhor Moreira, destacando sua vida dedicada ao serviço religioso e sua importância para a comunidade.</p>
                     <div class="document-footer">
                         <span class="document-type">Livro</span>
-                        <a href="Monsenhor Moreira - Uma vida a servi├ºo do Reino de Deus.pdf autora_ Luiza Izabel Biagioni.pdf" class="read-button">Ler</a>
+                        <a href="Monsenhor Moreira - Uma vida a servi├ºo do Reino de Deus.pdf autora_ Luiza Izabel Biagioni.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 <div class="document-card" style="animation-delay: 2.2s;">
@@ -2442,7 +2966,7 @@ video-synopsis {
                     <p>Diploma da Ordem dos Construtores do Progresso de Conselheiro Lafaiete</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="https://drive.google.com/file/d/1p7ExGzkHrSUf6ekhRYUO6yaenOIUqT2B/view?usp=sharing" class="read-button">Ler</a>
+                        <a href="https://drive.google.com/file/d/1p7ExGzkHrSUf6ekhRYUO6yaenOIUqT2B/view?usp=sharing" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 <div class="document-card" style="animation-delay: 2.2s;">
@@ -2454,7 +2978,7 @@ video-synopsis {
                         </p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="https://drive.google.com/file/d/1g6pH_pzgGB7MMMTtNT3lBqW9NrTLuytp/view?usp=sharing" class="read-button">Ler</a>
+                        <a href="https://drive.google.com/file/d/1g6pH_pzgGB7MMMTtNT3lBqW9NrTLuytp/view?usp=sharing" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2466,7 +2990,7 @@ video-synopsis {
                     <p>Precioso cadastro de mais de 100 autores de nossa cidade e suas obras, organizado pela Bibliotecária Vera de Souza Braga. Ótimo roteiro e oportunidade para se criar a Biblioteca Pública de Livros Digitais. Salvar os livros e disponibilizá-los para leitura.</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="https://www.conselheirolafaiete.mg.leg.br/institucional/biblioteca/CATALOGO2023.pdf" class="read-button">Ler</a>
+                        <a href="https://www.conselheirolafaiete.mg.leg.br/institucional/biblioteca/CATALOGO2023.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2478,7 +3002,7 @@ video-synopsis {
                     <p>Biografia de Regina Coeli, destacando sua força de caráter e contribuições para a família e comunidade.</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="Uma mulher de fibra chamada Regina Coeli.pdf" class="read-button">Ler</a>
+                        <a href="Uma mulher de fibra chamada Regina Coeli.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2490,7 +3014,7 @@ video-synopsis {
                     <p>Documento sobre a herança cultural e familiar dos Castanheiras, preservando a história e tradições da família.</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="https://docs.google.com/document/d/18ao4PhN-X0Lh79Rj5VqJJrNXt0C1SJsSUlyvH7O6zXo/edit?usp=sharing" class="read-button">Ler</a>
+                        <a href="https://docs.google.com/document/d/18ao4PhN-X0Lh79Rj5VqJJrNXt0C1SJsSUlyvH7O6zXo/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2502,7 +3026,7 @@ video-synopsis {
                     <p>Texto escrito em 1972 homenageando meu Pai, destacando sua história, qualidades, ensinamentos e o legado dado a sua família</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="Homenagem ao meu Pai.docx.pdf" class="read-button">Ler</a>
+                        <a href="Homenagem ao meu Pai.docx.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -2514,7 +3038,7 @@ video-synopsis {
                     <p>Um presente que Deus me deu. Uma história real, que vivi, e que me permitiu ajudar um "cidadão de rua", a reconquistar sua cidadania espanhola e ter um final de vida com dignidade.</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="https://docs.google.com/document/d/1KTaV4InYKOGFSo_gSawJeiyCQMWahIDh/edit?usp=drive_link&ouid=101310131554810017817&rtpof=true&sd=true" class="read-button" target="_blank">Ler</a>
+                        <a href=" https://drive.google.com/file/d/1nQZ-b6bnlsSecaI-OLb3S4XOtENIWH0r/view?usp=sharing" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -3621,6 +4145,555 @@ function openVideo(videoId, isProtected) {
                     document.body.style.overflow = '';
                 }
             });
+        });
+    </script>
+    
+    <!-- Modern Video Popup Window JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const curatorButton = document.getElementById('curator-button');
+            const videoPopup = document.getElementById('video-popup');
+            const videoWindow = document.querySelector('.video-window');
+            const closeBtn = document.getElementById('close-btn');
+            const minimizeBtn = document.getElementById('minimize-btn');
+            const maximizeBtn = document.getElementById('maximize-btn');
+            const videoHeader = document.querySelector('.video-header');
+            const video = document.getElementById('curator-video');
+            
+            let isDragging = false;
+            let isResizing = false;
+            let currentResizeHandle = null;
+            let dragOffset = { x: 0, y: 0 };
+            let originalSize = { width: 0, height: 0 };
+            let originalPosition = { x: 0, y: 0 };
+            let isMaximized = false;
+            let isMinimized = false;
+            let lastMoveTime = 0; // Add throttling variable
+            
+
+            
+            // Smooth close animation
+            function closeVideoPopup() {
+                videoPopup.classList.remove('active');
+                video.pause();
+                
+                setTimeout(() => {
+                    videoPopup.style.display = 'none';
+                    document.body.classList.remove('video-open');
+                    resetWindowState();
+                }, 400);
+            }
+            
+            // Reset window to default state
+            function resetWindowState() {
+                videoWindow.classList.remove('maximized', 'minimized', 'transitioning');
+                isMaximized = false;
+                isMinimized = false;
+                maximizeBtn.textContent = '□';
+                minimizeBtn.textContent = '─';
+            }
+            
+            // Open video popup with smooth animation
+            curatorButton.addEventListener('click', function() {
+                openVideoPopup();
+            });
+            
+            // Close popup with smooth animation
+            closeBtn.addEventListener('click', function() {
+                closeVideoPopup();
+            });
+            
+            // Enhanced minimize with smooth animation
+            minimizeBtn.addEventListener('click', function() {
+                if (!isMinimized) {
+                    videoWindow.classList.add('transitioning', 'minimized');
+                    minimizeBtn.textContent = '□';
+                    isMinimized = true;
+                    isMaximized = false;
+                } else {
+                    videoWindow.classList.remove('minimized');
+                    minimizeBtn.textContent = '─';
+                    isMinimized = false;
+                }
+                
+                setTimeout(() => {
+                    videoWindow.classList.remove('transitioning');
+                }, 300);
+                
+                // Restart animation when window state changes
+                setTimeout(() => {
+                    startTitleAnimation();
+                }, 350);
+            });
+            
+            // Enhanced maximize with smooth animation
+            maximizeBtn.addEventListener('click', function() {
+                if (!isMaximized) {
+                    videoWindow.classList.add('transitioning', 'maximized');
+                    videoPopup.classList.add('maximized');
+                    maximizeBtn.textContent = '❐';
+                    isMaximized = true;
+                    isMinimized = false;
+                } else {
+                    videoWindow.classList.remove('maximized');
+                    videoPopup.classList.remove('maximized');
+                    maximizeBtn.textContent = '□';
+                    isMaximized = false;
+                }
+                
+                setTimeout(() => {
+                    videoWindow.classList.remove('transitioning');
+                }, 300);
+                
+                // Restart animation when window state changes
+                setTimeout(() => {
+                    startTitleAnimation();
+                }, 350);
+            });
+            
+            // Completely redesigned dragging system with modern performance
+            let dragStartPos = { x: 0, y: 0 };
+            let windowStartPos = { x: 0, y: 0 };
+            let lastDragUpdate = 0;
+            let dragVelocity = { x: 0, y: 0 };
+            let lastDragPos = { x: 0, y: 0 };
+            
+            // Enhanced drag start with better event handling
+            videoHeader.addEventListener('mousedown', function(e) {
+                // Prevent dragging when clicking on controls
+                if (e.target.closest('.video-controls')) return;
+                
+                // Prevent conflicts with resize handles
+                if (e.target.closest('.resize-handle')) return;
+                
+                e.preventDefault();
+                e.stopPropagation();
+                
+                isDragging = true;
+                dragStartPos = { x: e.clientX, y: e.clientY };
+                windowStartPos = { 
+                    x: videoWindow.offsetLeft, 
+                    y: videoWindow.offsetTop 
+                };
+                lastDragPos = { x: e.clientX, y: e.clientY };
+                
+                // Disable transitions and set cursor
+                videoWindow.style.transition = 'none';
+                videoWindow.style.cursor = 'grabbing';
+                videoHeader.style.cursor = 'grabbing';
+                videoWindow.style.userSelect = 'none';
+                
+                // Enhanced visual feedback
+                videoWindow.style.boxShadow = '0 40px 80px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.2)';
+                videoWindow.style.transform = 'scale(1.02)';
+                
+                // Add drag indicator
+                videoWindow.style.border = '2px solid rgba(212, 180, 95, 0.6)';
+            });
+            
+            // Optimized mousemove with velocity tracking
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                // Throttle updates for smooth performance
+                const now = Date.now();
+                if (now - lastDragUpdate < 8) return; // ~120fps for smoother movement
+                lastDragUpdate = now;
+                
+                // Calculate new position
+                const deltaX = e.clientX - dragStartPos.x;
+                const deltaY = e.clientY - dragStartPos.y;
+                
+                let newX = windowStartPos.x + deltaX;
+                let newY = windowStartPos.y + deltaY;
+                
+                // Calculate velocity for momentum effects
+                const timeDelta = now - lastDragUpdate;
+                if (timeDelta > 0) {
+                    dragVelocity.x = (e.clientX - lastDragPos.x) / timeDelta;
+                    dragVelocity.y = (e.clientY - lastDragPos.y) / timeDelta;
+                }
+                lastDragPos = { x: e.clientX, y: e.clientY };
+                
+                // Smart boundary constraints
+                const windowWidth = videoWindow.offsetWidth;
+                const windowHeight = videoWindow.offsetHeight;
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                // Allow partial overflow for natural feel
+                const maxOverflow = Math.min(windowWidth, windowHeight) * 0.3;
+                
+                // Constrain with smooth boundaries
+                const minX = -maxOverflow;
+                const maxX = viewportWidth - windowWidth + maxOverflow;
+                const minY = -maxOverflow;
+                const maxY = viewportHeight - windowHeight + maxOverflow;
+                
+                newX = Math.max(minX, Math.min(newX, maxX));
+                newY = Math.max(minY, Math.min(newY, maxY));
+                
+                // Apply position with smooth animation
+                requestAnimationFrame(() => {
+                    videoWindow.style.left = newX + 'px';
+                    videoWindow.style.top = newY + 'px';
+                });
+            });
+            
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    
+                    // Restore all properties after dragging
+                    videoWindow.style.cursor = 'default';
+                    videoHeader.style.cursor = 'default';
+                    videoWindow.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                    videoWindow.style.userSelect = 'auto';
+                    videoWindow.style.transform = 'scale(1)';
+                    videoWindow.style.border = 'none';
+                    
+                    // Enhanced shadow restoration with momentum effect
+                    const finalVelocity = Math.sqrt(dragVelocity.x * dragVelocity.x + dragVelocity.y * dragVelocity.y);
+                    if (finalVelocity > 0.5) {
+                        // Add momentum effect for fast movements
+                        videoWindow.style.boxShadow = '0 50px 100px rgba(0, 0, 0, 0.3), 0 12px 24px rgba(0, 0, 0, 0.15)';
+                        setTimeout(() => {
+                            videoWindow.style.boxShadow = '0 32px 64px rgba(0, 0, 0, 0.2), 0 8px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
+                        }, 200);
+                    } else {
+                        videoWindow.style.boxShadow = '0 32px 64px rgba(0, 0, 0, 0.2), 0 8px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
+                    }
+                    
+                    // Reset velocity tracking
+                    dragVelocity = { x: 0, y: 0 };
+                }
+                if (isResizing) {
+                    isResizing = false;
+                    
+                    // Restore properties after resize
+                    videoWindow.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                    videoWindow.style.userSelect = 'auto';
+                    
+                    // Reset resize handle visual feedback
+                    if (currentResizeHandle) {
+                        if (currentResizeHandle.classList.contains('resize-handle')) {
+                            currentResizeHandle.style.transform = 'scale(1)';
+                        } else {
+                            currentResizeHandle.style.background = 'transparent';
+                        }
+                        currentResizeHandle = null;
+                    }
+                    
+                    // Add a small delay to prevent accidental interactions
+                    setTimeout(() => {
+                        if (!isResizing && !isDragging) {
+                            videoWindow.style.pointerEvents = 'auto';
+                        }
+                    }, 100);
+                }
+            });
+            
+            // Enhanced resizing with improved efficiency and conflict prevention
+            const resizeHandles = document.querySelectorAll('.resize-handle');
+            const resizeEdges = document.querySelectorAll('.resize-edge');
+            let resizeStartTime = 0;
+            let lastResizeUpdate = 0;
+            
+            // Function to handle resize start
+            function startResize(e, element) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Prevent conflicts with other interactions
+                if (isDragging) return;
+                
+                isResizing = true;
+                currentResizeHandle = element;
+                resizeStartTime = Date.now();
+                
+                const rect = videoWindow.getBoundingClientRect();
+                originalSize.width = rect.width;
+                originalSize.height = rect.height;
+                originalPosition.x = e.clientX;
+                originalPosition.y = e.clientY;
+                
+                // Disable transitions during resize for smooth performance
+                videoWindow.style.transition = 'none';
+                videoWindow.style.userSelect = 'none';
+                
+                // Add visual feedback
+                if (element.classList.contains('resize-handle')) {
+                    element.style.transform = 'scale(1.2)';
+                } else {
+                    element.style.background = 'rgba(212, 180, 95, 0.3)';
+                }
+            }
+            
+            // Add event listeners for corner handles
+            resizeHandles.forEach(handle => {
+                handle.addEventListener('mousedown', function(e) {
+                    startResize(e, handle);
+                });
+            });
+            
+            // Add event listeners for edge handles
+            resizeEdges.forEach(edge => {
+                edge.addEventListener('mousedown', function(e) {
+                    startResize(e, edge);
+                });
+            });
+            
+            // Optimized mousemove handler with throttling
+            document.addEventListener('mousemove', function(e) {
+                if (!isResizing || !currentResizeHandle) return;
+                
+                // Throttle updates for better performance (60fps max)
+                const now = Date.now();
+                if (now - lastResizeUpdate < 16) return; // ~60fps
+                lastResizeUpdate = now;
+                
+                const deltaX = e.clientX - originalPosition.x;
+                const deltaY = e.clientY - originalPosition.y;
+                
+                let newWidth = originalSize.width;
+                let newHeight = originalSize.height;
+                let newLeft = videoWindow.offsetLeft;
+                let newTop = videoWindow.offsetTop;
+                
+                // Improved resizing logic with better precision - allow smaller sizes to remove black bars
+                if (currentResizeHandle.classList.contains('resize-handle-se')) {
+                    newWidth = Math.max(150, originalSize.width + deltaX);
+                    newHeight = Math.max(100, originalSize.height + deltaY);
+                } else if (currentResizeHandle.classList.contains('resize-handle-sw')) {
+                    newWidth = Math.max(150, originalSize.width - deltaX);
+                    newHeight = Math.max(100, originalSize.height + deltaY);
+                    newLeft = videoWindow.offsetLeft + (originalSize.width - newWidth);
+                } else if (currentResizeHandle.classList.contains('resize-handle-ne')) {
+                    newWidth = Math.max(150, originalSize.width + deltaX);
+                    newHeight = Math.max(100, originalSize.height - deltaY);
+                    newTop = videoWindow.offsetTop + (originalSize.height - newHeight);
+                } else if (currentResizeHandle.classList.contains('resize-handle-nw')) {
+                    newWidth = Math.max(150, originalSize.width - deltaX);
+                    newHeight = Math.max(100, originalSize.height - deltaY);
+                    newLeft = videoWindow.offsetLeft + (originalSize.width - newWidth);
+                    newTop = videoWindow.offsetTop + (originalSize.height - newHeight);
+                } else if (currentResizeHandle.classList.contains('resize-edge-n')) {
+                    // North edge - resize height from top
+                    newHeight = Math.max(100, originalSize.height - deltaY);
+                    newTop = videoWindow.offsetTop + (originalSize.height - newHeight);
+                } else if (currentResizeHandle.classList.contains('resize-edge-s')) {
+                    // South edge - resize height from bottom
+                    newHeight = Math.max(100, originalSize.height + deltaY);
+                } else if (currentResizeHandle.classList.contains('resize-edge-e')) {
+                    // East edge - resize width from right
+                    newWidth = Math.max(150, originalSize.width + deltaX);
+                } else if (currentResizeHandle.classList.contains('resize-edge-w')) {
+                    // West edge - resize width from left
+                    newWidth = Math.max(150, originalSize.width - deltaX);
+                    newLeft = videoWindow.offsetLeft + (originalSize.width - newWidth);
+                }
+                
+                // Improved constraints with better bounds - allow smaller sizes to remove black bars
+                const maxWidth = window.innerWidth;
+                const maxHeight = window.innerHeight;
+                const minWidth = 150;
+                const minHeight = 100;
+                
+                newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
+                newHeight = Math.max(minHeight, Math.min(newHeight, maxHeight));
+                
+                // Better boundary handling - prevent window from jumping off screen
+                const maxLeft = window.innerWidth - minWidth;
+                const maxTop = window.innerHeight - minHeight;
+                
+                // Keep window always visible
+                newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+                newTop = Math.max(0, Math.min(newTop, maxTop));
+                
+                // Apply changes with requestAnimationFrame for smooth updates
+                requestAnimationFrame(() => {
+                    videoWindow.style.width = newWidth + 'px';
+                    videoWindow.style.height = newHeight + 'px';
+                    videoWindow.style.left = newLeft + 'px';
+                    videoWindow.style.top = newTop + 'px';
+                });
+            });
+            
+            // Remove outside click to close - only X button closes the video
+            // videoPopup.addEventListener('click', function(e) {
+            //     if (e.target === videoPopup) {
+            //         closeVideoPopup();
+            //     }
+            // });
+            
+            // Prevent closing when clicking inside the video window
+            videoWindow.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Prevent dragging from content area
+            videoWindow.addEventListener('mousedown', function(e) {
+                // Only allow dragging from header, prevent from content area
+                if (!e.target.closest('.video-header')) {
+                    e.stopPropagation();
+                }
+            });
+            
+
+            
+            // Enhanced keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (videoPopup.style.display === 'block') {
+                    switch(e.key) {
+                        case 'Escape':
+                            closeVideoPopup();
+                            break;
+                        case 'm':
+                        case 'M':
+                            if (e.ctrlKey || e.metaKey) {
+                                e.preventDefault();
+                                minimizeBtn.click();
+                            }
+                            break;
+                        case 'f':
+                        case 'F':
+                            if (e.ctrlKey || e.metaKey) {
+                                e.preventDefault();
+                                maximizeBtn.click();
+                            }
+                            break;
+                    }
+                }
+            });
+            
+            // Add hover effects for better UX
+            videoWindow.addEventListener('mouseenter', function() {
+                this.style.transform = this.style.transform.replace('scale(1)', 'scale(1.02)');
+            });
+            
+            videoWindow.addEventListener('mouseleave', function() {
+                this.style.transform = this.style.transform.replace('scale(1.02)', 'scale(1)');
+            });
+            
+            // Title animation sequence - works in all window states
+            function startTitleAnimation() {
+                console.log('Starting title animation...');
+                const videoTitle = document.getElementById('video-title');
+                const soundwave = document.getElementById('soundwave');
+                
+                if (!videoTitle || !soundwave) {
+                    console.error('Video title or soundwave elements not found!');
+                    return;
+                }
+                
+                console.log('Elements found, starting animation sequence...');
+                
+                // Clear any existing animation classes
+                videoTitle.classList.remove('fade-out-right', 'fade-in-left');
+                soundwave.classList.remove('fade-in', 'fade-out', 'flatten');
+                
+                // Step 1: Title fades out to the right after 5 seconds
+                setTimeout(() => {
+                    console.log('Step 1: Title fading out...');
+                    videoTitle.classList.add('fade-out-right');
+                    
+                    // Step 2: Soundwave fades in
+                    setTimeout(() => {
+                        console.log('Step 2: Soundwave fading in...');
+                        soundwave.classList.add('fade-in');
+                        
+                        // Step 3: After 5 seconds, soundwave flattens and fades out
+                        setTimeout(() => {
+                            console.log('Step 3: Soundwave flattening and fading out...');
+                            soundwave.classList.add('flatten');
+                            soundwave.classList.add('fade-out');
+                            
+                            // Step 4: Title fades back in from the left
+                            setTimeout(() => {
+                                console.log('Step 4: Title fading back in...');
+                                videoTitle.classList.remove('fade-out-right');
+                                videoTitle.classList.add('fade-in-left');
+                                
+                                // Reset for next cycle
+                                setTimeout(() => {
+                                    console.log('Animation cycle complete, resetting...');
+                                    videoTitle.classList.remove('fade-in-left');
+                                    soundwave.classList.remove('fade-in', 'fade-out', 'flatten');
+                                    
+                                    // Restart animation cycle
+                                    setTimeout(() => {
+                                        startTitleAnimation();
+                                    }, 2000);
+                                }, 500);
+                            }, 500);
+                        }, 5000);
+                    }, 500);
+                }, 5000);
+            }
+            
+            // Start animation when video popup opens
+            function openVideoPopup() {
+                console.log('Opening video popup...');
+                videoPopup.style.display = 'block';
+                document.body.classList.add('video-open');
+                
+                // Centralize the window in the viewport
+                const winW = window.innerWidth;
+                const winH = window.innerHeight;
+                const width = 800;
+                const height = 500;
+                videoWindow.style.left = ((winW - width) / 2) + 'px';
+                videoWindow.style.top = ((winH - height) / 2) + 'px';
+                videoWindow.style.transform = 'none';
+                
+                // Trigger entrance animation
+                requestAnimationFrame(() => {
+                    videoPopup.classList.add('active');
+                });
+                
+                // Auto-play video with delay for smooth experience
+                setTimeout(() => {
+                    video.play().catch(e => console.log('Auto-play prevented:', e));
+                }, 300);
+                
+                // Start title animation sequence
+                console.log('Calling startTitleAnimation...');
+                startTitleAnimation();
+            }
+            
+            // Smooth video loading
+            video.addEventListener('loadstart', function() {
+                videoWindow.style.opacity = '0.8';
+            });
+            
+            video.addEventListener('canplay', function() {
+                videoWindow.style.opacity = '1';
+            });
+            
+            // Ensure video window stays in viewport when window is resized
+            window.addEventListener('resize', function() {
+                if (videoPopup.style.display === 'block') {
+                    const rect = videoWindow.getBoundingClientRect();
+                    const maxX = window.innerWidth - videoWindow.offsetWidth;
+                    const maxY = window.innerHeight - videoWindow.offsetHeight;
+                    
+                    let newLeft = rect.left;
+                    let newTop = rect.top;
+                    
+                    // Adjust position if window is outside viewport
+                    if (newLeft < 0) newLeft = 0;
+                    if (newTop < 0) newTop = 0;
+                    if (newLeft > maxX) newLeft = maxX;
+                    if (newTop > maxY) newTop = maxY;
+                    
+                    videoWindow.style.left = newLeft + 'px';
+                    videoWindow.style.top = newTop + 'px';
+                }
+            });
+            
+
+            
+
         });
     </script>
 </body>
