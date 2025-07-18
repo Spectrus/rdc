@@ -1880,6 +1880,28 @@ video-synopsis {
     margin-bottom: 1rem;
     color: var(--gold-color);
 }
+/* ÁREAS DE HOVER INVISÍVEIS PARA ATIVAR AS SETAS */
+.hover-zone-top {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 150px;
+    z-index: 98;
+    pointer-events: auto;
+}
+
+.hover-zone-bottom {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 150px;
+    height: 150px;
+    z-index: 98;
+    pointer-events: auto;
+}
+
+/* SETAS DE NAVEGAÇÃO - COMPLETAMENTE INVISÍVEIS QUANDO NÃO NECESSÁRIAS */
 .rect-scroll-btn {
     width: 55px;
     height: 55px;
@@ -1891,16 +1913,52 @@ video-synopsis {
     align-items: center;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    opacity: 0.8;
     pointer-events: auto;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
     z-index: 99999 !important;
     position: fixed !important;
+    
+    /* INICIALMENTE INVISÍVEIS */
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.8);
+}
+
+/* ESTADO: BOTÃO DISPONÍVEL MAS OCULTO (pode aparecer no hover) */
+.rect-scroll-btn.available {
+    /* Ainda invisível, mas pode ser ativado pelo hover */
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.8);
+}
+
+/* ESTADO: BOTÃO COMPLETAMENTE INVISÍVEL (não pode aparecer) */
+.rect-scroll-btn.unavailable {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: scale(0) !important;
+    pointer-events: none !important;
+}
+
+/* SETAS APARECEM NO HOVER DAS ZONAS - APENAS SE DISPONÍVEIS */
+.hover-zone-top:hover ~ #back-to-top.available,
+#back-to-top.available:hover {
+    opacity: 0.9;
+    visibility: visible;
+    transform: scale(1);
+}
+
+.hover-zone-bottom:hover ~ #scroll-to-bottom.available,
+#scroll-to-bottom.available:hover {
+    opacity: 0.9;
+    visibility: visible;
+    transform: scale(1);
 }
 
 .rect-scroll-btn:hover {
-    opacity: 1;
-    transform: scale(1.1);
+    opacity: 1 !important;
+    transform: scale(1.1) !important;
+    background-color: var(--primary-color);
 }
 
 .rect-scroll-btn span {
@@ -1911,22 +1969,29 @@ video-synopsis {
     transition: border-color 0.3s ease;
 }
 
-/* seta para cima */
+/* Seta para cima */
+#back-to-top {
+    top: 16px;
+    right: 16px;
+}
+
 #back-to-top span {
     border-bottom: 16px solid var(--primary-color);
     transform: translateY(-2px);
 }
 
-/* seta para baixo */
+/* Seta para baixo */
+#scroll-to-bottom {
+    bottom: 16px;
+    right: 16px;
+}
+
 #scroll-to-bottom span {
     border-top: 16px solid var(--primary-color);
     transform: translateY(2px);
 }
 
-/* Hover - fundo marrom, seta dourada */
-.rect-scroll-btn:hover {
-    background-color: var(--primary-color);
-}
+/* Hover - seta dourada */
 #back-to-top:hover span {
     border-bottom-color: var(--gold-color);
 }
@@ -2171,6 +2236,13 @@ video-synopsis {
                 .media-card:hover {
                     transform: translateY(-5px);
                     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                }
+                
+                /* Zonas de hover menores em mobile */
+                .hover-zone-top,
+                .hover-zone-bottom {
+                    width: 100px;
+                    height: 100px;
                 }
             </style>
             
@@ -5387,15 +5459,16 @@ function openVideo(videoId, isProtected) {
         });
     </script>
 
-    <!-- Back to Top -->
-    <button id="back-to-top" class="rect-scroll-btn" title="Voltar ao topo"
-    style="position:fixed !important; right:16px; top:16px; z-index:99999 !important; transform:none !important;">
+    <!-- ZONAS DE HOVER INVISÍVEIS -->
+    <div class="hover-zone-top"></div>
+    <div class="hover-zone-bottom"></div>
+
+    <!-- SETAS DE NAVEGAÇÃO INTELIGENTES E INVISÍVEIS -->
+    <button id="back-to-top" class="rect-scroll-btn" title="Voltar ao topo">
       <span></span>
     </button>
 
-    <!-- Scroll to Bottom -->
-    <button id="scroll-to-bottom" class="rect-scroll-btn" title="Ir para o final"
-    style="position:fixed !important;right:16px;bottom:16px; z-index:99999 !important; transform:none !important;">
+    <button id="scroll-to-bottom" class="rect-scroll-btn" title="Ir para o final">
       <span></span>
     </button>
 
@@ -5403,14 +5476,56 @@ function openVideo(videoId, isProtected) {
     document.addEventListener('DOMContentLoaded', function () {
       const backToTop = document.getElementById('back-to-top');
       const scrollToBottom = document.getElementById('scroll-to-bottom');
+      
+      // Configurações
+      const TOP_THRESHOLD = 100; // Pixels do topo para considerar "no topo"
+      const BOTTOM_THRESHOLD = 100; // Pixels do final para considerar "no final"
 
-      // Buttons scroll behavior
-      backToTop.addEventListener('click', () =>
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      );
-      scrollToBottom.addEventListener('click', () =>
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
-      );
+      // Função para verificar se deve mostrar as setas
+      function updateArrowsAvailability() {
+        const scrollY = window.scrollY;
+        const documentHeight = document.documentElement.scrollHeight;
+        const windowHeight = window.innerHeight;
+        const scrolledToBottom = (scrollY + windowHeight) >= (documentHeight - BOTTOM_THRESHOLD);
+        const isAtTop = scrollY <= TOP_THRESHOLD;
+
+        // SETA "VOLTAR AO TOPO"
+        if (!isAtTop) {
+          // Disponível - pode aparecer no hover
+          backToTop.classList.remove('unavailable');
+          backToTop.classList.add('available');
+        } else {
+          // Indisponível - completamente invisível
+          backToTop.classList.remove('available');
+          backToTop.classList.add('unavailable');
+        }
+
+        // SETA "IR PARA BAIXO"
+        if (!scrolledToBottom) {
+          // Disponível - pode aparecer no hover
+          scrollToBottom.classList.remove('unavailable');
+          scrollToBottom.classList.add('available');
+        } else {
+          // Indisponível - completamente invisível
+          scrollToBottom.classList.remove('available');
+          scrollToBottom.classList.add('unavailable');
+        }
+      }
+
+      // Funcionalidade de clique das setas
+      backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      scrollToBottom.addEventListener('click', () => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      });
+
+      // Escutar evento de scroll para atualizar disponibilidade
+      window.addEventListener('scroll', updateArrowsAvailability);
+      
+      // Verificar disponibilidade inicial
+      updateArrowsAvailability();
     });
     </script>
 </body>
