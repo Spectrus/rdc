@@ -304,6 +304,24 @@
             border: 10px solid var(--gold-color);
             padding: 5px;
             background-color: #fff;
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .historical-photo.expanded {
+            max-width: 900px;
+            border-radius: 16px;
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.2);
+            min-height: 500px;
+            aspect-ratio: 16/9;
+        }
+        
+        .historical-photo.expanded img,
+        .historical-photo.expanded .historical-photo-caption {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         
         .historical-photo img {
@@ -319,6 +337,302 @@
             color: var(--primary-color);
             text-align: center;
             margin-top: 0;
+        }
+        
+        /* Curator Video Content Styles */
+        .curator-video-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            opacity: 0;
+            transform: scale(0.8) translateY(20px);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+        
+        .curator-video-content.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        
+        .curator-video-header {
+            background: var(--gold-color);
+            color: var(--primary-color);
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            border-bottom: 1px solid rgba(74, 44, 42, 0.2);
+            min-height: 60px;
+        }
+        
+        .curator-video-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            flex: 1;
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        
+        .curator-soundwave {
+            position: absolute;
+            top: 50%;
+            left: 80px;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 1;
+            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+        
+        .curator-soundwave-bar {
+            width: 4px;
+            background: #ffed4e;
+            border-radius: 2px;
+            animation: soundwave-pulse 1s ease-in-out infinite;
+            min-height: 8px;
+            box-shadow: 0 0 6px rgba(255, 237, 78, 0.8);
+        }
+        
+        .curator-soundwave-bar:nth-child(1) { height: 12px; animation-delay: 0s; }
+        .curator-soundwave-bar:nth-child(2) { height: 18px; animation-delay: 0.1s; }
+        .curator-soundwave-bar:nth-child(3) { height: 24px; animation-delay: 0.2s; }
+        .curator-soundwave-bar:nth-child(4) { height: 30px; animation-delay: 0.3s; }
+        .curator-soundwave-bar:nth-child(5) { height: 24px; animation-delay: 0.4s; }
+        .curator-soundwave-bar:nth-child(6) { height: 18px; animation-delay: 0.5s; }
+        .curator-soundwave-bar:nth-child(7) { height: 12px; animation-delay: 0.6s; }
+        
+        .curator-video-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-left: 20px;
+        }
+        
+        .curator-video-controls button {
+            background: rgba(74, 44, 42, 0.1);
+            border: 1px solid rgba(74, 44, 42, 0.3);
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            font-weight: 500;
+        }
+        
+        .curator-video-controls button:hover {
+            background: rgba(74, 44, 42, 0.2);
+            border-color: rgba(74, 44, 42, 0.5);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(74, 44, 42, 0.2);
+        }
+        
+        .curator-video-controls button:hover {
+            background: rgba(74, 44, 42, 0.2);
+            border-color: rgba(74, 44, 42, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .curator-close-btn:hover {
+            background: linear-gradient(135deg, #ff4444 0%, #cc3333 100%) !important;
+            color: white !important;
+            border-color: #ff4444 !important;
+        }
+        
+
+        
+        .curator-fullscreen-btn:hover {
+            background: rgba(40, 167, 69, 0.2) !important;
+            border-color: #28a745 !important;
+        }
+        
+        /* Hide close button when in fullscreen with fade transition */
+        .curator-close-btn {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .historical-photo:fullscreen .curator-close-btn,
+        .historical-photo:-webkit-full-screen .curator-close-btn,
+        .historical-photo:-moz-full-screen .curator-close-btn,
+        .historical-photo:-ms-fullscreen .curator-close-btn {
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+        
+        .curator-video-player {
+            background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+            overflow: hidden;
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .curator-video-player::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(212, 180, 95, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .curator-video-player.active::before {
+            opacity: 1;
+        }
+        
+        .curator-video-player video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        
+        /* Animation classes for title and soundwave */
+        .curator-video-title.slide-out-right {
+            animation: slideOutRight 0.8s ease forwards !important;
+        }
+        
+        .curator-video-title.slide-in-left {
+            animation: slideInLeft 0.8s ease forwards !important;
+        }
+        
+        .curator-soundwave.fade-in {
+            animation: soundwaveFadeIn 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+            opacity: 1 !important;
+        }
+        
+        .curator-soundwave.fade-out {
+            animation: soundwaveFadeOut 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+        }
+        
+        .curator-soundwave.hidden {
+            opacity: 0 !important;
+        }
+        
+        .curator-soundwave.visible {
+            opacity: 1 !important;
+        }
+        
+        /* Minimized state for curator video */
+        .historical-photo.minimized {
+            max-width: 400px;
+            transform: scale(0.8);
+        }
+        
+        .historical-photo.minimized .curator-video-player {
+            display: none;
+        }
+        
+        .historical-photo.minimized .curator-video-header {
+            padding: 12px 16px;
+        }
+        
+        .historical-photo.minimized .curator-video-title {
+            font-size: 1rem;
+        }
+        
+        /* Smooth keyframe animations */
+        @keyframes curatorTitleSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes curatorTitleSlideOut {
+            0% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+        }
+        
+        @keyframes curatorSoundwaveFadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes curatorSoundwaveFadeOut {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .historical-photo.expanded {
+                max-width: 95vw;
+                min-height: 400px;
+            }
+            
+            .curator-video-header {
+                padding: 16px 20px;
+                min-height: 50px;
+            }
+            
+            .curator-video-title {
+                font-size: 1.1rem;
+            }
+            
+            .curator-video-controls button {
+                min-width: 32px;
+                height: 32px;
+                font-size: 1rem;
+                padding: 6px 10px;
+            }
+            
+            .curator-soundwave {
+                left: 60px;
+                gap: 2px;
+            }
         }
         
         .acervo-title {
@@ -569,6 +883,84 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .button-text {
+            transition: all 0.8s ease;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .button-text.slide-out-right {
+            animation: buttonTextSlideOut 0.8s ease forwards !important;
+        }
+        
+        .button-text.slide-in-left {
+            animation: buttonTextSlideIn 0.8s ease forwards !important;
+        }
+        
+        .button-soundwave {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            opacity: 0;
+            transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+        
+        .button-soundwave.fade-in {
+            animation: buttonSoundwaveFadeIn 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+            opacity: 1 !important;
+        }
+        
+        .button-soundwave.fade-out {
+            animation: buttonSoundwaveFadeOut 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+        }
+        
+        .button-soundwave.hidden {
+            opacity: 0 !important;
+        }
+        
+        @keyframes buttonTextSlideOut {
+            to {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+        }
+        
+        @keyframes buttonTextSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes buttonSoundwaveFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes buttonSoundwaveFadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
         }
         
         .curator-button:hover {
@@ -586,18 +978,18 @@
         /* Modern Video Popup Window Styles */
         .video-popup {
             position: fixed;
-            top: 0;
+            z-index: 999;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 0;
+            width: 100%;
+            height: 100%;
             background-color: transparent;
             display: none;
-            z-index: 10000;
             opacity: 0;
-            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: none;
-            /* Ensure popup stays fixed on screen */
-            will-change: opacity;
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            justify-content: center;
+            align-items: center;
         }
         
         .video-popup.active {
@@ -609,13 +1001,12 @@
         }
         
         .video-window {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.8);
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            margin: 5% auto;
+            padding: 0;
+            border: 1px solid rgba(212, 180, 95, 0.3);
             width: 800px;
             height: 500px;
-            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
             border-radius: 16px;
             box-shadow: 
                 0 32px 64px rgba(0, 0, 0, 0.2),
@@ -629,11 +1020,22 @@
             min-height: 350px;
             pointer-events: auto;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(212, 180, 95, 0.3);
-            z-index: 10001;
+            z-index: 1000;
             transform-origin: center center;
             /* Ensure window stays fixed on screen */
             will-change: transform;
+            animation: fadeInSlide 0.4s ease;
+        }
+        
+        @keyframes fadeInSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .video-popup.active .video-window {
@@ -654,6 +1056,7 @@
             position: relative;
             border-bottom: 1px solid rgba(212, 180, 95, 0.2);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
         }
         
         .video-header:hover {
@@ -680,26 +1083,37 @@
             gap: 8px;
             position: relative;
             overflow: hidden;
+            transition: all 0.8s ease;
         }
         
         /* Soundwave animation */
         .soundwave {
             position: absolute;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            left: 70px;
+            transform: translateY(-50%);
             display: flex;
             align-items: center;
             gap: 2px;
             opacity: 0;
-            transition: opacity 0.5s ease;
+            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
         }
         
         .soundwave-bar {
             width: 3px;
-            background: var(--gold-color);
+            background: var(--primary-color);
             border-radius: 2px;
             animation: soundwave-pulse 1s ease-in-out infinite;
+            transition: background-color 0.3s ease;
+        }
+        
+        .curator-button:hover .soundwave-bar {
+            background: var(--gold-color);
+        }
+        
+        .video-window .soundwave-bar {
+            background: var(--gold-color);
         }
         
         .soundwave-bar:nth-child(1) { height: 8px; animation-delay: 0s; }
@@ -711,63 +1125,79 @@
         .soundwave-bar:nth-child(7) { height: 8px; animation-delay: 0.6s; }
         
         @keyframes soundwave-pulse {
-            0%, 100% { transform: scaleY(1); }
-            50% { transform: scaleY(1.5); }
+            0%, 100% { 
+                transform: scaleY(1); 
+                opacity: 1;
+            }
+            50% { 
+                transform: scaleY(2.2); 
+                opacity: 1;
+            }
         }
         
         /* Title animation states - works in all window states */
-        .video-title.fade-out-right {
-            animation: fadeOutRight 0.5s ease forwards !important;
+        .video-title.slide-out-right {
+            animation: slideOutRight 0.8s ease forwards !important;
         }
         
-        .video-title.fade-in-left {
-            animation: fadeInLeft 0.5s ease forwards !important;
+        .video-title.slide-in-left {
+            animation: slideInLeft 0.8s ease forwards !important;
         }
         
         .soundwave.fade-in {
+            animation: soundwaveFadeIn 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
             opacity: 1 !important;
         }
         
         .soundwave.fade-out {
+            animation: soundwaveFadeOut 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+        }
+        
+        .soundwave.hidden {
             opacity: 0 !important;
         }
         
-        .soundwave.flatten {
-            animation: flatten 0.5s ease forwards !important;
+        .soundwave.visible {
+            opacity: 1 !important;
         }
         
         /* Ensure animations work in maximized state */
-        .video-window.maximized .video-title.fade-out-right {
-            animation: fadeOutRight 0.5s ease forwards !important;
+        .video-window.maximized .video-title.slide-out-right {
+            animation: slideOutRight 0.8s ease forwards !important;
         }
         
-        .video-window.maximized .video-title.fade-in-left {
-            animation: fadeInLeft 0.5s ease forwards !important;
+        .video-window.maximized .video-title.slide-in-left {
+            animation: slideInLeft 0.8s ease forwards !important;
         }
         
         .video-window.maximized .soundwave.fade-in {
+            animation: soundwaveFadeIn 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
             opacity: 1 !important;
         }
         
         .video-window.maximized .soundwave.fade-out {
+            animation: soundwaveFadeOut 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+        }
+        
+        .video-window.maximized .soundwave.hidden {
             opacity: 0 !important;
         }
         
-        .video-window.maximized .soundwave.flatten {
-            animation: flatten 0.5s ease forwards !important;
+        .video-window.maximized .soundwave.visible {
+            opacity: 1 !important;
         }
         
-        @keyframes fadeOutRight {
+        @keyframes slideOutRight {
             to {
                 opacity: 0;
-                transform: translateX(20px);
+                transform: translateX(50px);
             }
         }
         
-        @keyframes fadeInLeft {
+        @keyframes slideInLeft {
             from {
                 opacity: 0;
-                transform: translateX(-20px);
+                transform: translateX(-50px);
             }
             to {
                 opacity: 1;
@@ -775,9 +1205,21 @@
             }
         }
         
-        @keyframes flatten {
+        @keyframes soundwaveFadeIn {
+            from {
+                opacity: 0;
+            }
             to {
-                transform: translate(-50%, -50%) scaleY(0.3);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes soundwaveFadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
             }
         }
         
@@ -828,13 +1270,15 @@
         }
         
         .minimize-btn:hover {
-            background: rgba(255, 193, 7, 0.2) !important;
-            border-color: #ffc107 !important;
-        }
-        
-        .maximize-btn:hover {
             background: rgba(40, 167, 69, 0.2) !important;
             border-color: #28a745 !important;
+        }
+        
+
+        
+        .fullscreen-btn:hover {
+            background: rgba(255, 193, 7, 0.2) !important;
+            border-color: #ffc107 !important;
         }
         
         .video-content {
@@ -1447,26 +1891,14 @@ video-synopsis {
     align-items: center;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    z-index: 3002;
-    position: fixed;
-}
-
-.rect-scroll-btn.visible {
-    opacity: 1;
-    pointer-events: auto;
-    transform: scale(1.1);
-}
-
-/* Make buttons more visible when they can be used */
-.rect-scroll-btn.can-show {
     opacity: 0.8;
     pointer-events: auto;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 99999 !important;
+    position: fixed !important;
 }
 
-.rect-scroll-btn.can-show:hover {
+.rect-scroll-btn:hover {
     opacity: 1;
     transform: scale(1.1);
 }
@@ -1528,69 +1960,7 @@ video-synopsis {
         <a href="#acervo">Acervo</a>
     </div>
     
-    <!-- Back to Top -->
-    <button id="back-to-top" class="rect-scroll-btn" title="Voltar ao topo"
-    style="position:fixed; right:16px; top:16px;">
-      <span></span>
-    </button>
 
-    <!-- Scroll to Bottom -->
-    <button id="scroll-to-bottom" class="rect-scroll-btn" title="Ir para o final"
-    style="position:fixed;right:16px;bottom:16px;">
-      <span></span>
-    </button>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const backToTop = document.getElementById('back-to-top');
-      const scrollToBottom = document.getElementById('scroll-to-bottom');
-
-      function updateScrollState() {
-        const scrollY = window.scrollY;
-        const windowH = window.innerHeight;
-        const docH = document.documentElement.scrollHeight;
-
-        // Mark whether buttons *can* be shown
-        backToTop.dataset.enabled = scrollY > 50 ? 'true' : 'false';
-        scrollToBottom.dataset.enabled = (scrollY + windowH < docH - 50) ? 'true' : 'false';
-      }
-
-      function handleMouseMove(e) {
-        const y = e.clientY;
-        const screenH = window.innerHeight;
-
-        const topZone = screenH * 0.25;    // top 25%
-        const bottomZone = screenH * 0.75; // bottom 25%
-
-        if (y < topZone && backToTop.dataset.enabled === 'true') {
-          backToTop.classList.add('visible');
-        } else {
-          backToTop.classList.remove('visible');
-        }
-
-        if (y > bottomZone && scrollToBottom.dataset.enabled === 'true') {
-          scrollToBottom.classList.add('visible');
-        } else {
-          scrollToBottom.classList.remove('visible');
-        }
-      }
-
-      // Watch scrolling + resizing
-      window.addEventListener('scroll', updateScrollState);
-      window.addEventListener('resize', updateScrollState);
-      document.addEventListener('mousemove', handleMouseMove);
-
-      // Buttons scroll behavior
-      backToTop.addEventListener('click', () =>
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      );
-      scrollToBottom.addEventListener('click', () =>
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
-      );
-
-      updateScrollState(); // on load
-    });
-    </script>
 
     <div class="container">
         <section id="intro" class="intro">
@@ -1858,9 +2228,37 @@ video-synopsis {
             <p>Acervo de Histórias, Contos, Fotos, Livros e Vídeos que resolvi guardar em arquivos digitais. Assim fazendo, tenho condições de preservar os guardados, evitando que caiam no esquecimento, nos sebos e/ou descarte nos lixos. Com este propósito possibilito que outras pessoas possam apreciar e revisitar quantos momentos que guardei.</p>
             <p>Todos os arquivos estão agora de livre acesso para apreciação e revisitação dos momentos históricos preservados.</p>
             
-            <div class="historical-photo">
+            <div class="historical-photo" id="historical-photo">
                 <img src="historical_couple.jpg" alt="Foto histórica da cidade">
                 <p class="historical-photo-caption">Álvaro e Maria - meus pais</p>
+                
+                <!-- Curator Video Content (initially hidden inside the same container) -->
+                <div class="curator-video-content" id="curator-video-content" style="display: none;">
+                    <div class="curator-video-header">
+                        <div class="curator-video-title" id="curator-video-title">
+                            Palavras do Curador
+                        </div>
+                        <div class="curator-soundwave" id="curator-soundwave">
+                            <div class="soundwave-bar"></div>
+                            <div class="soundwave-bar"></div>
+                            <div class="soundwave-bar"></div>
+                            <div class="soundwave-bar"></div>
+                            <div class="soundwave-bar"></div>
+                            <div class="soundwave-bar"></div>
+                            <div class="soundwave-bar"></div>
+                        </div>
+                        <div class="curator-video-controls">
+                            <button class="curator-fullscreen-btn" id="curator-fullscreen-btn" title="Tela cheia">⛶</button>
+                            <button class="curator-close-btn" id="curator-close-btn">×</button>
+                        </div>
+                    </div>
+                    <div class="curator-video-player">
+                        <video id="curator-video" controls>
+                            <source src="Curador.mp4" type="video/mp4">
+                            Seu navegador não suporta o elemento de vídeo.
+                        </video>
+                    </div>
+                </div>
             </div>
         </section>
         
@@ -1868,7 +2266,18 @@ video-synopsis {
             <h2 class="timeline-title">Linha do Tempo </h2>
             
             <div style="text-align: center; margin-bottom: 15px;">
-                <button class="curator-button" id="curator-button">Palavras do Curador</button>
+                <button class="curator-button" id="curator-button">
+                    <span class="button-text">Palavras do Curador</span>
+                    <div class="button-soundwave">
+                        <div class="soundwave-bar"></div>
+                        <div class="soundwave-bar"></div>
+                        <div class="soundwave-bar"></div>
+                        <div class="soundwave-bar"></div>
+                        <div class="soundwave-bar"></div>
+                        <div class="soundwave-bar"></div>
+                        <div class="soundwave-bar"></div>
+                    </div>
+                </button>
             </div>
         
             <div class="horizontal-timeline">
@@ -2661,6 +3070,7 @@ video-synopsis {
                 <div class="video-header">
                     <div class="video-title" id="video-title">
                     Palavras do Curador
+                    </div>
                     <div class="soundwave" id="soundwave">
                         <div class="soundwave-bar"></div>
                         <div class="soundwave-bar"></div>
@@ -2670,10 +3080,9 @@ video-synopsis {
                         <div class="soundwave-bar"></div>
                         <div class="soundwave-bar"></div>
                     </div>
-                </div>
                     <div class="video-controls">
                         <button class="minimize-btn" id="minimize-btn">─</button>
-                        <button class="maximize-btn" id="maximize-btn">□</button>
+                        <button class="fullscreen-btn" id="fullscreen-btn" title="Tela cheia">⛶</button>
                         <button class="close-btn" id="close-btn">×</button>
                     </div>
                 </div>
@@ -4156,7 +4565,7 @@ function openVideo(videoId, isProtected) {
             const videoWindow = document.querySelector('.video-window');
             const closeBtn = document.getElementById('close-btn');
             const minimizeBtn = document.getElementById('minimize-btn');
-            const maximizeBtn = document.getElementById('maximize-btn');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
             const videoHeader = document.querySelector('.video-header');
             const video = document.getElementById('curator-video');
             
@@ -4166,7 +4575,6 @@ function openVideo(videoId, isProtected) {
             let dragOffset = { x: 0, y: 0 };
             let originalSize = { width: 0, height: 0 };
             let originalPosition = { x: 0, y: 0 };
-            let isMaximized = false;
             let isMinimized = false;
             let lastMoveTime = 0; // Add throttling variable
             
@@ -4186,16 +4594,14 @@ function openVideo(videoId, isProtected) {
             
             // Reset window to default state
             function resetWindowState() {
-                videoWindow.classList.remove('maximized', 'minimized', 'transitioning');
-                isMaximized = false;
+                videoWindow.classList.remove('minimized', 'transitioning');
                 isMinimized = false;
-                maximizeBtn.textContent = '□';
                 minimizeBtn.textContent = '─';
             }
             
             // Open video popup with smooth animation
             curatorButton.addEventListener('click', function() {
-                openVideoPopup();
+                openCuratorVideo();
             });
             
             // Close popup with smooth animation
@@ -4209,7 +4615,6 @@ function openVideo(videoId, isProtected) {
                     videoWindow.classList.add('transitioning', 'minimized');
                     minimizeBtn.textContent = '□';
                     isMinimized = true;
-                    isMaximized = false;
                 } else {
                     videoWindow.classList.remove('minimized');
                     minimizeBtn.textContent = '─';
@@ -4226,29 +4631,69 @@ function openVideo(videoId, isProtected) {
                 }, 350);
             });
             
-            // Enhanced maximize with smooth animation
-            maximizeBtn.addEventListener('click', function() {
-                if (!isMaximized) {
-                    videoWindow.classList.add('transitioning', 'maximized');
-                    videoPopup.classList.add('maximized');
-                    maximizeBtn.textContent = '❐';
-                    isMaximized = true;
-                    isMinimized = false;
+
+            
+            // Native fullscreen functionality
+            fullscreenBtn.addEventListener('click', function() {
+                if (document.fullscreenElement) {
+                    // Exit fullscreen
+                    document.exitFullscreen();
                 } else {
-                    videoWindow.classList.remove('maximized');
-                    videoPopup.classList.remove('maximized');
-                    maximizeBtn.textContent = '□';
-                    isMaximized = false;
+                    // Enter fullscreen
+                    if (video.requestFullscreen) {
+                        video.requestFullscreen();
+                    } else if (video.webkitRequestFullscreen) {
+                        video.webkitRequestFullscreen();
+                    } else if (video.mozRequestFullScreen) {
+                        video.mozRequestFullScreen();
+                    } else if (video.msRequestFullscreen) {
+                        video.msRequestFullscreen();
+                    }
                 }
-                
-                setTimeout(() => {
-                    videoWindow.classList.remove('transitioning');
-                }, 300);
-                
-                // Restart animation when window state changes
-                setTimeout(() => {
-                    startTitleAnimation();
-                }, 350);
+            });
+            
+            // Update fullscreen button state
+            document.addEventListener('fullscreenchange', function() {
+                if (document.fullscreenElement) {
+                    fullscreenBtn.textContent = '⛶';
+                    fullscreenBtn.title = 'Sair da tela cheia';
+                } else {
+                    fullscreenBtn.textContent = '⛶';
+                    fullscreenBtn.title = 'Tela cheia';
+                }
+            });
+            
+            // Handle fullscreen change for webkit browsers
+            document.addEventListener('webkitfullscreenchange', function() {
+                if (document.webkitFullscreenElement) {
+                    fullscreenBtn.textContent = '⛶';
+                    fullscreenBtn.title = 'Sair da tela cheia';
+                } else {
+                    fullscreenBtn.textContent = '⛶';
+                    fullscreenBtn.title = 'Tela cheia';
+                }
+            });
+            
+            // Handle fullscreen change for moz browsers
+            document.addEventListener('mozfullscreenchange', function() {
+                if (document.mozFullScreenElement) {
+                    fullscreenBtn.textContent = '⛶';
+                    fullscreenBtn.title = 'Sair da tela cheia';
+                } else {
+                    fullscreenBtn.textContent = '⛶';
+                    fullscreenBtn.title = 'Tela cheia';
+                }
+            });
+            
+            // Handle fullscreen change for ms browsers
+            document.addEventListener('MSFullscreenChange', function() {
+                if (document.msFullscreenElement) {
+                    fullscreenBtn.textContent = '⛶';
+                    fullscreenBtn.title = 'Sair da tela cheia';
+                } else {
+                    fullscreenBtn.textContent = '⛶';
+                    fullscreenBtn.title = 'Tela cheia';
+                }
             });
             
             // Completely redesigned dragging system with modern performance
@@ -4271,11 +4716,20 @@ function openVideo(videoId, isProtected) {
                 
                 isDragging = true;
                 dragStartPos = { x: e.clientX, y: e.clientY };
+                
+                // Get current position - handle both fixed and flex positioning
+                const rect = videoWindow.getBoundingClientRect();
                 windowStartPos = { 
-                    x: videoWindow.offsetLeft, 
-                    y: videoWindow.offsetTop 
+                    x: rect.left, 
+                    y: rect.top 
                 };
                 lastDragPos = { x: e.clientX, y: e.clientY };
+                
+                // Switch to fixed positioning for dragging
+                videoWindow.style.position = 'fixed';
+                videoWindow.style.margin = '0';
+                videoWindow.style.left = rect.left + 'px';
+                videoWindow.style.top = rect.top + 'px';
                 
                 // Disable transitions and set cursor
                 videoWindow.style.transition = 'none';
@@ -4352,6 +4806,9 @@ function openVideo(videoId, isProtected) {
                     videoWindow.style.transform = 'scale(1)';
                     videoWindow.style.border = 'none';
                     
+                    // Keep fixed positioning for continued dragging capability
+                    // videoWindow.style.position = 'fixed'; // Keep this for dragging
+                    
                     // Enhanced shadow restoration with momentum effect
                     const finalVelocity = Math.sqrt(dragVelocity.x * dragVelocity.x + dragVelocity.y * dragVelocity.y);
                     if (finalVelocity > 0.5) {
@@ -4361,7 +4818,7 @@ function openVideo(videoId, isProtected) {
                             videoWindow.style.boxShadow = '0 32px 64px rgba(0, 0, 0, 0.2), 0 8px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
                         }, 200);
                     } else {
-                        videoWindow.style.boxShadow = '0 32px 64px rgba(0, 0, 0, 0.2), 0 8px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
+                    videoWindow.style.boxShadow = '0 32px 64px rgba(0, 0, 0, 0.2), 0 8px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
                     }
                     
                     // Reset velocity tracking
@@ -4381,8 +4838,8 @@ function openVideo(videoId, isProtected) {
                         } else {
                             currentResizeHandle.style.background = 'transparent';
                         }
-                        currentResizeHandle = null;
-                    }
+                    currentResizeHandle = null;
+                }
                     
                     // Add a small delay to prevent accidental interactions
                     setTimeout(() => {
@@ -4401,24 +4858,24 @@ function openVideo(videoId, isProtected) {
             
             // Function to handle resize start
             function startResize(e, element) {
-                e.preventDefault();
+                    e.preventDefault();
                 e.stopPropagation();
                 
                 // Prevent conflicts with other interactions
                 if (isDragging) return;
                 
-                isResizing = true;
+                    isResizing = true;
                 currentResizeHandle = element;
                 resizeStartTime = Date.now();
-                
-                const rect = videoWindow.getBoundingClientRect();
-                originalSize.width = rect.width;
-                originalSize.height = rect.height;
-                originalPosition.x = e.clientX;
-                originalPosition.y = e.clientY;
-                
+                    
+                    const rect = videoWindow.getBoundingClientRect();
+                    originalSize.width = rect.width;
+                    originalSize.height = rect.height;
+                    originalPosition.x = e.clientX;
+                    originalPosition.y = e.clientY;
+                    
                 // Disable transitions during resize for smooth performance
-                videoWindow.style.transition = 'none';
+                    videoWindow.style.transition = 'none';
                 videoWindow.style.userSelect = 'none';
                 
                 // Add visual feedback
@@ -4512,8 +4969,8 @@ function openVideo(videoId, isProtected) {
                 
                 // Apply changes with requestAnimationFrame for smooth updates
                 requestAnimationFrame(() => {
-                    videoWindow.style.width = newWidth + 'px';
-                    videoWindow.style.height = newHeight + 'px';
+                videoWindow.style.width = newWidth + 'px';
+                videoWindow.style.height = newHeight + 'px';
                     videoWindow.style.left = newLeft + 'px';
                     videoWindow.style.top = newTop + 'px';
                 });
@@ -4539,6 +4996,26 @@ function openVideo(videoId, isProtected) {
                 }
             });
             
+            // Double-click on video to toggle fullscreen
+            video.addEventListener('dblclick', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    if (video.requestFullscreen) {
+                        video.requestFullscreen();
+                    } else if (video.webkitRequestFullscreen) {
+                        video.webkitRequestFullscreen();
+                    } else if (video.mozRequestFullScreen) {
+                        video.mozRequestFullScreen();
+                    } else if (video.msRequestFullscreen) {
+                        video.msRequestFullscreen();
+                    }
+                }
+            });
+            
 
             
             // Enhanced keyboard shortcuts
@@ -4555,12 +5032,10 @@ function openVideo(videoId, isProtected) {
                                 minimizeBtn.click();
                             }
                             break;
-                        case 'f':
-                        case 'F':
-                            if (e.ctrlKey || e.metaKey) {
-                                e.preventDefault();
-                                maximizeBtn.click();
-                            }
+
+                        case 'F11':
+                            e.preventDefault();
+                            fullscreenBtn.click();
                             break;
                     }
                 }
@@ -4589,62 +5064,104 @@ function openVideo(videoId, isProtected) {
                 console.log('Elements found, starting animation sequence...');
                 
                 // Clear any existing animation classes
-                videoTitle.classList.remove('fade-out-right', 'fade-in-left');
-                soundwave.classList.remove('fade-in', 'fade-out', 'flatten');
+                videoTitle.classList.remove('slide-out-right', 'slide-in-left');
+                soundwave.classList.remove('fade-in', 'fade-out', 'hidden', 'visible');
                 
-                // Step 1: Title fades out to the right after 5 seconds
+                // Set initial state - title visible, soundwave hidden
+                soundwave.classList.add('hidden');
+                
+                // Step 1: Title slides out to the right and soundwave fades in simultaneously after 3 seconds
                 setTimeout(() => {
-                    console.log('Step 1: Title fading out...');
-                    videoTitle.classList.add('fade-out-right');
+                    console.log('Step 1: Title sliding out to the right and soundwave fading in...');
+                    videoTitle.classList.add('slide-out-right');
+                    soundwave.classList.remove('hidden');
+                    soundwave.classList.add('fade-in');
                     
-                    // Step 2: Soundwave fades in
+                    // Step 2: After 3 seconds, soundwave fades out and title slides back in
                     setTimeout(() => {
-                        console.log('Step 2: Soundwave fading in...');
-                        soundwave.classList.add('fade-in');
+                        console.log('Step 2: Soundwave fading out and title sliding back in...');
+                        soundwave.classList.remove('fade-in');
+                        soundwave.classList.add('fade-out');
+                        videoTitle.classList.remove('slide-out-right');
+                        videoTitle.classList.add('slide-in-left');
                         
-                        // Step 3: After 5 seconds, soundwave flattens and fades out
+                        // Reset for next cycle
                         setTimeout(() => {
-                            console.log('Step 3: Soundwave flattening and fading out...');
-                            soundwave.classList.add('flatten');
-                            soundwave.classList.add('fade-out');
+                            console.log('Animation cycle complete, resetting...');
+                            videoTitle.classList.remove('slide-in-left');
+                            soundwave.classList.remove('fade-out');
+                            soundwave.classList.add('hidden');
                             
-                            // Step 4: Title fades back in from the left
+                            // Restart animation cycle
                             setTimeout(() => {
-                                console.log('Step 4: Title fading back in...');
-                                videoTitle.classList.remove('fade-out-right');
-                                videoTitle.classList.add('fade-in-left');
-                                
-                                // Reset for next cycle
-                                setTimeout(() => {
-                                    console.log('Animation cycle complete, resetting...');
-                                    videoTitle.classList.remove('fade-in-left');
-                                    soundwave.classList.remove('fade-in', 'fade-out', 'flatten');
-                                    
-                                    // Restart animation cycle
-                                    setTimeout(() => {
-                                        startTitleAnimation();
-                                    }, 2000);
-                                }, 500);
-                            }, 500);
-                        }, 5000);
-                    }, 500);
-                }, 5000);
+                                startTitleAnimation();
+                            }, 1000);
+                        }, 1200);
+                    }, 3000);
+                }, 3000);
             }
+            
+            // Button animation sequence
+            function startButtonAnimation() {
+                console.log('Starting button animation...');
+                const buttonText = document.querySelector('.button-text');
+                const buttonSoundwave = document.querySelector('.button-soundwave');
+                
+                if (!buttonText || !buttonSoundwave) {
+                    console.error('Button text or soundwave elements not found!');
+                    return;
+                }
+                
+                console.log('Button elements found, starting animation sequence...');
+                
+                // Clear any existing animation classes
+                buttonText.classList.remove('slide-out-right', 'slide-in-left');
+                buttonSoundwave.classList.remove('fade-in', 'fade-out', 'hidden');
+                
+                // Set initial state - text visible, soundwave hidden
+                buttonSoundwave.classList.add('hidden');
+                
+                // Step 1: Text slides out to the right and soundwave fades in simultaneously after 3 seconds
+                setTimeout(() => {
+                    console.log('Step 1: Button text sliding out to the right and soundwave fading in...');
+                    buttonText.classList.add('slide-out-right');
+                    buttonSoundwave.classList.remove('hidden');
+                    buttonSoundwave.classList.add('fade-in');
+                    
+                    // Step 2: After 3 seconds, soundwave fades out and text slides back in
+                    setTimeout(() => {
+                        console.log('Step 2: Button soundwave fading out and text sliding back in...');
+                        buttonSoundwave.classList.remove('fade-in');
+                        buttonSoundwave.classList.add('fade-out');
+                        buttonText.classList.remove('slide-out-right');
+                        buttonText.classList.add('slide-in-left');
+                        
+                        // Reset for next cycle
+                        setTimeout(() => {
+                            console.log('Button animation cycle complete, resetting...');
+                            buttonText.classList.remove('slide-in-left');
+                            buttonSoundwave.classList.remove('fade-out');
+                            buttonSoundwave.classList.add('hidden');
+                            
+                            // Restart animation cycle
+                            setTimeout(() => {
+                                startButtonAnimation();
+                            }, 1000);
+                        }, 1200);
+                    }, 3000);
+                }, 3000);
+            }
+            
+            // Start button animation when page loads
+            setTimeout(() => {
+                startButtonAnimation();
+            }, 1000);
             
             // Start animation when video popup opens
             function openVideoPopup() {
                 console.log('Opening video popup...');
-                videoPopup.style.display = 'block';
+                videoPopup.style.display = 'flex';
                 document.body.classList.add('video-open');
-                
-                // Centralize the window in the viewport
-                const winW = window.innerWidth;
-                const winH = window.innerHeight;
-                const width = 800;
-                const height = 500;
-                videoWindow.style.left = ((winW - width) / 2) + 'px';
-                videoWindow.style.top = ((winH - height) / 2) + 'px';
-                videoWindow.style.transform = 'none';
                 
                 // Trigger entrance animation
                 requestAnimationFrame(() => {
@@ -4658,8 +5175,179 @@ function openVideo(videoId, isProtected) {
                 
                 // Start title animation sequence
                 console.log('Calling startTitleAnimation...');
-                startTitleAnimation();
+                setTimeout(() => {
+                    startTitleAnimation();
+                }, 500);
             }
+            
+            // New function to handle curator video transition
+            function openCuratorVideo() {
+                const historicalPhoto = document.getElementById('historical-photo');
+                const curatorVideoContent = document.getElementById('curator-video-content');
+                const curatorVideo = document.getElementById('curator-video');
+                const curatorVideoTitle = document.getElementById('curator-video-title');
+                const curatorSoundwave = document.getElementById('curator-soundwave');
+                const curatorCloseBtn = document.getElementById('curator-close-btn');
+                const curatorFullscreenBtn = document.getElementById('curator-fullscreen-btn');
+                
+                // Step 1: Expand the container first with smooth easing
+                historicalPhoto.classList.add('expanded');
+                
+                // Step 2: After container expansion starts, fade out photo elements with better timing
+                setTimeout(() => {
+                    const photoImg = historicalPhoto.querySelector('img');
+                    const photoCaption = historicalPhoto.querySelector('.historical-photo-caption');
+                    
+                    photoImg.style.transition = 'opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    photoCaption.style.transition = 'opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    photoImg.style.opacity = '0';
+                    photoCaption.style.opacity = '0';
+                    
+                    // Step 3: Show video content after photo fades out with smoother timing
+                    setTimeout(() => {
+                        photoImg.style.display = 'none';
+                        photoCaption.style.display = 'none';
+                        curatorVideoContent.style.display = 'flex';
+                        
+                        // Trigger video content entrance animation with better timing
+                        requestAnimationFrame(() => {
+                            curatorVideoContent.classList.add('active');
+                            // Add active class to video player for smooth background effect
+                            setTimeout(() => {
+                                const videoPlayer = curatorVideoContent.querySelector('.curator-video-player');
+                                if (videoPlayer) {
+                                    videoPlayer.classList.add('active');
+                                }
+                            }, 200);
+                        });
+                        
+                        // Auto-play video with slight delay for smoother experience
+                        setTimeout(() => {
+                            curatorVideo.play().catch(e => console.log('Auto-play prevented:', e));
+                        }, 400);
+                        
+                        // Start curator title animation with better timing
+                        setTimeout(() => {
+                            startCuratorTitleAnimation();
+                        }, 800);
+                    }, 800); // Increased delay for smoother transition
+                }, 600); // Increased delay for container expansion
+                
+                // Close button functionality
+                curatorCloseBtn.addEventListener('click', function() {
+                    closeCuratorVideo();
+                });
+                
+                // Fullscreen functionality - only toggle fullscreen, don't close video
+                curatorFullscreenBtn.addEventListener('click', function() {
+                    if (document.fullscreenElement) {
+                        // When exiting fullscreen, just exit - don't close video
+                        document.exitFullscreen().catch(e => console.log('Exit fullscreen failed:', e));
+                    } else {
+                        // Hide close button with fade when entering fullscreen
+                        curatorCloseBtn.style.opacity = '0';
+                        curatorCloseBtn.style.visibility = 'hidden';
+                        historicalPhoto.requestFullscreen().catch(e => console.log('Fullscreen failed:', e));
+                    }
+                });
+            }
+            
+            // Function to close curator video and return to photo with natural transition
+            function closeCuratorVideo() {
+                const historicalPhoto = document.getElementById('historical-photo');
+                const curatorVideoContent = document.getElementById('curator-video-content');
+                const curatorVideo = document.getElementById('curator-video');
+                const photoImg = historicalPhoto.querySelector('img');
+                const photoCaption = historicalPhoto.querySelector('.historical-photo-caption');
+                
+                // Pause video
+                curatorVideo.pause();
+                curatorVideo.currentTime = 0;
+                
+                // Fade out video content with smoother timing
+                curatorVideoContent.classList.remove('active');
+                
+                setTimeout(() => {
+                    curatorVideoContent.style.display = 'none';
+                    
+                    // Show photo elements again with smooth fade-in
+                    photoImg.style.display = 'block';
+                    photoCaption.style.display = 'block';
+                    
+                    // Smooth fade-in for photo elements with natural timing
+                    requestAnimationFrame(() => {
+                        photoImg.style.transition = 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                        photoCaption.style.transition = 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                        photoImg.style.opacity = '1';
+                        photoCaption.style.opacity = '1';
+                    });
+                    
+                    // Contract the container back to original size with natural delay
+                    setTimeout(() => {
+                        historicalPhoto.classList.remove('expanded');
+                    }, 400);
+                }, 1000); // Increased delay for more natural transition
+            }
+            
+            // Curator title animation function with smoother transitions
+            function startCuratorTitleAnimation() {
+                const curatorVideoTitle = document.getElementById('curator-video-title');
+                const curatorSoundwave = document.getElementById('curator-soundwave');
+                
+                // Clear any existing animation classes
+                curatorVideoTitle.classList.remove('slide-out-right', 'slide-in-left');
+                curatorSoundwave.classList.remove('fade-in', 'fade-out', 'hidden', 'visible');
+                
+                // Set initial state - title visible, soundwave hidden
+                curatorSoundwave.classList.add('hidden');
+                
+                // Initial title animation - slide in from left
+                curatorVideoTitle.style.animation = 'curatorTitleSlideIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
+                
+                // Step 1: Title slides out to the right and soundwave fades in simultaneously after 4 seconds
+                setTimeout(() => {
+                    curatorVideoTitle.style.animation = 'curatorTitleSlideOut 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
+                    curatorSoundwave.classList.remove('hidden');
+                    curatorSoundwave.style.animation = 'curatorSoundwaveFadeIn 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
+                    
+                    // Step 2: After 3 seconds, soundwave fades out and title slides back in
+                    setTimeout(() => {
+                        curatorSoundwave.style.animation = 'curatorSoundwaveFadeOut 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
+                        curatorVideoTitle.style.animation = 'curatorTitleSlideIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
+                        
+                        // Reset for next cycle
+                        setTimeout(() => {
+                            curatorVideoTitle.style.animation = '';
+                            curatorSoundwave.style.animation = '';
+                            curatorSoundwave.classList.add('hidden');
+                            
+                            // Restart animation cycle
+                            setTimeout(() => {
+                                startCuratorTitleAnimation();
+                            }, 1500);
+                        }, 1200);
+                    }, 3000);
+                }, 4000);
+            }
+            
+            // Listen for fullscreen changes to handle button visibility with fade
+            document.addEventListener('fullscreenchange', function() {
+                const closeBtn = document.getElementById('curator-close-btn');
+                
+                if (!document.fullscreenElement) {
+                    // Fullscreen was exited, show close button with fade in
+                    if (closeBtn) {
+                        closeBtn.style.opacity = '1';
+                        closeBtn.style.visibility = 'visible';
+                    }
+                } else {
+                    // Entered fullscreen, hide close button with fade out
+                    if (closeBtn) {
+                        closeBtn.style.opacity = '0';
+                        closeBtn.style.visibility = 'hidden';
+                    }
+                }
+            });
             
             // Smooth video loading
             video.addEventListener('loadstart', function() {
@@ -4694,7 +5382,36 @@ function openVideo(videoId, isProtected) {
 
             
 
+            
+
         });
+    </script>
+
+    <!-- Back to Top -->
+    <button id="back-to-top" class="rect-scroll-btn" title="Voltar ao topo"
+    style="position:fixed !important; right:16px; top:16px; z-index:99999 !important; transform:none !important;">
+      <span></span>
+    </button>
+
+    <!-- Scroll to Bottom -->
+    <button id="scroll-to-bottom" class="rect-scroll-btn" title="Ir para o final"
+    style="position:fixed !important;right:16px;bottom:16px; z-index:99999 !important; transform:none !important;">
+      <span></span>
+    </button>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const backToTop = document.getElementById('back-to-top');
+      const scrollToBottom = document.getElementById('scroll-to-bottom');
+
+      // Buttons scroll behavior
+      backToTop.addEventListener('click', () =>
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      );
+      scrollToBottom.addEventListener('click', () =>
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      );
+    });
     </script>
 </body>
 </html>
