@@ -1880,13 +1880,14 @@ video-synopsis {
     margin-bottom: 1rem;
     color: var(--gold-color);
 }
+
 /* ÁREAS DE HOVER INVISÍVEIS PARA ATIVAR AS SETAS */
 .hover-zone-top {
     position: fixed;
     top: 0;
     right: 0;
-    width: 150px;
-    height: 150px;
+    width: 300px;
+    height: 300px;
     z-index: 98;
     pointer-events: auto;
 }
@@ -1895,8 +1896,8 @@ video-synopsis {
     position: fixed;
     bottom: 0;
     right: 0;
-    width: 150px;
-    height: 150px;
+    width: 300px;
+    height: 300px;
     z-index: 98;
     pointer-events: auto;
 }
@@ -1998,6 +1999,7 @@ video-synopsis {
 #scroll-to-bottom:hover span {
     border-top-color: var(--gold-color);
 }
+
   
   
 
@@ -2238,11 +2240,117 @@ video-synopsis {
                     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
                 }
                 
-                /* Zonas de hover menores em mobile */
+                /* Zonas de hover maiores em mobile */
                 .hover-zone-top,
                 .hover-zone-bottom {
-                    width: 100px;
-                    height: 100px;
+                    width: 200px;
+                    height: 200px;
+                }
+                
+                /* Mobile styles for historical photo and curator video */
+                .historical-photo {
+                    margin: 1rem 0; /* Keep within container */
+                    max-width: 100%; /* Use full container width */
+                    border: 8px solid var(--gold-color);
+                    border-radius: 12px;
+                }
+                
+                .historical-photo.expanded {
+                    max-width: 100%; /* Stay within container */
+                    margin: 0.5rem 0; /* Minimal margin */
+                    border-radius: 12px;
+                    min-height: 400px;
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Enhanced shadow for prominence */
+                }
+                
+                .curator-video-content {
+                    border-radius: 12px;
+                }
+                
+                .curator-video-header {
+                    padding: 15px 20px;
+                    min-height: 50px;
+                }
+                
+                .curator-video-title {
+                    font-size: 1.1rem;
+                }
+                
+                .curator-video-player {
+                    min-height: 250px;
+                }
+                
+                /* Ensure control buttons remain accessible on mobile */
+                .curator-video-controls {
+                    position: relative;
+                    z-index: 1000;
+                    margin-right: 10px; /* Keep buttons away from edge */
+                }
+                
+                .curator-video-controls button {
+                    min-width: 40px; /* Larger touch targets */
+                    height: 40px;
+                    font-size: 1.1rem;
+                }
+                
+                /* Tablet styles - moderate expansion */
+                @media (min-width: 769px) and (max-width: 1024px) {
+                    .historical-photo {
+                        margin: 1.5rem -10px; /* Slight break-out */
+                        max-width: calc(100% + 20px); /* Slightly wider */
+                    }
+                    
+                    .historical-photo.expanded {
+                        max-width: calc(100% + 20px);
+                        margin: 0.5rem -10px;
+                        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
+                    }
+                    
+                    /* Ensure buttons are accessible on tablet */
+                    .curator-video-controls {
+                        margin-right: 15px;
+                    }
+                }
+                
+                /* Desktop styles - restore original desktop behavior */
+                @media (min-width: 1025px) {
+                    .historical-photo {
+                        margin: 2rem auto; /* Original desktop margin */
+                        max-width: 500px; /* Original desktop max-width */
+                        border: 10px solid var(--gold-color); /* Original border */
+                        border-radius: 0; /* Remove border radius for desktop */
+                    }
+                    
+                    .historical-photo.expanded {
+                        max-width: 900px; /* Original expanded width */
+                        margin: 2rem auto; /* Original margin */
+                        border-radius: 16px; /* Original border radius */
+                        min-height: 500px; /* Original min-height */
+                        box-shadow: 0 32px 64px rgba(0, 0, 0, 0.2); /* Original shadow */
+                    }
+                    
+                    .curator-video-content {
+                        border-radius: 16px; /* Original border radius */
+                    }
+                    
+                    .curator-video-header {
+                        padding: 20px 24px; /* Original padding */
+                        min-height: 60px; /* Original min-height */
+                    }
+                    
+                    .curator-video-title {
+                        font-size: 1.3rem; /* Original font size */
+                    }
+                    
+                    .curator-video-player {
+                        min-height: 300px; /* Original min-height */
+                    }
+                    
+                    .curator-video-controls button {
+                        min-width: 36px; /* Original button size */
+                        height: 36px;
+                        font-size: 1.2rem;
+                    }
                 }
             </style>
             
@@ -2268,7 +2376,6 @@ video-synopsis {
                     const statLabel = document.getElementById('stat-label');
 
                     let mostrandoAcessos = false;
-                    let totalAcessos = 100;
 
                     function alternarTexto() {
                         // Aplicar fade-out com leve deslocamento para a direita
@@ -2280,9 +2387,8 @@ video-synopsis {
                                 statNumber.textContent = '70+';
                                 statLabel.textContent = 'Obras';
                             } else {
-                                statNumber.textContent = totalAcessos;
+                                statNumber.textContent = '+250';
                                 statLabel.textContent = 'Acessos';
-                                totalAcessos += Math.floor(Math.random() * 4);
                             }
 
                             mostrandoAcessos = !mostrandoAcessos;
@@ -5528,5 +5634,6 @@ function openVideo(videoId, isProtected) {
       updateArrowsAvailability();
     });
     </script>
+
 </body>
 </html>
