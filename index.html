@@ -348,8 +348,9 @@
             height: 100%;
             background-color: #fff;
             opacity: 0;
+            visibility: hidden;
             transform: scale(0.8) translateY(20px);
-            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0s 1.2s;
             display: flex;
             flex-direction: column;
             z-index: 10;
@@ -357,7 +358,9 @@
         
         .curator-video-content.active {
             opacity: 1;
+            visibility: visible;
             transform: scale(1) translateY(0);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0s;
         }
         
         .curator-video-header {
@@ -2253,6 +2256,7 @@ video-synopsis {
                     max-width: 100%; /* Use full container width */
                     border: 8px solid var(--gold-color);
                     border-radius: 12px;
+                    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                 }
                 
                 .historical-photo.expanded {
@@ -2261,23 +2265,28 @@ video-synopsis {
                     border-radius: 12px;
                     min-height: 400px;
                     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Enhanced shadow for prominence */
+                    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                 }
                 
                 .curator-video-content {
                     border-radius: 12px;
+                    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                 }
                 
                 .curator-video-header {
                     padding: 15px 20px;
                     min-height: 50px;
+                    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                 }
                 
                 .curator-video-title {
                     font-size: 1.1rem;
+                    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                 }
                 
                 .curator-video-player {
                     min-height: 250px;
+                    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                 }
                 
                 /* Ensure control buttons remain accessible on mobile */
@@ -2285,12 +2294,14 @@ video-synopsis {
                     position: relative;
                     z-index: 1000;
                     margin-right: 10px; /* Keep buttons away from edge */
+                    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                 }
                 
                 .curator-video-controls button {
                     min-width: 40px; /* Larger touch targets */
                     height: 40px;
                     font-size: 1.1rem;
+                    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                 }
                 
                 /* Tablet styles - moderate expansion */
@@ -2298,17 +2309,20 @@ video-synopsis {
                     .historical-photo {
                         margin: 1.5rem -10px; /* Slight break-out */
                         max-width: calc(100% + 20px); /* Slightly wider */
+                        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                     }
                     
                     .historical-photo.expanded {
                         max-width: calc(100% + 20px);
                         margin: 0.5rem -10px;
                         box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
+                        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                     }
                     
                     /* Ensure buttons are accessible on tablet */
                     .curator-video-controls {
                         margin-right: 15px;
+                        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                     }
                 }
                 
@@ -2319,6 +2333,7 @@ video-synopsis {
                         max-width: 500px; /* Original desktop max-width */
                         border: 10px solid var(--gold-color); /* Original border */
                         border-radius: 0; /* Remove border radius for desktop */
+                        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                     }
                     
                     .historical-photo.expanded {
@@ -2327,29 +2342,35 @@ video-synopsis {
                         border-radius: 16px; /* Original border radius */
                         min-height: 500px; /* Original min-height */
                         box-shadow: 0 32px 64px rgba(0, 0, 0, 0.2); /* Original shadow */
+                        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                     }
                     
                     .curator-video-content {
                         border-radius: 16px; /* Original border radius */
+                        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                     }
                     
                     .curator-video-header {
                         padding: 20px 24px; /* Original padding */
                         min-height: 60px; /* Original min-height */
+                        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                     }
                     
                     .curator-video-title {
                         font-size: 1.3rem; /* Original font size */
+                        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                     }
                     
                     .curator-video-player {
                         min-height: 300px; /* Original min-height */
+                        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                     }
                     
                     .curator-video-controls button {
                         min-width: 36px; /* Original button size */
                         height: 36px;
                         font-size: 1.2rem;
+                        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth responsive transitions */
                     }
                 }
             </style>
@@ -5383,11 +5404,12 @@ function openVideo(videoId, isProtected) {
                     
                     // Step 3: Show video content after photo fades out with smoother timing
                     setTimeout(() => {
-                        photoImg.style.display = 'none';
-                        photoCaption.style.display = 'none';
-                        curatorVideoContent.style.display = 'flex';
+                        // Hide photo elements with fade
+                        photoImg.style.opacity = '0';
+                        photoCaption.style.opacity = '0';
                         
-                        // Trigger video content entrance animation with better timing
+                        // Show video content with fade
+                        curatorVideoContent.style.display = 'flex';
                         requestAnimationFrame(() => {
                             curatorVideoContent.classList.add('active');
                             // Add active class to video player for smooth background effect
@@ -5446,13 +5468,10 @@ function openVideo(videoId, isProtected) {
                 curatorVideoContent.classList.remove('active');
                 
                 setTimeout(() => {
-                    curatorVideoContent.style.display = 'none';
+                    // Hide video content with fade
+                    curatorVideoContent.classList.remove('active');
                     
                     // Show photo elements again with smooth fade-in
-                    photoImg.style.display = 'block';
-                    photoCaption.style.display = 'block';
-                    
-                    // Smooth fade-in for photo elements with natural timing
                     requestAnimationFrame(() => {
                         photoImg.style.transition = 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                         photoCaption.style.transition = 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
