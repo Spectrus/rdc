@@ -4750,7 +4750,7 @@ function openVideo(videoId, isProtected) {
         // JS-driven hover band near the top of the viewport to reveal the nav
         (function(){
             const OFFSET = 0;        // start at the very top
-            const BAND = 35;         // 35px hover band
+            const BAND = 25;         // 25px hover band
             const CLOSE_DELAY = 500; // ms
             const docEl = document.documentElement;
             const header = document.querySelector('.nav-bar');
@@ -6100,7 +6100,10 @@ function openVideo(videoId, isProtected) {
                     font-weight: 800;
                     line-height: 1;
                     cursor: pointer;
-                    transition: background-color .2s ease, filter .2s ease;
+                    opacity: 0;
+                    transform: translateY(-2px);
+                    pointer-events: none;
+                    transition: opacity .2s ease, transform .2s ease, background-color .2s ease, filter .2s ease;
                 `;
                 closeBtn.addEventListener('mouseenter', () => {
                     closeBtn.style.filter = 'brightness(1.2)';
@@ -6130,6 +6133,17 @@ function openVideo(videoId, isProtected) {
                 requestAnimationFrame(() => {
                     notification.style.opacity = '1';
                     notification.style.transform = 'translateY(0) scale(1)';
+                });
+                // reveal close button only on hover (fade in/out)
+                notification.addEventListener('mouseenter', () => {
+                    closeBtn.style.opacity = '1';
+                    closeBtn.style.transform = 'translateY(0)';
+                    closeBtn.style.pointerEvents = 'auto';
+                });
+                notification.addEventListener('mouseleave', () => {
+                    closeBtn.style.opacity = '0';
+                    closeBtn.style.transform = 'translateY(-2px)';
+                    closeBtn.style.pointerEvents = 'none';
                 });
                 const performDismiss = () => {
                     notification.style.opacity = '0';
