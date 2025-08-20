@@ -5832,7 +5832,8 @@ function openVideo(videoId, isProtected) {
             enableEditMode() {
                 this.isEditMode = true;
                 document.body.classList.add('edit-mode');
-                this.ensureRemoveButtons();
+                // remove any leftover trash buttons from older sessions
+                document.querySelectorAll('.remove-memory-btn').forEach(btn => btn.remove());
                 this.bindEditEvents();
             }
             
@@ -5841,27 +5842,7 @@ function openVideo(videoId, isProtected) {
                 return;
             }
 
-            ensureRemoveButtons() {
-                const cards = document.querySelectorAll('.document-card');
-                cards.forEach(card => {
-                    if (card.querySelector('.remove-memory-btn')) return;
-                    const codeEl = card.querySelector('.document-code');
-                    if (!codeEl) return;
-                    const codeNum = parseInt(String(codeEl.textContent).trim(), 10);
-                    if (!Number.isInteger(codeNum)) return;
-                    let footer = card.querySelector('.document-footer');
-                    if (!footer) {
-                        footer = document.createElement('div');
-                        footer.className = 'document-footer';
-                        card.appendChild(footer);
-                    }
-                    const btn = document.createElement('button');
-                    btn.className = 'remove-memory-btn';
-                    btn.textContent = '🗑️';
-                    btn.setAttribute('onclick', `editSystem.removeUserMemory(${codeNum})`);
-                    footer.appendChild(btn);
-                });
-            }
+            // ensureRemoveButtons removed per request to hide bin buttons
             
             editElement(event) {
                 if (!this.isEditMode) return;
@@ -6588,9 +6569,6 @@ function openVideo(videoId, isProtected) {
                             ${this.getButtonText(memory.type)}
                         </a>
                         <button class="edit-card-btn" title="Editar">✏️</button>
-                        <button class="remove-memory-btn" onclick="editSystem.removeUserMemory(${memory.code})">
-                            🗑️
-                        </button>
                     </div>
                 `;
                 // floating edit button
