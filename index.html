@@ -1921,9 +1921,9 @@ video-synopsis {
 .hover-zone-top {
     position: fixed;
     top: 0;
-    right: 0;
-    width: 300px;
-    height: 300px;
+    left: 0;
+    width: 100%;
+    height: 60px;
     z-index: 98;
     pointer-events: auto;
 }
@@ -1931,9 +1931,9 @@ video-synopsis {
 .hover-zone-bottom {
     position: fixed;
     bottom: 0;
-    right: 0;
-    width: 300px;
-    height: 300px;
+    left: 0;
+    width: 100%;
+    height: 60px;
     z-index: 98;
     pointer-events: auto;
 }
@@ -1967,7 +1967,7 @@ video-synopsis {
         <a href="#acervo">Acervo</a>
     </div>
     <!-- Fixed down arrow near header top-right -->
-    <button id="nav-down-arrow" class="nav-down-arrow" title="Ir para o fim">▼</button>
+    <button id="nav-down-arrow" class="nav-down-arrow" title="Ir para o fim"><span class="arrow-icon">▼</span></button>
     
     <!-- Voltar (top-right inside Exit Console modal) -->
     <template id="exit-back-button-template">
@@ -4772,20 +4772,28 @@ function openVideo(videoId, isProtected) {
                 hideTimer = setTimeout(() => docEl.classList.remove('nav-open'), 300);
             });
         })();
-        // Scroll helpers for fixed buttons (ensure DOM is fully parsed)
+        // Scroll helpers + hover reveal for top/bottom buttons
         document.addEventListener('DOMContentLoaded', function(){
-          const downArrow = document.getElementById('nav-down-arrow');
-          const toTop = document.getElementById('scrollTopBtn');
-          if (toTop) {
-            toTop.addEventListener('click', function(){
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
+          const btnTop = document.getElementById('scrollTopBtn');
+          const btnDown = document.getElementById('nav-down-arrow');
+
+          if (btnTop) btnTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+          if (btnDown) btnDown.addEventListener('click', () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }));
+
+          // Show buttons only when hovering near top/bottom edges
+          const HOVER_BAND = 200; // how many pixels from the top/bottom edge to trigger
+          const canHover = window.matchMedia && matchMedia('(hover: hover)').matches;
+          if (!canHover) return; // skip on touch devices
+
+          function updateVisibility(e){
+            const y = e.clientY;
+            const h = window.innerHeight;
+            // Inverted: show TOP button on bottom hover, DOWN button on top hover
+            if (btnTop) btnTop.classList.toggle('visible', y >= h - HOVER_BAND);
+            if (btnDown) btnDown.classList.toggle('visible', y <= HOVER_BAND);
           }
-          if (downArrow) {
-            downArrow.addEventListener('click', function(){
-              window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
-            });
-          }
+
+          window.addEventListener('mousemove', updateVisibility, { passive: true });
         });
     </script>
     
@@ -5737,7 +5745,7 @@ function openVideo(videoId, isProtected) {
     <div id="addMemoryFloating" class="add-memory-floating">
         <span>+</span>
     </div>
-    <button id="scrollTopBtn" class="scroll-top-fixed" title="Voltar ao Início" aria-label="Voltar ao Início">▲</button>
+    <button id="scrollTopBtn" class="scroll-top-fixed" title="Voltar ao Início" aria-label="Voltar ao Início"><span class="arrow-icon">▲</span></button>
     
     <!-- Botão Sair do Console -->
     <div id="exitConsoleBtn" class="exit-console-btn">
@@ -5824,12 +5832,35 @@ function openVideo(videoId, isProtected) {
             enableEditMode() {
                 this.isEditMode = true;
                 document.body.classList.add('edit-mode');
+                this.ensureRemoveButtons();
                 this.bindEditEvents();
             }
             
             bindEditEvents() {
                 // Disable field-by-field editing. Use pencil + modal only.
                 return;
+            }
+
+            ensureRemoveButtons() {
+                const cards = document.querySelectorAll('.document-card');
+                cards.forEach(card => {
+                    if (card.querySelector('.remove-memory-btn')) return;
+                    const codeEl = card.querySelector('.document-code');
+                    if (!codeEl) return;
+                    const codeNum = parseInt(String(codeEl.textContent).trim(), 10);
+                    if (!Number.isInteger(codeNum)) return;
+                    let footer = card.querySelector('.document-footer');
+                    if (!footer) {
+                        footer = document.createElement('div');
+                        footer.className = 'document-footer';
+                        card.appendChild(footer);
+                    }
+                    const btn = document.createElement('button');
+                    btn.className = 'remove-memory-btn';
+                    btn.textContent = '🗑️';
+                    btn.setAttribute('onclick', `editSystem.removeUserMemory(${codeNum})`);
+                    footer.appendChild(btn);
+                });
             }
             
             editElement(event) {
@@ -6655,41 +6686,63 @@ function openVideo(videoId, isProtected) {
                 });
             }
             
-            removeUserMemory(code) {
-                if (confirm('Tem certeza que deseja remover esta memória?')) {
-                    // Remover do localStorage
-                    let savedMemories = JSON.parse(localStorage.getItem('userMemories') || '[]');
-                    savedMemories = savedMemories.filter(memory => memory.code !== code);
-                    localStorage.setItem('userMemories', JSON.stringify(savedMemories));
-                    
-                    // Remover da página
-                    const allCodes = document.querySelectorAll('.document-code');
-                    let cardElement = null;
-                    
-                    allCodes.forEach(codeEl => {
-                        if (codeEl.textContent.trim() === code.toString()) {
-                            cardElement = codeEl.closest('.document-card');
-                        }
-                    });
-                    
-                    if (cardElement) {
-                        cardElement.style.transition = 'all 0.3s ease';
-                        cardElement.style.opacity = '0';
-                        cardElement.style.transform = 'translateX(-100%)';
-                        setTimeout(() => cardElement.remove(), 300);
-                    }
+            async removeUserMemory(code) {
+                const ok = confirm('Tem certeza que deseja remover esta memória?');
+                if (!ok) return;
 
-                    // Remover da Linha do Tempo
-                    const tlItem = document.querySelector(`#timeline .timeline-item-horizontal[data-user-code="${code}"]`);
-                    if (tlItem) {
-                        tlItem.style.transition = 'all 0.3s ease';
-                        tlItem.style.opacity = '0';
-                        tlItem.style.transform = 'translateX(-100%)';
-                        setTimeout(() => tlItem.remove(), 300);
+                // Tenta deletar do Firebase, se função existir
+                try {
+                    if (typeof window.firebaseDeleteMemory === 'function') {
+                        // Tenta descobrir o id do documento, se disponível no card atual
+                        let cardElement = null;
+                        const allCodes = document.querySelectorAll('.document-code');
+                        allCodes.forEach(codeEl => {
+                            if (codeEl.textContent.trim() === String(code)) {
+                                cardElement = codeEl.closest('.document-card');
+                            }
+                        });
+                        const cloudId = cardElement?.getAttribute('data-cloud-id');
+                        const deleted = await window.firebaseDeleteMemory({ id: cloudId || undefined, code });
+                        if (deleted > 0) {
+                            console.info(`Firebase: removidos ${deleted} documento(s) relacionados ao código ${code}.`);
+                        }
                     }
-                    
-                    this.showNotification('🗑️ Memória removida com sucesso!', 'info');
+                } catch (e) {
+                    console.warn('Falha ao remover do Firebase (prosseguindo com remoção local):', e);
                 }
+
+                // Remover do localStorage
+                try {
+                    let savedMemories = JSON.parse(localStorage.getItem('userMemories') || '[]');
+                    savedMemories = savedMemories.filter(memory => Number(memory.code) !== Number(code));
+                    localStorage.setItem('userMemories', JSON.stringify(savedMemories));
+                } catch {}
+
+                // Remover da página (card)
+                const allCodes = document.querySelectorAll('.document-code');
+                let cardElement = null;
+                allCodes.forEach(codeEl => {
+                    if (codeEl.textContent.trim() === String(code)) {
+                        cardElement = codeEl.closest('.document-card');
+                    }
+                });
+                if (cardElement) {
+                    cardElement.style.transition = 'all 0.3s ease';
+                    cardElement.style.opacity = '0';
+                    cardElement.style.transform = 'translateX(-100%)';
+                    setTimeout(() => cardElement.remove(), 300);
+                }
+
+                // Remover da Linha do Tempo
+                const tlItem = document.querySelector(`#timeline .timeline-item-horizontal[data-user-code="${code}"]`);
+                if (tlItem) {
+                    tlItem.style.transition = 'all 0.3s ease';
+                    tlItem.style.opacity = '0';
+                    tlItem.style.transform = 'translateX(-100%)';
+                    setTimeout(() => tlItem.remove(), 300);
+                }
+
+                this.showNotification('🗑️ Memória removida com sucesso!', 'info');
             }
             
             async loadUserMemories() {
@@ -7572,20 +7625,20 @@ function openVideo(videoId, isProtected) {
           z-index: 900000 !important;
         }
 
-        /* Always-visible "Voltar ao Início" button */
+        /* Scroll buttons */
         .scroll-top-fixed {
           position: fixed;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 44px; height: 44px;
+          width: 51px; height: 51px; /* +15% from 44px */
           background: var(--header-bg);
           color: var(--primary-color);
           border-radius: 50%;
           border: 1px solid rgba(0,0,0,0.15);
           box-shadow: 0 6px 18px rgba(0,0,0,0.25);
           font-weight: 900;
-          font-size: 28px;
+          font-size: 34px; /* slightly larger triangle */
           cursor: pointer;
           z-index: 1000001;
         }
@@ -7596,20 +7649,41 @@ function openVideo(videoId, isProtected) {
         /* Fixed down arrow placed under the header, top-right */
         .nav-down-arrow {
           position: fixed;
-          top: 82px; /* just below header height (75px + spacing) */
+          top: 88px; /* lowered slightly */
           right: 16px;
-          width: 48px; height: 48px;
+          width: 55px; height: 55px; /* +15% from 48px */
           display: inline-flex; align-items:center; justify-content:center;
           background: var(--header-bg);
           color: var(--primary-color);
           border-radius: 50%;
           border: 1px solid rgba(0,0,0,0.15);
           box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-          font-size: 28px; font-weight: 900;
+          font-size: 34px; /* slightly larger triangle */
+          font-weight: 900;
           cursor: pointer;
           z-index: 1000001;
         }
+
+        /* Wider triangle glyphs inside the buttons */
+        .scroll-top-fixed .arrow-icon,
+        .nav-down-arrow .arrow-icon {
+          display: inline-block;
+          transform: scaleX(1.15);
+        }
         .nav-down-arrow:hover { transform: translateY(-1px); }
+
+        /* Hidden by default; revealed on hover bands via JS */
+        .scroll-top-fixed,
+        .nav-down-arrow {
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 150ms ease;
+        }
+        .scroll-top-fixed.visible,
+        .nav-down-arrow.visible {
+          opacity: 1;
+          pointer-events: auto;
+        }
     </style>
 
     <!-- Modal para Adicionar Memória -->
