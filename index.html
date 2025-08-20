@@ -6056,7 +6056,7 @@ function openVideo(videoId, isProtected) {
                     right: 20px;
                     background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(0,0,0,0.06)), ${fgColor};
                     color: ${bgColor};
-                    padding: 14px 26px;
+                    padding: 14px 34px 14px 26px;
                     border-radius: 16px;
                     font-weight: 800;
                     font-size: 1.15rem; /* larger text */
@@ -6078,6 +6078,36 @@ function openVideo(videoId, isProtected) {
                        linear-gradient(180deg, rgba(255,255,255,0.12), rgba(0,0,0,0.06));
                     background-blend-mode: normal, multiply;
                 `;
+                // close button (top-right)
+                const closeBtn = document.createElement('button');
+                closeBtn.type = 'button';
+                closeBtn.setAttribute('aria-label', 'Fechar notificação');
+                closeBtn.textContent = '×';
+                closeBtn.style.cssText = `
+                    position: absolute;
+                    top: 6px;
+                    right: 8px;
+                    width: 28px;
+                    height: 28px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: transparent;
+                    color: ${bgColor};
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 20px;
+                    font-weight: 800;
+                    line-height: 1;
+                    cursor: pointer;
+                    transition: background-color .2s ease, filter .2s ease;
+                `;
+                closeBtn.addEventListener('mouseenter', () => {
+                    closeBtn.style.filter = 'brightness(1.2)';
+                });
+                closeBtn.addEventListener('mouseleave', () => {
+                    closeBtn.style.filter = 'none';
+                });
                 // content wrapper for icon + text
                 const wrap = document.createElement('div');
                 wrap.style.display = 'flex';
@@ -6093,6 +6123,7 @@ function openVideo(videoId, isProtected) {
                 text.textContent = message;
                 wrap.appendChild(icon);
                 wrap.appendChild(text);
+                notification.appendChild(closeBtn);
                 notification.appendChild(wrap);
                 document.body.appendChild(notification);
                 // fade-in
@@ -6100,16 +6131,25 @@ function openVideo(videoId, isProtected) {
                     notification.style.opacity = '1';
                     notification.style.transform = 'translateY(0) scale(1)';
                 });
-                // Auto-dismiss with smooth fade-out
-                setTimeout(() => {
+                const performDismiss = () => {
                     notification.style.opacity = '0';
                     notification.style.transform = 'translateY(-6px) scale(0.985)';
-                setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
-                    }
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
                     }, 400);
-                }, 3500);
+                };
+                // Auto-dismiss with smooth fade-out after 12s
+                let autoTimer = setTimeout(() => {
+                    performDismiss();
+                }, 12000);
+                // manual close
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (autoTimer) clearTimeout(autoTimer);
+                    performDismiss();
+                });
             }
             
             showExitModal() {
