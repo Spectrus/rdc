@@ -2445,19 +2445,30 @@ video-synopsis {
             
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    const passwordR = document.getElementById('password-r');
                     const welcomeMessage = document.getElementById('welcome-message');
-                    
-                    passwordR.addEventListener('click', function() {
-                        // Password protection removed - welcome message always shows
+                    const WELCOME_KEY = 'welcomeShown';
+
+                    function showWelcomeOnce() {
+                        if (!welcomeMessage) return;
+                        if (localStorage.getItem(WELCOME_KEY) === 'true') return;
                         welcomeMessage.textContent = 'Bem-Vindo!';
                         welcomeMessage.classList.add('show');
-                        
-                        // Hide the message after 5 seconds
                         setTimeout(function() {
                             welcomeMessage.classList.remove('show');
                         }, 5000);
-                    });
+                        try { localStorage.setItem(WELCOME_KEY, 'true'); } catch (e) {}
+                    }
+
+                    // Show only on the first visit
+                    showWelcomeOnce();
+
+                    // Keep handler for passwordR if present, but do not re-show welcome
+                    const passwordR = document.getElementById('password-r');
+                    if (passwordR) {
+                        passwordR.addEventListener('click', function() {
+                            // No-op for welcome
+                        });
+                    }
                     
                     // Funcionalidade de alternância da badge
                     const statContent = document.getElementById('stat-content');
@@ -5775,7 +5786,7 @@ function openVideo(videoId, isProtected) {
             showAuthModal() {
                 document.getElementById('authModal').style.display = 'block';
                 const passwordInput = document.getElementById('passwordInput');
-                passwordInput.focus();
+                setTimeout(() => passwordInput && passwordInput.focus(), 0);
                 
                 // Adicionar evento Enter para confirmar senha
                 const handleEnter = (e) => {
@@ -6010,13 +6021,7 @@ function openVideo(videoId, isProtected) {
                 };
                 input.addEventListener('keydown', handleEnter);
                 
-                // Scroll automático para o modal - corrigido
-                setTimeout(() => {
-                    window.scrollTo({
-                        top: window.innerHeight / 2,
-                        behavior: 'smooth'
-                    });
-                }, 200);
+                // Do not auto-scroll; keep modal at current viewport
                 
                 input.focus();
             }
@@ -6024,13 +6029,8 @@ function openVideo(videoId, isProtected) {
             showSuccessMessage() {
                 const welcomeMessage = document.getElementById('welcome-message');
                 if (welcomeMessage) {
-                    welcomeMessage.textContent = 'Bem Vindo de Volta Reinaldão!';
-                    welcomeMessage.classList.add('show');
-                    
-                    // Hide the message after 5 seconds (mesmo tempo da original)
-                    setTimeout(() => {
-                        welcomeMessage.classList.remove('show');
-                    }, 5000);
+                    // Do not show repeat success banner; respect first-visit only
+                    // If you wish to show a one-time return message, gate it with another key
                 }
             }
             
@@ -6122,6 +6122,8 @@ function openVideo(videoId, isProtected) {
                     }
                 };
                 document.addEventListener('keydown', handleEnter);
+                const defaultBtn = modal.querySelector('.save-btn') || modal.querySelector('.discard-btn');
+                if (defaultBtn) setTimeout(() => defaultBtn.focus(), 0);
                 
                 // Remover evento quando modal fechar
                 const originalHideExitModal = this.hideExitModal.bind(this);
@@ -6186,15 +6188,9 @@ function openVideo(videoId, isProtected) {
                     inputs.forEach(input => {
                         input.addEventListener('keydown', handleEnter);
                     });
-                    
-                    // Scroll automático para o modal - corrigido
-                    setTimeout(() => {
-                        // Scroll para o centro da página onde está o modal
-                        window.scrollTo({
-                            top: window.innerHeight / 2,
-                            behavior: 'smooth'
-                        });
-                    }, 200);
+                    // Do not auto-scroll; keep modal at current viewport
+                    const firstFocusable = modal.querySelector('input, select, textarea, button');
+                    if (firstFocusable) setTimeout(() => firstFocusable.focus(), 0);
                 }
             }
             
@@ -6899,13 +6895,7 @@ function openVideo(videoId, isProtected) {
                 modal.appendChild(content);
                 document.body.appendChild(modal);
                 
-                // Scroll automático para o modal - corrigido
-                setTimeout(() => {
-                    window.scrollTo({
-                        top: window.innerHeight / 2,
-                        behavior: 'smooth'
-                    });
-                }, 200);
+                // Do not auto-scroll; keep modal at current viewport
             }
             
             showVideoUploadDialog(video) {
@@ -7063,13 +7053,7 @@ function openVideo(videoId, isProtected) {
                 modal.appendChild(content);
                 document.body.appendChild(modal);
                 
-                // Scroll automático para o modal - corrigido
-                setTimeout(() => {
-                    window.scrollTo({
-                        top: window.innerHeight / 2,
-                        behavior: 'smooth'
-                    });
-                }, 200);
+                // Do not auto-scroll; keep modal at current viewport
             }
         }
         
