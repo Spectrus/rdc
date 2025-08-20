@@ -53,29 +53,32 @@
             background-color: var(--header-bg);
             padding: 0 0 0 0;
             position: fixed;
-            top: -75px; /* Adjusted for new position context */
+            top: 0;
             left: 0;
             right: 0;
-            z-index: 100;
+            z-index: 1000002;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             display: flex;
             justify-content: center;
             gap: 2rem;
-            transition: top 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.25s ease, opacity 0.25s ease;
             height: 75px; /* Reduced header height */
             align-items: center;
             padding-top: 6px;
             padding-bottom: 6px;
-            opacity: 0;
-            pointer-events: none;
+            opacity: 0.98;
+            transform: translateY(-100%);
+            pointer-events: auto;
         }
         
-        /* When hovered, reveal and expand the nav-bar */
-        .nav-hover-trigger:hover + .nav-bar,
+        /* Ensure header and its children are always clickable when visible */
+        .nav-bar, .nav-bar * { pointer-events: auto !important; }
+
+        /* Reveal when page is in nav-open state or when hovering the bar */
+        html.nav-open .nav-bar,
         .nav-bar:hover {
-            top: 0;
+            transform: translateY(0);
             opacity: 1;
-            pointer-events: auto;
         }
         
         .nav-bar a {
@@ -97,21 +100,7 @@
             transition: color 0.15s cubic-bezier(0.4,0,0.2,1), text-decoration-color 0.15s cubic-bezier(0.4,0,0.2,1);
         }
         
-        /* Add a hover trigger area at the top */
-        .nav-hover-trigger {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 64px; /* Expanded hover trigger area for easier access */
-            width: 100%;
-            z-index: 101;
-            background: transparent;
-        }
-        
-        .nav-hover-trigger:hover + .nav-bar,
-        .nav-bar:hover {
-            top: 0;
-        }
+        /* Former .nav-hover-trigger removed in favor of JS-based hover band */
         
         /* Hamburger menu styles */
         .hamburger-menu {
@@ -1957,7 +1946,7 @@ video-synopsis {
     </style>
 </head>
 <body>
-    <div class="nav-hover-trigger"></div>
+    
     <div class="nav-bar">
         <a href="#intro">Início</a>
         <a href="#timeline">Linha do Tempo</a>
@@ -4758,38 +4747,31 @@ function openVideo(videoId, isProtected) {
         </script>
     
     <script>
-        // Controle do cabeçalho com hover - execução imediata
-        document.addEventListener('DOMContentLoaded', function() {
-            const hoverTrigger = document.querySelector('.hover-trigger');
-            const navBar = document.querySelector('.nav-bar');
-            
-            if (hoverTrigger && navBar) {
-                console.log('Elementos encontrados, configurando hover...');
-                
-                hoverTrigger.addEventListener('mouseenter', function() {
-                    console.log('Mouse entrou no trigger');
-                    navBar.classList.add('show');
-                });
-                
-                navBar.addEventListener('mouseleave', function() {
-                    console.log('Mouse saiu da nav-bar');
-                    navBar.classList.remove('show');
-                });
-                
-                hoverTrigger.addEventListener('mouseleave', function() {
-                    console.log('Mouse saiu do trigger');
-                    setTimeout(() => {
-                        if (!navBar.matches(':hover')) {
-                            navBar.classList.remove('show');
-                        }
-                    }, 100);
-                });
-            } else {
-                console.log('Elementos não encontrados:', { hoverTrigger, navBar });
-            }
-        });
-
-        });
+        // JS-driven hover band near the top of the viewport to reveal the nav
+        (function(){
+            const OFFSET = 10;       // start band 10px below very top
+            const BAND = 120;        // 120px tall band
+            const CLOSE_DELAY = 500; // ms
+            const docEl = document.documentElement;
+            const header = document.querySelector('.nav-bar');
+            let hideTimer = null;
+            const canHover = window.matchMedia && matchMedia('(hover: hover)').matches;
+            if (!canHover || !header) return;
+            window.addEventListener('mousemove', (e) => {
+                if (e.clientY >= OFFSET && e.clientY <= OFFSET + BAND) {
+                    docEl.classList.add('nav-open');
+                    if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+                    hideTimer = setTimeout(() => docEl.classList.remove('nav-open'), CLOSE_DELAY);
+                }
+            }, { passive: true });
+            header.addEventListener('mouseenter', () => {
+                if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+                docEl.classList.add('nav-open');
+            });
+            header.addEventListener('mouseleave', () => {
+                hideTimer = setTimeout(() => docEl.classList.remove('nav-open'), 300);
+            });
+        })();
     </script>
     
     
