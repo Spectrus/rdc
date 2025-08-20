@@ -35,6 +35,9 @@
             padding-top: 40px; /* Increased from 20px to account for larger hover area */
             opacity: 0;
             animation: fadeIn 1.5s ease-in-out forwards;
+            /* Garantir que as setas não sejam cortadas */
+            overflow-x: visible !important;
+            overflow-y: visible !important;
         }
         
         @keyframes fadeIn {
@@ -49,7 +52,7 @@
         .nav-bar {
             background-color: var(--header-bg);
             padding: 0 0 0 0;
-            position: absolute;
+            position: fixed;
             top: -75px; /* Adjusted for new position context */
             left: 0;
             right: 0;
@@ -99,7 +102,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            height: 33px; /* Fine-tuned hover trigger area */
+            height: 64px; /* Expanded hover trigger area for easier access */
             width: 100%;
             z-index: 101;
             background: transparent;
@@ -193,7 +196,7 @@
             .nav-hover-trigger {
                 display: none;
             }
-            
+
             .nav-bar {
                 display: none;
             }
@@ -251,7 +254,7 @@
         }
         
         .stat-badge {
-            position: absolute;
+            position: absolute; /* back to original spot */
             right: -20px;
             top: 10px;
             width: 100px;
@@ -265,6 +268,7 @@
             overflow: hidden;
             transform: rotate(10deg);
             border: 2px dashed var(--primary-color);
+            z-index: 10010; /* stays above the console panel */
         }
         
         .stat-badge::before {
@@ -283,18 +287,57 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             transition: opacity 0.5s ease, transform 0.5s ease;
             position: absolute;
             color: var(--primary-color);
             font-weight: bold;
             font-size: 1.1rem;
             text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
         }
         
-        #stat-number {
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 11;
+        }
+        
+        .stat-item.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .stat-item.slide-out-left {
+            opacity: 0;
+            transform: translateX(-100px);
+        }
+        
+        .stat-item.slide-in-right {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .stat-number {
             font-size: 1.8rem;
             line-height: 1;
             font-weight: 900;
+        }
+        
+        .stat-label {
+            font-size: 1.1rem;
+            font-weight: bold;
         }
         
         .historical-photo {
@@ -1906,103 +1949,7 @@ video-synopsis {
     pointer-events: auto;
 }
 
-/* SETAS DE NAVEGAÇÃO - COMPLETAMENTE INVISÍVEIS QUANDO NÃO NECESSÁRIAS */
-.rect-scroll-btn {
-    width: 55px;
-    height: 55px;
-    border-radius: 50%;
-    background-color: var(--gold-color);
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    pointer-events: auto;
-    transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
-    z-index: 99999 !important;
-    position: fixed !important;
-    
-    /* INICIALMENTE INVISÍVEIS */
-    opacity: 0;
-    visibility: hidden;
-    transform: scale(0.8);
-}
 
-/* ESTADO: BOTÃO DISPONÍVEL MAS OCULTO (pode aparecer no hover) */
-.rect-scroll-btn.available {
-    /* Ainda invisível, mas pode ser ativado pelo hover */
-    opacity: 0;
-    visibility: hidden;
-    transform: scale(0.8);
-}
-
-/* ESTADO: BOTÃO COMPLETAMENTE INVISÍVEL (não pode aparecer) */
-.rect-scroll-btn.unavailable {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    transform: scale(0) !important;
-    pointer-events: none !important;
-}
-
-/* SETAS APARECEM NO HOVER DAS ZONAS - APENAS SE DISPONÍVEIS */
-.hover-zone-top:hover ~ #back-to-top.available,
-#back-to-top.available:hover {
-    opacity: 0.9;
-    visibility: visible;
-    transform: scale(1);
-}
-
-.hover-zone-bottom:hover ~ #scroll-to-bottom.available,
-#scroll-to-bottom.available:hover {
-    opacity: 0.9;
-    visibility: visible;
-    transform: scale(1);
-}
-
-.rect-scroll-btn:hover {
-    opacity: 1 !important;
-    transform: scale(1.1) !important;
-    background-color: var(--primary-color);
-}
-
-.rect-scroll-btn span {
-    width: 0;
-    height: 0;
-    border-left: 16px solid transparent;
-    border-right: 16px solid transparent;
-    transition: border-color 0.3s ease;
-}
-
-/* Seta para cima */
-#back-to-top {
-    top: 16px;
-    right: 16px;
-}
-
-#back-to-top span {
-    border-bottom: 16px solid var(--primary-color);
-    transform: translateY(-2px);
-}
-
-/* Seta para baixo */
-#scroll-to-bottom {
-    bottom: 16px;
-    right: 16px;
-}
-
-#scroll-to-bottom span {
-    border-top: 16px solid var(--primary-color);
-    transform: translateY(2px);
-}
-
-/* Hover - seta dourada */
-#back-to-top:hover span {
-    border-bottom-color: var(--gold-color);
-}
-#scroll-to-bottom:hover span {
-    border-top-color: var(--gold-color);
-}
 
   
   
@@ -2031,6 +1978,13 @@ video-synopsis {
         <a href="#acervo">Acervo</a>
     </div>
     
+    <!-- Voltar (top-right inside Exit Console modal) -->
+    <template id="exit-back-button-template">
+      <button class="exit-back-button" title="Voltar" onclick="editSystem.hideExitModal()">
+        <span class="back-arrow">←</span>
+        <span class="back-text">Voltar</span>
+      </button>
+    </template>
 
 
     <div class="container">
@@ -2042,11 +1996,99 @@ video-synopsis {
                 </div>
                 <h1>Biblioteca Digital Reinaldo Duarte Castanheira</h1>
                 <div class="stat-badge" id="stat-badge">
-                    <div class="stat-content" id="stat-content">
-                        <span id="stat-number">70+</span>
-                        <div id="stat-label">Obras</div>
+                    <div class="stat-content" id="stat-container">
+                        <div class="stat-item active" id="obras-stat">
+                            <div class="stat-number">70+</div>
+                            <div class="stat-label">Obras</div>
+                        </div>
+                        <div class="stat-item" id="visits-stat">
+                            <div class="stat-number">2.847</div>
+                            <div class="stat-label">Visitas</div>
+                        </div>
                     </div>
                 </div>
+                
+                <!-- Botão + painel MS-DOS: Extrato Semanal -->
+                <div id="weekly-extract" style="margin-top:12px;text-align:right;">
+                    <button id="btn-weekly-extract">Extrato semanal</button>
+                    <pre id="weekly-dos" class="dos" hidden></pre>
+                </div>
+                
+                <style>
+                    body.edit-mode #stat-badge,
+                    body.authenticated #stat-badge { cursor: pointer; }
+                    #weekly-extract{display:none; position: relative; overflow:hidden; transition: margin-bottom .75s cubic-bezier(0.4, 0, 0.2, 1);} 
+                    #btn-weekly-extract{display:none!important;}
+                    #btn-weekly-extract{
+                        background:
+                          linear-gradient(180deg,#3f2d1c 0%, #2f2115 100%),
+                          linear-gradient(135deg,#fbe38a 0%, #d6a94c 50%, #fbe38a 100%);
+                        background-clip: padding-box, border-box;
+                        background-origin: border-box;
+                        color:#ffdf7e;border:1px solid transparent;
+                        padding:10px 14px;border-radius:12px;font-weight:800;cursor:pointer;
+                        box-shadow:none;
+                        -webkit-text-stroke:0.1px rgba(0,0,0,0.4);
+                        text-shadow: 0 0.4px 0 rgba(0,0,0,0.25);
+                        font-weight:800;
+                        transition:transform .15s ease,box-shadow .2s ease,filter .15s ease
+                    }
+                    #btn-weekly-extract:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(209,168,75,0.32)}
+                    #btn-weekly-extract:active{transform:none;filter:brightness(1.02)}
+                    #weekly-dos.dos{
+                        position:relative; z-index:0;
+                        background: #3b2a1d; /* solid brown */
+                        color:#f3d27a;
+                        border:0; border-radius:18px; /* softly rounded edges */
+                        overflow:hidden; /* smooth corners */
+                        box-shadow:none;
+                        padding:44px 12px 12px 12px; /* top space for internal toolbar */
+                        margin-top:12px;text-align:left;max-height:0;overflow:auto;
+                        transition:max-height .35s ease,padding .35s ease,border-width .35s ease;white-space:pre-wrap;
+                        font-family:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace;line-height:1.6;
+                        -webkit-text-stroke:0.1px rgba(0,0,0,0.35);
+                        text-shadow: 0 0.4px 0 rgba(0,0,0,0.25);
+                        font-weight:800;
+                        /* Hide scrollbars across browsers while keeping scroll */
+                        scrollbar-width:none; -ms-overflow-style:none;
+                    }
+                    /* Toolbar inside the panel */
+                    #weekly-toolbar{ position:absolute; top:0; left:0; right:0; display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:0; align-items:stretch; z-index:2; padding:0; }
+                    #weekly-toolbar button{ width:100%; height:48px; background:#2a1d12; color:#f3d27a; border:1px solid #d1a84b; border-bottom:none; border-right:1px solid #d1a84b; cursor:pointer; font-weight:800; transition: background .15s ease; border-radius:0; }
+                    #weekly-toolbar .tab-spacer{ width:100%; height:48px; background:#2a1d12; border:1px solid #d1a84b; border-bottom:none; border-right:1px solid #d1a84b; border-top-right-radius:16px; }
+                    #weekly-toolbar button:first-child{ border-top-left-radius:16px; }
+                    #weekly-toolbar button:last-child{ border-right:1px solid #d1a84b; border-top-right-radius:16px; }
+                    #weekly-toolbar button:hover, #weekly-toolbar button:focus-visible{ background:#4a3323; outline:none; }
+                    /* Hover inversion specifically for 'Semanal' */
+                    #weekly-toolbar .seg:hover, #weekly-toolbar .seg:focus-visible {
+                        background: var(--gold-color);
+                        color: #2a1d12;
+                        border-color: #2a1d12;
+                    }
+                    #weekly-toolbar .seg.active:hover {
+                        background: var(--gold-color);
+                        color: #2a1d12;
+                        border-color: #2a1d12;
+                    }
+                    /* Apply same hover inversion to 'Mensal' and 'Anual' */
+                    #weekly-toolbar .mes:hover, #weekly-toolbar .mes:focus-visible,
+                    #weekly-toolbar .ano:hover, #weekly-toolbar .ano:focus-visible {
+                        background: var(--gold-color);
+                        color: #2a1d12;
+                        border-color: #2a1d12;
+                    }
+                    #weekly-toolbar button.active{ background:#3b2a1d; }
+                    /* inner bevel & liner */
+                    #weekly-dos.dos::before{ content:none; }
+                    /* outer museum frame highlights */
+                    #weekly-dos.dos::after{ content:none; }
+                    #weekly-dos.open{max-height:none;min-height:300px;padding:56px 16px 16px 16px;border-width:0}
+                    /* Custom scrollbars (WebKit) */
+                    #weekly-dos::-webkit-scrollbar{width:0;height:0}
+                    #weekly-dos::-webkit-scrollbar-track{background:transparent;border-radius:0}
+                    #weekly-dos::-webkit-scrollbar-thumb{background:transparent;border:0}
+                    #weekly-dos::-webkit-scrollbar-thumb:hover{background:transparent}
+                </style>
                 <div id="welcome-message" class="welcome-message"></div>
             </div>
             
@@ -2124,6 +2166,31 @@ video-synopsis {
                     opacity: 1;
                     transform: translateY(0);
                 }
+
+                /* Back (Voltar) button styles */
+        .exit-back-button {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 10;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: var(--gold-color);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            font-weight: 700;
+        }
+        .exit-back-button:hover { background: #e2c874; }
+                .back-arrow {
+                    font-size: 1rem;
+                    line-height: 1;
+                }
+        @media (max-width: 768px) { }
                 
                 @media (max-width: 768px) {
                     .stylized-r {
@@ -4203,51 +4270,7 @@ document.addEventListener('DOMContentLoaded', function() {
               exploreButton.style.display  = 'flex';
               recolherButton.style.display = 'none';
             });
-        
-            // Filtros
-            const filterButtons = document.querySelectorAll('.filter-button');
-            const documentCards = document.querySelectorAll('.document-card');
-        
-            filterButtons.forEach(button => {
-              button.addEventListener('click', function() {
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-        
-                const filter = this.getAttribute('data-filter');
-                // Filtrar os cards de acordo com o gênero
-                let filtered = Array.from(documentCards).filter(card => {
-                  const type = card.querySelector('.document-type').textContent.toLowerCase();
-                  if (filter === 'todos') return true;
-                  if (filter === 'livro'     && type === 'livro')   return true;
-                  if (filter === 'conto'     && type === 'conto')   return true;
-                  if (filter === 'poema'     && (type === 'poema' || type === 'poesia')) return true;
-                  if (filter === 'documento' && type === 'documento') return true;
-                  if (filter === 'mídia'     && type === 'mídia')   return true;
-                  return false;
-                });
-        
-                // Esconder todos os cards primeiro
-                documentCards.forEach(card => card.style.display = 'none');
-        
-                // Selecionar as áreas visível e oculta
-                const visible = document.getElementById('visible-documents');
-                const hidden  = document.getElementById('hidden-documents');
-                visible.innerHTML = '';
-                hidden.innerHTML  = '';
-        
-                // Adicionar os 6 primeiros ao visível, o resto ao oculto
-                filtered.forEach((card, i) => {
-                  card.style.display = 'flex';
-                  if (i < 6) visible.appendChild(card);
-                  else       hidden.appendChild(card);
-                });
-        
-                // Sempre expandir a área oculta ao filtrar
-                hidden.classList.add('expanded');
-                exploreButton.style.display  = 'none';
-                recolherButton.style.display = 'flex';
-              });
-            });
+            
         
             // Busca
             const searchInput  = document.querySelector('.search-input');
@@ -4291,7 +4314,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const sortSelect = document.querySelector('.sort-select');
             sortSelect.addEventListener('change', function() {
               const option = this.value;
-              const allDocs = Array.from(documentCards);
+              // Always get the latest cards, including those added in console mode
+              const allDocs = Array.from(document.querySelectorAll('.document-card'));
         
               allDocs.sort((a,b) => {
                 if (option === 'Ordenar por Título') {
@@ -4332,7 +4356,13 @@ document.addEventListener('DOMContentLoaded', function() {
           });
       
         document.addEventListener('DOMContentLoaded', function() {
-            renderizarDocumentos(documentos);
+            try {
+              if (typeof renderizarDocumentos === 'function' && typeof documentos !== 'undefined') {
+                renderizarDocumentos(documentos);
+              }
+            } catch (e) {
+              console.warn('renderizarDocumentos/documentos indisponíveis, seguindo sem renderização inicial.');
+            }
           // Botões de expandir e recolher
           const exploreButton   = document.getElementById('explore-button');
           const recolherButton  = document.getElementById('recolher-button');
@@ -4353,48 +4383,89 @@ document.addEventListener('DOMContentLoaded', function() {
       
           // Filtros
           const filterButtons = document.querySelectorAll('.filter-button');
-         
-      
-          filterButtons.forEach(button => {
-            button.addEventListener('click', function() {
-              filterButtons.forEach(btn => btn.classList.remove('active'));
-              this.classList.add('active');
-      
-              const filter = this.getAttribute('data-filter');
-              // Filtrar os cards de acordo com o gênero
-              let filtered = Array.from(documentCards).filter(card => {
-                const type = card.querySelector('.document-type').textContent.toLowerCase();
-                if (filter === 'todos') return true;
-                if (filter === 'livro'     && type === 'livro')   return true;
-                if (filter === 'conto'     && type === 'conto')   return true;
-                if (filter === 'poema'     && (type === 'poema' || type === 'poesia')) return true;
-                if (filter === 'documento' && type === 'documento') return true;
-                if (filter === 'mídia'     && type === 'mídia')   return true;
-                return false;
-              });
-      
-              // Esconder todos os cards primeiro
-              documentCards.forEach(card => card.style.display = 'none');
-      
-              // Selecionar as áreas visível e oculta
-              const visible = document.getElementById('visible-documents');
-              const hidden  = document.getElementById('hidden-documents');
-              visible.innerHTML = '';
-              hidden.innerHTML  = '';
-      
-              // Adicionar os 6 primeiros ao visível, o resto ao oculto
-              filtered.forEach((card, i) => {
+          const filterContainer = document.querySelector('.filter-container');
+
+          function matchesFilter(filter, typeText) {
+            const t = String(typeText || '').toLowerCase().trim();
+            if (filter === 'todos') return true;
+            if (filter === 'livro') return t === 'livro';
+            if (filter === 'conto') return t === 'conto';
+            if (filter === 'poema') return t === 'poema' || t === 'poesia';
+            if (filter === 'documento') return t === 'documento';
+            if (filter === 'mídia') return (
+              t === 'mídia' || t === 'midia' || t === 'vídeo' || t === 'video' || t === 'áudio' || t === 'audio'
+            );
+            return true;
+          }
+
+          function applyFilter(filter) {
+            const allCards = Array.from(document.querySelectorAll('.document-card'));
+            const filtered = allCards.filter(card => {
+              const typeText = card.querySelector('.document-type')?.textContent || '';
+              return matchesFilter(filter, typeText);
+            });
+
+            const visible = document.getElementById('visible-documents');
+            const hidden  = document.getElementById('hidden-documents');
+            if (!visible || !hidden) return;
+            visible.innerHTML = '';
+            hidden.innerHTML  = '';
+
+            const matchedSet = new Set(filtered);
+            let visibleCount = 0;
+            allCards.forEach(card => {
+              if (matchedSet.has(card)) {
                 card.style.display = 'flex';
-                if (i < 6) visible.appendChild(card);
-                else       hidden.appendChild(card);
-              });
-      
-              // Sempre expandir a área oculta ao filtrar
+                if (visibleCount < 9) {
+                  visible.appendChild(card);
+                } else {
+                  hidden.appendChild(card);
+                }
+                visibleCount += 1;
+              } else {
+                card.style.display = 'none';
+                hidden.appendChild(card);
+              }
+            });
+
+            if (filter === 'todos') {
+              // Restore initial collapsed state and default sort by code
+              hidden.classList.remove('expanded');
+              exploreButton.style.display  = 'flex';
+              recolherButton.style.display = 'none';
+              const sortSelect = document.querySelector('.sort-select');
+              if (sortSelect) sortSelect.value = 'Ordenar por Código';
+              if (typeof applySort === 'function') applySort('Ordenar por Código');
+            } else {
               hidden.classList.add('expanded');
               exploreButton.style.display  = 'none';
               recolherButton.style.display = 'flex';
+            }
+          }
+
+          // Direct listeners only (avoid duplicate delegation)
+          filterButtons.forEach(button => {
+            // Remove any previous handler to avoid stacking
+            button.replaceWith(button.cloneNode(true));
+          });
+          // Re-select buttons and attach a single handler
+          const filterButtonsFresh = document.querySelectorAll('.filter-button');
+          filterButtonsFresh.forEach(button => {
+            button.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              filterButtonsFresh.forEach(btn => btn.classList.remove('active'));
+              this.classList.add('active');
+              applyFilter(this.getAttribute('data-filter'));
             });
           });
+
+          // Initialize with current active or default to 'todos'
+          const activeBtn = document.querySelector('.filter-button.active') || document.querySelector('.filter-button[data-filter="todos"]');
+          const initialFilter = activeBtn ? activeBtn.getAttribute('data-filter') : 'todos';
+          applyFilter(initialFilter);
+          // Apply default sort (by Código) so cards appear in numeric order on open
+          applySort('Ordenar por Código');
       
           // Busca
           const searchInput  = document.querySelector('.search-input');
@@ -4443,10 +4514,9 @@ document.addEventListener('DOMContentLoaded', function() {
       
           // Ordenação
           const sortSelect = document.querySelector('.sort-select');
-          sortSelect.addEventListener('change', function() {
-            const option = this.value;
-            const allDocs = Array.from(documentCards);
-      
+
+          function applySort(option) {
+            const allDocs = Array.from(document.querySelectorAll('.document-card'));
             allDocs.sort((a,b) => {
               if (option === 'Ordenar por Título') {
                 return a.querySelector('h3').textContent.localeCompare(b.querySelector('h3').textContent);
@@ -4459,16 +4529,21 @@ document.addEventListener('DOMContentLoaded', function() {
               }
               return 0;
             });
-      
+
             const visible = document.getElementById('visible-documents');
             const hidden  = document.getElementById('hidden-documents');
+            if (!visible || !hidden) return;
             visible.innerHTML = '';
             hidden .innerHTML = '';
-      
+
             allDocs.forEach((doc, i) => {
               if (i < 9) visible.appendChild(doc);
               else      hidden.appendChild(doc);
             });
+          }
+
+          sortSelect.addEventListener('change', function() {
+            applySort(this.value);
           });
       
           // Password protection removed - all content is now publicly accessible
@@ -4706,7 +4781,7 @@ function openVideo(videoId, isProtected) {
         });
     </script>
     
-    <script src="navigation-controls.js"></script>
+    
     
     <!-- Hamburger Menu JavaScript -->
     <script>
@@ -5578,82 +5653,2842 @@ function openVideo(videoId, isProtected) {
             });
             
 
+                
             
-
+        });
+        
+        // Sistema de Console - Início
+        function initStatAnimation() {
+            const obrasstat = document.getElementById('obras-stat');
+            const visitsStat = document.getElementById('visits-stat');
+            let isShowingObras = true;
             
+            // Função para alternar entre obras e visitas
+            function toggleStats() {
+                if (isShowingObras) {
+                    // Slide out obras para a esquerda
+                    obrasstat.classList.remove('active');
+                    obrasstat.classList.add('slide-out-left');
+                    
+                    // Aguardar um pouco e slide in visitas da direita
+                    setTimeout(() => {
+                        visitsStat.classList.remove('slide-out-left');
+                        visitsStat.classList.add('active', 'slide-in-right');
+                    }, 300);
+                    
+                } else {
+                    // Slide out visitas para a esquerda
+                    visitsStat.classList.remove('active', 'slide-in-right');
+                    visitsStat.classList.add('slide-out-left');
+                    
+                    // Aguardar um pouco e slide in obras da direita
+                    setTimeout(() => {
+                        obrasstat.classList.remove('slide-out-left');
+                        obrasstat.classList.add('active');
+                    }, 300);
+                }
+                
+                isShowingObras = !isShowingObras;
+            }
+            
+            // Iniciar animação a cada 4 segundos
+            setInterval(toggleStats, 4000);
+        }
+        
+        // Inicializar animação do círculo
+        initStatAnimation();
+    </script>
+    
+    <!-- Modal de Autenticação -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-content">
+            <h2>🔐 Acesso ao Console</h2>
+            <p>Digite a senha para acessar o modo de edição:</p>
+            <input type="password" id="passwordInput" placeholder="Digite a senha..." />
+            <div id="authError" class="auth-error"></div>
+            <div class="auth-buttons">
+                <button onclick="editSystem.checkPassword()">Confirmar</button>
+                <button onclick="editSystem.hideAuthModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Sair do Console -->
+    <div id="exitModal" class="exit-modal">
+        <div class="exit-content">
+            <h2>💾 Sair do Console</h2>
+            <p>Deseja salvar suas alterações?</p>
+            <div class="exit-buttons">
+                <button class="save-btn" onclick="editSystem.saveAndExit()">✅ Sim</button>
+                <button class="discard-btn" onclick="editSystem.exitWithoutSaving()">❌ Não</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Botão Flutuante + -->
+    <div id="addMemoryFloating" class="add-memory-floating">
+        <span>+</span>
+    </div>
+    
+    <!-- Botão Sair do Console -->
+    <div id="exitConsoleBtn" class="exit-console-btn">
+        <span class="exit-arrow">←</span>
+        <span class="exit-text">Sair do Console</span>
+    </div>
+    
+    <script>
+        class EditSystem {
+            constructor() {
+                this.isAuthenticated = false;
+                this.isEditMode = false;
+                this.correctPassword = '24042003';
+                this.renderedCloudIds = new Set();
+                this.init();
+            }
+            
+            init() {
+                // Adicionar evento de clique no R para autenticação
+                const rElement = document.getElementById('password-r');
+                if (rElement) {
+                    rElement.addEventListener('click', () => {
+                        this.showAuthModal();
+                    });
+                }
+                
+                // Adicionar evento ao botão de sair do console
+                const exitBtn = document.getElementById('exitConsoleBtn');
+                if (exitBtn) {
+                    exitBtn.addEventListener('click', () => {
+                        this.showExitModal();
+                    });
+                }
+                
+                // Adicionar evento ao botão flutuante +
+                const addBtn = document.getElementById('addMemoryFloating');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => {
+                        this.addNewMemory();
+                    });
+                }
+            }
+            
+            showAuthModal() {
+                document.getElementById('authModal').style.display = 'block';
+                const passwordInput = document.getElementById('passwordInput');
+                passwordInput.focus();
+                
+                // Adicionar evento Enter para confirmar senha
+                const handleEnter = (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.checkPassword();
+                        passwordInput.removeEventListener('keydown', handleEnter);
+                    }
+                };
+                passwordInput.addEventListener('keydown', handleEnter);
+            }
+            
+            hideAuthModal() {
+                document.getElementById('authModal').style.display = 'none';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('authError').style.display = 'none';
+            }
+            
+            checkPassword() {
+                const password = document.getElementById('passwordInput').value;
+                const errorDiv = document.getElementById('authError');
+                
+                if (password === this.correctPassword) {
+                    this.isAuthenticated = true;
+                    this.hideAuthModal();
+                    document.body.classList.add('authenticated');
+                    this.enableEditMode();
+                    this.showSuccessMessage();
+                } else {
+                    errorDiv.textContent = '❌ Senha incorreta. Tente novamente.';
+                    errorDiv.style.display = 'block';
+                    document.getElementById('passwordInput').value = '';
+                    document.getElementById('passwordInput').focus();
+                }
+            }
+            
+            enableEditMode() {
+                this.isEditMode = true;
+                document.body.classList.add('edit-mode');
+                this.bindEditEvents();
+            }
+            
+            bindEditEvents() {
+                // Disable field-by-field editing. Use pencil + modal only.
+                return;
+            }
+            
+            editElement(event) {
+                if (!this.isEditMode) return;
+                
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const element = event.currentTarget;
+                this.showEditDialog(element);
+            }
+            
+            showEditDialog(element) {
+                const isLinkButton = element.classList.contains('read-button') || element.classList.contains('timeline-button-horizontal');
+                const isCodeBadge  = element.classList.contains('document-code');
+                
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    z-index: 10002;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.7);
+                    backdrop-filter: blur(5px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                
+                const content = document.createElement('div');
+                content.style.cssText = `
+                    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+                    padding: 2rem;
+                    border-radius: 15px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                    max-width: 500px;
+                    width: 90%;
+                    border: 2px solid var(--gold-color);
+                `;
+                
+                const title = document.createElement('h3');
+                title.textContent = '✏️ Editar Conteúdo';
+                title.style.cssText = `
+                    margin-bottom: 1rem;
+                    color: var(--primary-color);
+                    text-align: center;
+                `;
+                
+                const label = document.createElement('label');
+                label.textContent = isLinkButton ? 'URL:' : (isCodeBadge ? 'Código:' : 'Texto:');
+                label.style.cssText = `
+                    display: block;
+                    margin-bottom: 0.5rem;
+                    font-weight: bold;
+                    color: var(--primary-color);
+                `;
+                
+                const input = document.createElement('input');
+                input.type = isCodeBadge ? 'number' : 'text';
+                if (isCodeBadge) {
+                    input.min = '1';
+                    input.step = '1';
+                }
+                // Preserve the original attribute value for links to avoid automatic absolute URL expansion
+                const originalHref = isLinkButton ? (element.getAttribute('href') || '') : '';
+                input.value = isLinkButton ? originalHref : element.textContent.trim();
+                input.style.cssText = `
+                    width: 100%;
+                    padding: 0.75rem;
+                    border: 2px solid var(--gold-color);
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    margin-bottom: 1rem;
+                    outline: none;
+                `;
+                input.select();
+                
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.cssText = `
+                    display: flex;
+                    gap: 1rem;
+                    justify-content: flex-end;
+                `;
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.textContent = 'Cancelar';
+                cancelBtn.style.cssText = `
+                    padding: 0.75rem 1.5rem;
+                    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: all 0.3s ease;
+                `;
+                
+                const saveBtn = document.createElement('button');
+                saveBtn.textContent = 'Salvar';
+                saveBtn.style.cssText = `
+                    padding: 0.75rem 1.5rem;
+                    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: all 0.3s ease;
+                `;
+                
+                cancelBtn.onclick = () => document.body.removeChild(modal);
+                saveBtn.onclick = () => {
+                    if (isLinkButton) {
+                        // Preserve exactly what was typed (relative or absolute)
+                        element.setAttribute('href', input.value);
+                    } else if (isCodeBadge) {
+                        const oldCode = parseInt(String(element.textContent).trim(), 10);
+                        const newCode = parseInt(String(input.value).trim(), 10);
+                        if (!Number.isInteger(newCode) || newCode <= 0) {
+                            this.showNotification('❌ Código inválido. Use um número inteiro positivo.', 'error');
+                            return;
+                        }
+                        if (!this.isCodeAvailable(newCode, oldCode)) {
+                            this.showNotification('❌ Código já existe. Escolha outro número.', 'error');
+                            return;
+                        }
+                        // Atualiza o badge
+                        element.textContent = String(newCode);
+                        // Atualiza botão de remover (se existir neste card)
+                        const card = element.closest('.document-card');
+                        const removeBtn = card?.querySelector('.remove-memory-btn');
+                        if (removeBtn) {
+                            removeBtn.setAttribute('onclick', `editSystem.removeUserMemory(${newCode})`);
+                        }
+                        // Atualiza timeline e armazenamento local
+                        this.updateUserMemoryCode(oldCode, newCode);
+                        // Atualiza lastUserCode se necessário
+                        const lastUsed = parseInt(localStorage.getItem('lastUserCode') || '0', 10) || 0;
+                        if (newCode > lastUsed) localStorage.setItem('lastUserCode', String(newCode));
+                    } else {
+                        element.textContent = input.value;
+                    }
+                    
+                    element.style.border = '2px solid var(--gold-color)';
+                    element.style.position = 'relative';
+                    
+                    if (!element.querySelector('.edit-indicator')) {
+                        const indicator = document.createElement('div');
+                        indicator.className = 'edit-indicator';
+                        indicator.textContent = 'Clique para editar';
+                        indicator.style.cssText = `
+                            position: absolute;
+                            top: -25px;
+                            left: 0;
+                            background: var(--gold-color);
+                            color: var(--primary-color);
+                            padding: 2px 8px;
+                            border-radius: 4px;
+                            font-size: 0.7rem;
+                            font-weight: bold;
+                            z-index: 1000;
+                        `;
+                        element.appendChild(indicator);
+                    }
+                    
+                    this.showNotification('✅ Conteúdo atualizado com sucesso!', 'success');
+                    document.body.removeChild(modal);
+                };
+                
+                buttonContainer.appendChild(cancelBtn);
+                buttonContainer.appendChild(saveBtn);
+                content.appendChild(title);
+                content.appendChild(label);
+                content.appendChild(input);
+                content.appendChild(buttonContainer);
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+                
+                // Adicionar evento Enter para salvar
+                const handleEnter = (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        saveBtn.click();
+                    }
+                };
+                input.addEventListener('keydown', handleEnter);
+                
+                // Scroll automático para o modal - corrigido
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: window.innerHeight / 2,
+                        behavior: 'smooth'
+                    });
+                }, 200);
+                
+                input.focus();
+            }
+            
+            showSuccessMessage() {
+                const welcomeMessage = document.getElementById('welcome-message');
+                if (welcomeMessage) {
+                    welcomeMessage.textContent = 'Bem Vindo de Volta Reinaldão!';
+                    welcomeMessage.classList.add('show');
+                    
+                    // Hide the message after 5 seconds (mesmo tempo da original)
+                    setTimeout(() => {
+                        welcomeMessage.classList.remove('show');
+                    }, 5000);
+                }
+            }
+            
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                const gold = getComputedStyle(document.documentElement).getPropertyValue('--gold-color') || '#d4b45f';
+                const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary-color') || '#4a2c2a';
+                const bgColor = gold.trim();
+                const fgColor = primary.trim();
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(0,0,0,0.06)), ${fgColor};
+                    color: ${bgColor};
+                    padding: 14px 26px;
+                    border-radius: 16px;
+                    font-weight: 800;
+                    font-size: 1.15rem; /* larger text */
+                    line-height: 1.5; /* more readable bullets */
+                    border: 1px solid ${bgColor}33;
+                    outline: 1px solid ${bgColor}1a;
+                    z-index: 10001;
+                    box-shadow: 0 10px 28px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.35);
+                    opacity: 0;
+                    transform: translateY(-8px) scale(0.98);
+                    transition: opacity .6s ease, transform .6s ease, filter .35s ease, box-shadow .6s ease;
+                    will-change: opacity, transform;
+                    backdrop-filter: blur(6px) saturate(110%);
+                    white-space: normal;
+                    max-width: 360px; /* slightly smaller */
+                    width: min(80vw, 360px); /* responsive but not huge */
+                    background-image:
+                       linear-gradient(90deg, ${bgColor}55 0 6px, transparent 6px),
+                       linear-gradient(180deg, rgba(255,255,255,0.12), rgba(0,0,0,0.06));
+                    background-blend-mode: normal, multiply;
+                `;
+                // content wrapper for icon + text
+                const wrap = document.createElement('div');
+                wrap.style.display = 'flex';
+                wrap.style.gap = '10px';
+                wrap.style.alignItems = 'flex-start';
+                const icon = document.createElement('span');
+                icon.textContent = '🔔';
+                icon.style.flex = '0 0 auto';
+                icon.style.filter = 'drop-shadow(0 1px 0 rgba(255,255,255,0.35))';
+                const text = document.createElement('div');
+                text.style.whiteSpace = 'pre-line';
+                text.style.letterSpacing = '0.2px';
+                text.textContent = message;
+                wrap.appendChild(icon);
+                wrap.appendChild(text);
+                notification.appendChild(wrap);
+                document.body.appendChild(notification);
+                // fade-in
+                requestAnimationFrame(() => {
+                    notification.style.opacity = '1';
+                    notification.style.transform = 'translateY(0) scale(1)';
+                });
+                // Auto-dismiss with smooth fade-out
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateY(-6px) scale(0.985)';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                    }, 400);
+                }, 3500);
+            }
+            
+            showExitModal() {
+                const modal = document.getElementById('exitModal');
+                modal.style.display = 'block';
+            // Inject top-right Voltar inside the modal content if not present
+            const tpl = document.getElementById('exit-back-button-template');
+            const container = modal.querySelector('.exit-content');
+            if (tpl && container && !container.querySelector('.exit-back-button')) {
+                container.style.position = 'relative';
+                container.appendChild(tpl.content.firstElementChild.cloneNode(true));
+            }
+                
+                // Adicionar evento Enter para confirmar "Sim"
+                const handleEnter = (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.saveAndExit();
+                        document.removeEventListener('keydown', handleEnter);
+                    }
+                };
+                document.addEventListener('keydown', handleEnter);
+                
+                // Remover evento quando modal fechar
+                const originalHideExitModal = this.hideExitModal.bind(this);
+                this.hideExitModal = () => {
+                    document.removeEventListener('keydown', handleEnter);
+                    originalHideExitModal();
+                };
+            }
+            
+            hideExitModal() {
+                document.getElementById('exitModal').style.display = 'none';
+            }
+            
+            saveAndExit() {
+                // Simular salvamento
+                this.showNotification('💾 Alterações salvas com sucesso!', 'success');
+                setTimeout(() => {
+                    this.exitConsole();
+                }, 1000);
+            }
+            
+            exitWithoutSaving() {
+                this.showNotification('🚪 Saindo sem salvar alterações...', 'info');
+                setTimeout(() => {
+                    this.exitConsole();
+                }, 1000);
+            }
+            
+            exitConsole() {
+                this.isAuthenticated = false;
+                this.isEditMode = false;
+                document.body.classList.remove('authenticated', 'edit-mode');
+                this.hideExitModal();
+                location.reload();
+            }
+            
+            addNewMemory() {
+                if (!this.isAuthenticated) {
+                    this.showNotification('❌ Você precisa estar autenticado para adicionar memórias!', 'error');
+                    return;
+                }
+                
+                this.showAddMemoryModal();
+            }
+            
+            showAddMemoryModal() {
+                const modal = document.getElementById('addMemoryModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Adicionar evento Enter para salvar memória
+                    const handleEnter = (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            this.saveNewMemory();
+                        }
+                    };
+                    
+                    // Adicionar evento a todos os inputs do formulário
+                    const inputs = modal.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => {
+                        input.addEventListener('keydown', handleEnter);
+                    });
+                    
+                    // Scroll automático para o modal - corrigido
+                    setTimeout(() => {
+                        // Scroll para o centro da página onde está o modal
+                        window.scrollTo({
+                            top: window.innerHeight / 2,
+                            behavior: 'smooth'
+                        });
+                    }, 200);
+                }
+            }
+            
+            hideAddMemoryModal() {
+                const modal = document.getElementById('addMemoryModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    this.clearAddMemoryForm();
+                }
+            }
+            
+            clearAddMemoryForm() {
+                const form = document.getElementById('addMemoryForm');
+                if (form) {
+                    form.reset();
+                }
+            }
 
+            // Route save: create vs update
+            async onSaveMemoryClicked() {
+                const form = document.getElementById('addMemoryForm');
+                const editingId = form?.dataset?.editingId || '';
+                const editingCode = form?.dataset?.editingCode || '';
+                if (editingId || editingCode) {
+                    await this.saveEditedMemory();
+                } else {
+                    await this.saveNewMemory();
+                }
+            }
+
+            // Open modal prefilled for editing a card
+            openEditForCard(cardEl) {
+                if (!this.isAuthenticated) return;
+                const form = document.getElementById('addMemoryForm');
+                const title = cardEl.querySelector('h3')?.textContent || '';
+                const author = cardEl.querySelector('.document-author')?.textContent || '';
+                const year = cardEl.querySelector('.document-year')?.textContent || '';
+                const description = cardEl.querySelector('p')?.textContent || '';
+                const type = cardEl.querySelector('.document-type')?.textContent || '';
+                const link = cardEl.querySelector('a.read-button')?.getAttribute('href') || '';
+                const codeText = cardEl.querySelector('.document-code')?.textContent || '';
+                const code = parseInt(String(codeText).trim(), 10) || '';
+                form.title.value = title;
+                form.author.value = author;
+                form.year.value = year;
+                form.type.value = type;
+                form.description.value = description;
+                form.link.value = link;
+                // try to keep cloud id when present
+                const cloudId = cardEl.getAttribute('data-cloud-id') || '';
+                form.dataset.editingId = cloudId;
+                form.dataset.editingCode = code ? String(code) : '';
+                this.showAddMemoryModal();
+            }
+
+            async saveEditedMemory() {
+                const form = document.getElementById('addMemoryForm');
+                const formData = new FormData(form);
+                const updated = {
+                    title: formData.get('title'),
+                    author: formData.get('author'),
+                    year: formData.get('year'),
+                    type: formData.get('type'),
+                    description: formData.get('description'),
+                    link: formData.get('link') || '#'
+                };
+                const id = form.dataset.editingId || '';
+                const code = parseInt(form.dataset.editingCode || '0', 10) || 0;
+                if (!updated.title || !updated.author || !updated.year || !updated.type) {
+                    this.showNotification('❌ Preencha todos os campos obrigatórios!', 'error');
+                    return;
+                }
+                // Update in DOM
+                const target = id ? document.querySelector(`.document-card[data-cloud-id="${id}"]`) : Array.from(document.querySelectorAll('.document-card')).find(el => (el.querySelector('.document-code')?.textContent||'').trim() === String(code));
+                if (target) {
+                    target.querySelector('h3').textContent = updated.title;
+                    const aEl = target.querySelector('a.read-button');
+                    if (aEl) aEl.setAttribute('href', updated.link);
+                    const tEl = target.querySelector('.document-type');
+                    if (tEl) tEl.textContent = this.normalizeType(updated.type);
+                    const au = target.querySelector('.document-author'); if (au) au.textContent = updated.author;
+                    const yr = target.querySelector('.document-year'); if (yr) yr.textContent = updated.year;
+                    const p = target.querySelector('p'); if (p) p.textContent = updated.description;
+                }
+                // Update in local backup
+                try {
+                    let saved = JSON.parse(localStorage.getItem('userMemories') || '[]');
+                    saved = saved.map(m => {
+                        const c = parseInt(String(m.code).trim(), 10);
+                        if (c === code) return { ...m, ...updated };
+                        return m;
+                    });
+                    localStorage.setItem('userMemories', JSON.stringify(saved));
+                } catch {}
+                // Update in Firebase if possible (by id if we have it)
+                try {
+                    if (id && window.firebaseUpdateFieldsById) {
+                        await window.firebaseUpdateFieldsById(id, updated);
+                    }
+                } catch (e) { console.warn('Falha ao atualizar no Firebase:', e); }
+                this.hideAddMemoryModal();
+                this.showNotification('✏️ Memória atualizada!', 'success');
+                delete form.dataset.editingId; delete form.dataset.editingCode;
+            }
+            
+            async saveNewMemory() {
+                const form = document.getElementById('addMemoryForm');
+                const formData = new FormData(form);
+                
+                const newMemory = {
+                    title: formData.get('title'),
+                    author: formData.get('author'),
+                    year: formData.get('year'),
+                    type: formData.get('type'),
+                    description: formData.get('description'),
+                    link: formData.get('link') || '#',
+                    code: undefined,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Validação básica
+                if (!newMemory.title || !newMemory.author || !newMemory.year || !newMemory.type) {
+                    this.showNotification('❌ Por favor, preencha todos os campos obrigatórios!', 'error');
+                    return;
+                }
+                // URL validation if provided
+                if (newMemory.link && newMemory.link.trim() && !/^https?:\/\//i.test(newMemory.link.trim())) {
+                    this.showNotification('❌ URL inválida. Use http(s)://', 'error');
+                    return;
+                }
+                // Código opcional informado pelo usuário
+                const desiredCodeRaw = String(formData.get('code') || '').trim();
+                if (desiredCodeRaw) {
+                    const desiredCode = parseInt(desiredCodeRaw, 10);
+                    if (!Number.isInteger(desiredCode) || desiredCode <= 0) {
+                        this.showNotification('❌ Código inválido. Use um número inteiro positivo.', 'error');
+                        return;
+                    }
+                    if (!this.isCodeAvailable(desiredCode)) {
+                        this.showNotification('❌ Código já existe. Escolha outro número.', 'error');
+                        return;
+                    }
+                    newMemory.code = desiredCode;
+                }
+                
+                // Aguarda autenticação/SDK para tentar salvar na nuvem
+                try {
+                    if (window.waitForFirebaseAuth && typeof window.waitForFirebaseAuth.then === 'function') {
+                        await window.waitForFirebaseAuth;
+                    }
+                } catch (_) { /* continue */ }
+                
+                // Se o usuário não informou código, gerar automaticamente (nuvem -> local)
+                if (!Number.isInteger(newMemory.code)) {
+                    try {
+                        if (typeof window.firebaseNextCode === 'function') {
+                            newMemory.code = await window.firebaseNextCode();
+                        }
+                    } catch (e) { /* fallback abaixo */ }
+                    if (!Number.isInteger(newMemory.code)) {
+                        newMemory.code = this.generateNextCode();
+                    }
+                }
+
+                // Sempre manter um backup local; tentar também salvar na nuvem
+                    this.saveMemoryToStorage(newMemory);
+                const savedInCloud = await this.saveMemoryToCloud(newMemory);
+                
+                // Se salvou na nuvem, aguardamos o snapshot atualizar a UI.
+                if (!savedInCloud) {
+                    // Adicionar à página
+                    this.addMemoryToPage(newMemory);
+                    // Adicionar à Linha do Tempo
+                    this.addMemoryToTimeline(newMemory);
+                }
+                
+                // Fechar modal
+                this.hideAddMemoryModal();
+                
+                // Mostrar sucesso
+                this.showNotification('✅ Nova memória adicionada com sucesso!', 'success');
+
+                // Reaplicar o filtro ativo (se houver) para garantir consistência de visibilidade
+                this.reapplyActiveFilterIfAny();
+                // Reaplicar ordenação atual para manter a ordem numérica/selecionada
+                this.reapplyActiveSortIfAny();
+            }
+
+            async saveMemoryToCloud(memory) {
+                try {
+                    if (typeof window.firebaseSaveMemory === 'function') {
+                        await window.firebaseSaveMemory(memory);
+                        return true;
+                    }
+                } catch (e) {
+                    console.warn('Falha ao salvar no Firebase:', e);
+                }
+                return false;
+            }
+
+            // Renderiza snapshot completo da nuvem: remove antigos e recria
+            renderCloudCards(cards) {
+                const visible = document.getElementById('visible-documents');
+                const hidden  = document.getElementById('hidden-documents');
+                if (!visible || !hidden) return;
+                // Remover cards anteriores da nuvem
+                document.querySelectorAll('.document-card.cloud-card').forEach(el => el.remove());
+                this.renderedCloudIds.clear();
+                if (!Array.isArray(cards)) cards = [];
+                const normalize = (t) => this.normalizeType(t);
+                // Avoid duplicating user-added cards already in DOM by code
+                const existingUserCodes = new Set(Array.from(document.querySelectorAll('.document-card:not(.cloud-card) .document-code'))
+                    .map(el => parseInt(String(el.textContent).trim(), 10))
+                    .filter(code => !Number.isNaN(code))
+                );
+                const makeCard = (c) => {
+                    const card = document.createElement('div');
+                    card.className = 'document-card cloud-card';
+                    if (c.id) card.setAttribute('data-cloud-id', c.id);
+                    const type = normalize(c.tipo ?? c.type);
+                    const code = c.codigo ?? c.code ?? '';
+                    card.innerHTML = `
+                        <div class="document-code">${code}</div>
+                        <h3>${c.titulo ?? c.title ?? ''}</h3>
+                        <div class="document-author">${c.autor ?? c.author ?? ''}</div>
+                        <div class="document-year">${c.ano ?? c.year ?? ''}</div>
+                        <p>${c.descricao ?? c.description ?? ''}</p>
+                        <div class="document-footer">
+                            <span class="document-type">${type}</span>
+                            <a href="${c.url ?? c.link ?? '#'}" class="read-button" target="_blank">${this.getButtonText(type)}</a>
+                        </div>`;
+                    // floating oval edit button in top-right
+                    const fab = document.createElement('button');
+                    fab.className = 'edit-card-btn';
+                    fab.title = 'Editar';
+                    fab.textContent = '✏️';
+                    fab.addEventListener('click', (e)=>{ e.stopPropagation(); this.openEditForCard(card); });
+                    card.appendChild(fab);
+                    return card;
+                };
+                // Adiciona inicialmente ao hidden; filtros/ordenação ajustarão a posição
+                cards.forEach(c => {
+                    const codeNum = parseInt(String(c.codigo ?? c.code ?? 0), 10) || 0;
+                    if (existingUserCodes.has(codeNum)) return; // skip duplicate of user-added card
+                    const card = makeCard(c);
+                    hidden.appendChild(card);
+                });
+                this.reapplyActiveFilterIfAny();
+                this.reapplyActiveSortIfAny();
+            }
+            
+            // Normaliza tipos para as categorias usadas pelos botões de filtro
+            normalizeType(type) {
+                const t = String(type || '').trim().toLowerCase();
+                if (!t) return '';
+                if (t === 'poesia' || t === 'poema') return 'Poema';
+                if (t === 'livro') return 'Livro';
+                if (t === 'conto') return 'Conto';
+                if (t === 'documento') return 'Documento';
+                if (t === 'mídia' || t === 'midia' || t === 'vídeo' || t === 'video' || t === 'áudio' || t === 'audio') return 'Mídia';
+                return type; // mantém valor original para categorias não mapeadas
+            }
+
+            // Coleta todos os códigos já existentes na página e no armazenamento local
+            getExistingCodesSet() {
+                const domCodes = Array.from(document.querySelectorAll('.document-code'))
+                    .map(el => parseInt(String(el.textContent).trim(), 10))
+                    .filter(code => !Number.isNaN(code));
+                const saved = JSON.parse(localStorage.getItem('userMemories') || '[]');
+                const savedCodes = saved
+                    .map(m => parseInt(String(m.code).trim(), 10))
+                    .filter(code => !Number.isNaN(code));
+                return new Set([...domCodes, ...savedCodes]);
+            }
+
+            generateNextCode() {
+                const codesSet = this.getExistingCodesSet();
+                const maxInSet = codesSet.size > 0 ? Math.max(...codesSet) : 300;
+                const lastUsed = parseInt(localStorage.getItem('lastUserCode') || '0', 10) || 0;
+                let next = Math.max(maxInSet, lastUsed) + 1;
+                while (codesSet.has(next)) next += 1;
+                localStorage.setItem('lastUserCode', String(next));
+                return next;
+            }
+            
+            isCodeAvailable(newCode, oldCode) {
+                if (Number.isInteger(oldCode) && newCode === oldCode) return true;
+                const codes = this.getExistingCodesSet();
+                return !codes.has(newCode);
+            }
+
+            updateUserMemoryCode(oldCode, newCode) {
+                try {
+                    let savedMemories = JSON.parse(localStorage.getItem('userMemories') || '[]');
+                    let updated = false;
+                    savedMemories = savedMemories.map(m => {
+                        const c = parseInt(String(m.code).trim(), 10);
+                        if (c === oldCode) {
+                            updated = true;
+                            return { ...m, code: newCode };
+                        }
+                        return m;
+                    });
+                    if (updated) {
+                        localStorage.setItem('userMemories', JSON.stringify(savedMemories));
+                        const tlItem = document.querySelector(`#timeline .timeline-item-horizontal[data-user-code="${oldCode}"]`);
+                        if (tlItem) tlItem.setAttribute('data-user-code', String(newCode));
+                    }
+                    if (typeof window.firebaseUpdateMemoryCode === 'function') {
+                        window.firebaseUpdateMemoryCode(oldCode, newCode).catch(e => console.warn('Falha ao atualizar código no Firebase:', e));
+                    }
+                } catch (e) {
+                    console.warn('Falha ao atualizar código no armazenamento local:', e);
+                }
+            }
+            
+            saveMemoryToStorage(memory) {
+                let savedMemories = JSON.parse(localStorage.getItem('userMemories') || '[]');
+                savedMemories.push(memory);
+                localStorage.setItem('userMemories', JSON.stringify(savedMemories));
+            }
+            
+            addMemoryToPage(memory) {
+                const container = document.querySelector('.documents-grid');
+                if (!container) return;
+                // Prevent duplicate insertion if a card with same code already exists
+                const existing = Array.from(document.querySelectorAll('.document-card .document-code'))
+                    .find(el => el.textContent.trim() === String(memory.code));
+                if (existing) return;
+
+                const memoryCard = this.createMemoryCard(memory);
+                container.insertBefore(memoryCard, container.firstChild);
+                
+                // Animar entrada
+                memoryCard.style.opacity = '0';
+                memoryCard.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    memoryCard.style.transition = 'all 0.5s ease';
+                    memoryCard.style.opacity = '1';
+                    memoryCard.style.transform = 'translateY(0)';
+                }, 100);
+            }
+            
+            createMemoryCard(memory) {
+                const card = document.createElement('div');
+                card.className = 'document-card user-added';
+                const normalizedType = this.normalizeType(memory.type);
+                card.innerHTML = `
+                    <div class="document-code">${memory.code}</div>
+                    <h3>${memory.title}</h3>
+                    <div class="document-author">${memory.author}</div>
+                    <div class="document-year">${memory.year}</div>
+                    <p>${memory.description}</p>
+                    <div class="document-footer">
+                        <span class="document-type">${normalizedType}</span>
+                        <a href="${memory.link}" class="read-button" target="_blank">
+                            ${this.getButtonText(memory.type)}
+                        </a>
+                        <button class="edit-card-btn" title="Editar">✏️</button>
+                        <button class="remove-memory-btn" onclick="editSystem.removeUserMemory(${memory.code})">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+                // floating edit button
+                const fab = document.createElement('button');
+                fab.className = 'edit-card-btn';
+                fab.title = 'Editar';
+                fab.textContent = '✏️';
+                fab.addEventListener('click', (e)=>{ e.stopPropagation(); this.openEditForCard(card); });
+                card.appendChild(fab);
+                return card;
+            }
+            
+            getButtonText(type) {
+                const buttonTexts = {
+                    'Livro': 'Ler',
+                    'Conto': 'Ler',
+                    'Poema': 'Ler',
+                    'Documento': 'Ver',
+                    'Mídia': 'Ver',
+                    'Vídeo': 'Ver',
+                    'Antologia': 'Ler',
+                    'Biografia': 'Ler'
+                };
+                return buttonTexts[type] || 'Ver';
+            }
+
+            getTimelineButtonText(type) {
+                const buttonTexts = {
+                    'Livro': 'Ler obra',
+                    'Conto': 'Ler obra',
+                    'Poema': 'Ler obra',
+                    'Documento': 'Ver obra',
+                    'Mídia': 'Ver obra',
+                    'Vídeo': 'Ver vídeo',
+                    'Antologia': 'Ler obra',
+                    'Biografia': 'Ler obra'
+                };
+                return buttonTexts[type] || 'Ver obra';
+            }
+
+            parseYearValue(yearText) {
+                if (!yearText) return Number.NEGATIVE_INFINITY;
+                const match = String(yearText).match(/\d{4}/);
+                return match ? parseInt(match[0], 10) : Number.NEGATIVE_INFINITY;
+            }
+
+            addMemoryToTimeline(memory) {
+                const track = document.querySelector('#timeline .timeline-track');
+                if (!track) return;
+                // Prevent duplicate insertion in the timeline
+                if (track.querySelector(`.timeline-item-horizontal[data-user-code="${String(memory.code)}"]`)) return;
+
+                const item = document.createElement('div');
+                item.className = 'timeline-item-horizontal';
+                item.setAttribute('data-user-code', String(memory.code));
+
+                const normalizedType = this.normalizeType(memory.type);
+                const buttonText = this.getTimelineButtonText(memory.type);
+                item.innerHTML = `
+                    <div class="timeline-content-horizontal">
+                        <div class="timeline-year-horizontal">${memory.year}</div>
+                        <div class="timeline-text-horizontal">${memory.title}</div>
+                        <div class="timeline-author-horizontal">${memory.author}</div>
+                        <div class="timeline-tag-horizontal">${normalizedType}</div>
+                        <a href="${memory.link}" class="timeline-button-horizontal" target="_blank">${buttonText}</a>
+                    </div>
+                `;
+
+                // Insert keeping chronological order (ascending by year)
+                const newYear = this.parseYearValue(memory.year);
+                const existingItems = Array.from(track.querySelectorAll('.timeline-item-horizontal'));
+                let inserted = false;
+                for (const existing of existingItems) {
+                    const yText = existing.querySelector('.timeline-year-horizontal')?.textContent || '';
+                    const y = this.parseYearValue(yText);
+                    if (y > newYear) {
+                        track.insertBefore(item, existing);
+                        inserted = true;
+                        break;
+                    }
+                }
+                if (!inserted) {
+                    track.appendChild(item);
+                }
+
+                // Subtle fade-in
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(-10px)';
+                requestAnimationFrame(() => {
+                    item.style.transition = 'all 0.4s ease';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                });
+            }
+            
+            removeUserMemory(code) {
+                if (confirm('Tem certeza que deseja remover esta memória?')) {
+                    // Remover do localStorage
+                    let savedMemories = JSON.parse(localStorage.getItem('userMemories') || '[]');
+                    savedMemories = savedMemories.filter(memory => memory.code !== code);
+                    localStorage.setItem('userMemories', JSON.stringify(savedMemories));
+                    
+                    // Remover da página
+                    const allCodes = document.querySelectorAll('.document-code');
+                    let cardElement = null;
+                    
+                    allCodes.forEach(codeEl => {
+                        if (codeEl.textContent.trim() === code.toString()) {
+                            cardElement = codeEl.closest('.document-card');
+                        }
+                    });
+                    
+                    if (cardElement) {
+                        cardElement.style.transition = 'all 0.3s ease';
+                        cardElement.style.opacity = '0';
+                        cardElement.style.transform = 'translateX(-100%)';
+                        setTimeout(() => cardElement.remove(), 300);
+                    }
+
+                    // Remover da Linha do Tempo
+                    const tlItem = document.querySelector(`#timeline .timeline-item-horizontal[data-user-code="${code}"]`);
+                    if (tlItem) {
+                        tlItem.style.transition = 'all 0.3s ease';
+                        tlItem.style.opacity = '0';
+                        tlItem.style.transform = 'translateX(-100%)';
+                        setTimeout(() => tlItem.remove(), 300);
+                    }
+                    
+                    this.showNotification('🗑️ Memória removida com sucesso!', 'info');
+                }
+            }
+            
+            async loadUserMemories() {
+                // Load both cloud items and locally saved console items, then render merged
+                const localMemories = JSON.parse(localStorage.getItem('userMemories') || '[]');
+                let cloudMemories = [];
+                try {
+                    if (typeof window.firebaseLoadMemories === 'function') {
+                        cloudMemories = await window.firebaseLoadMemories();
+                        if (!Array.isArray(cloudMemories)) cloudMemories = [];
+                    }
+                } catch (e) {
+                    console.warn('Falha ao carregar memórias do Firebase:', e);
+                }
+
+                // Merge by unique code to avoid duplicates
+                const byCode = new Map();
+                [...cloudMemories, ...localMemories].forEach(m => {
+                    const c = parseInt(String(m.codigo ?? m.code ?? 0), 10) || 0;
+                    if (!byCode.has(c)) byCode.set(c, m);
+                });
+                const merged = Array.from(byCode.values());
+                merged.forEach(memory => {
+                        this.addMemoryToPage(memory);
+                        this.addMemoryToTimeline(memory);
+                    });
+                // Garante que a visualização respeite o filtro em vigor ao carregar memórias
+                this.reapplyActiveFilterIfAny();
+                // Reaplica a ordenação atual para inserir itens do console na posição correta
+                this.reapplyActiveSortIfAny();
+            }
+
+            reapplyActiveFilterIfAny() {
+                const active = document.querySelector('.filter-button.active');
+                if (active) active.click();
+            }
+
+            reapplyActiveSortIfAny() {
+                const sortSelect = document.querySelector('.sort-select');
+                if (sortSelect) {
+                    const evt = new Event('change', { bubbles: true });
+                    sortSelect.dispatchEvent(evt);
+                }
+            }
+            
+            editImage(event) {
+                if (!this.isEditMode) return;
+                
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const img = event.currentTarget;
+                this.showImageUploadDialog(img);
+            }
+            
+            editVideo(event) {
+                if (!this.isEditMode) return;
+                
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const video = event.currentTarget;
+                this.showVideoUploadDialog(video);
+            }
+            
+            showImageUploadDialog(img) {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    z-index: 10002;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.8);
+                    backdrop-filter: blur(5px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                
+                const content = document.createElement('div');
+                content.style.cssText = `
+                    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+                    padding: 2rem;
+                    border-radius: 15px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                    max-width: 500px;
+                    width: 90%;
+                    border: 2px solid var(--gold-color);
+                `;
+                
+                const title = document.createElement('h3');
+                title.textContent = '🖼️ Alterar Imagem';
+                title.style.cssText = `
+                    margin-bottom: 1.5rem;
+                    color: var(--primary-color);
+                    text-align: center;
+                `;
+                
+                const preview = document.createElement('div');
+                preview.style.cssText = `
+                    text-align: center;
+                    margin-bottom: 1.5rem;
+                `;
+                
+                const currentImg = document.createElement('img');
+                currentImg.src = img.src;
+                currentImg.style.cssText = `
+                    max-width: 200px;
+                    max-height: 150px;
+                    border: 2px solid var(--gold-color);
+                    border-radius: 8px;
+                `;
+                preview.appendChild(currentImg);
+                
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.style.cssText = `
+                    width: 100%;
+                    padding: 0.75rem;
+                    border: 2px solid var(--gold-color);
+                    border-radius: 8px;
+                    margin-bottom: 1rem;
+                    background: white;
+                `;
+                
+                const urlInput = document.createElement('input');
+                urlInput.type = 'url';
+                urlInput.placeholder = 'Ou cole uma URL de imagem...';
+                urlInput.style.cssText = `
+                    width: 100%;
+                    padding: 0.75rem;
+                    border: 2px solid var(--gold-color);
+                    border-radius: 8px;
+                    margin-bottom: 1.5rem;
+                `;
+                
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.cssText = `
+                    display: flex;
+                    gap: 1rem;
+                    justify-content: flex-end;
+                `;
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.textContent = 'Cancelar';
+                cancelBtn.style.cssText = `
+                    padding: 0.75rem 1.5rem;
+                    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: all 0.3s ease;
+                `;
+                
+                const saveBtn = document.createElement('button');
+                saveBtn.textContent = 'Salvar';
+                saveBtn.style.cssText = `
+                    padding: 0.75rem 1.5rem;
+                    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: all 0.3s ease;
+                `;
+                
+                // Handle file upload
+                fileInput.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            currentImg.src = e.target.result;
+                            urlInput.value = '';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+                
+                // Handle URL input
+                urlInput.oninput = () => {
+                    if (urlInput.value) {
+                        currentImg.src = urlInput.value;
+                        fileInput.value = '';
+                    }
+                };
+                
+                cancelBtn.onclick = () => document.body.removeChild(modal);
+                saveBtn.onclick = () => {
+                    img.src = currentImg.src;
+                    img.style.border = '2px solid var(--gold-color)';
+                    this.showNotification('🖼️ Imagem atualizada com sucesso!', 'success');
+                    document.body.removeChild(modal);
+                };
+                
+                buttonContainer.appendChild(cancelBtn);
+                buttonContainer.appendChild(saveBtn);
+                content.appendChild(title);
+                content.appendChild(preview);
+                content.appendChild(fileInput);
+                content.appendChild(urlInput);
+                content.appendChild(buttonContainer);
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+                
+                // Scroll automático para o modal - corrigido
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: window.innerHeight / 2,
+                        behavior: 'smooth'
+                    });
+                }, 200);
+            }
+            
+            showVideoUploadDialog(video) {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    z-index: 10002;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.8);
+                    backdrop-filter: blur(5px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                
+                const content = document.createElement('div');
+                content.style.cssText = `
+                    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+                    padding: 2rem;
+                    border-radius: 15px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                    max-width: 500px;
+                    width: 90%;
+                    border: 2px solid var(--gold-color);
+                `;
+                
+                const title = document.createElement('h3');
+                title.textContent = '🎥 Alterar Vídeo';
+                title.style.cssText = `
+                    margin-bottom: 1.5rem;
+                    color: var(--primary-color);
+                    text-align: center;
+                `;
+                
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'video/*';
+                fileInput.style.cssText = `
+                    width: 100%;
+                    padding: 0.75rem;
+                    border: 2px solid var(--gold-color);
+                    border-radius: 8px;
+                    margin-bottom: 1rem;
+                    background: white;
+                `;
+                
+                const urlInput = document.createElement('input');
+                urlInput.type = 'url';
+                urlInput.placeholder = 'Ou cole uma URL de vídeo (YouTube, MP4, etc.)...';
+                urlInput.style.cssText = `
+                    width: 100%;
+                    padding: 0.75rem;
+                    border: 2px solid var(--gold-color);
+                    border-radius: 8px;
+                    margin-bottom: 1.5rem;
+                `;
+                
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.cssText = `
+                    display: flex;
+                    gap: 1rem;
+                    justify-content: flex-end;
+                `;
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.textContent = 'Cancelar';
+                cancelBtn.style.cssText = `
+                    padding: 0.75rem 1.5rem;
+                    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: all 0.3s ease;
+                `;
+                
+                const saveBtn = document.createElement('button');
+                saveBtn.textContent = 'Salvar';
+                saveBtn.style.cssText = `
+                    padding: 0.75rem 1.5rem;
+                    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: all 0.3s ease;
+                `;
+                
+                cancelBtn.onclick = () => document.body.removeChild(modal);
+                saveBtn.onclick = () => {
+                    const file = fileInput.files[0];
+                    const url = urlInput.value;
+                    
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const source = video.querySelector('source');
+                            if (source) {
+                                source.src = e.target.result;
+                            }
+                            video.load();
+                            video.style.border = '2px solid var(--gold-color)';
+                            this.showNotification('🎥 Vídeo atualizado com sucesso!', 'success');
+                        };
+                        reader.readAsDataURL(file);
+                    } else if (url) {
+                        // Handle YouTube URLs
+                        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                            let videoId = '';
+                            if (url.includes('youtube.com')) {
+                                videoId = url.split('v=')[1]?.split('&')[0];
+                            } else {
+                                videoId = url.split('youtu.be/')[1]?.split('?')[0];
+                            }
+                            
+                            if (videoId) {
+                                // Replace video with YouTube embed
+                                const iframe = document.createElement('iframe');
+                                iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                                iframe.style.cssText = video.style.cssText;
+                                iframe.width = video.width || '100%';
+                                iframe.height = video.height || '315';
+                                iframe.frameBorder = '0';
+                                iframe.allowFullscreen = true;
+                                
+                                video.parentNode.replaceChild(iframe, video);
+                                this.showNotification('🎥 Vídeo do YouTube integrado com sucesso!', 'success');
+                            }
+                        } else {
+                            // Direct video URL
+                            const source = video.querySelector('source');
+                            if (source) {
+                                source.src = url;
+                            }
+                            video.load();
+                            video.style.border = '2px solid var(--gold-color)';
+                            this.showNotification('🎥 Vídeo atualizado com sucesso!', 'success');
+                        }
+                    }
+                    
+                    document.body.removeChild(modal);
+                };
+                
+                buttonContainer.appendChild(cancelBtn);
+                buttonContainer.appendChild(saveBtn);
+                content.appendChild(title);
+                content.appendChild(fileInput);
+                content.appendChild(urlInput);
+                content.appendChild(buttonContainer);
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+                
+                // Scroll automático para o modal - corrigido
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: window.innerHeight / 2,
+                        behavior: 'smooth'
+                    });
+                }, 200);
+            }
+        }
+        
+        // Inicializar sistema de edição
+        const editSystem = new EditSystem();
+        // Expose globally so console and other scripts can access and so Firebase feed can call back into it
+        window.editSystem = editSystem;
+
+        // Console helper: persist a new memory (saves to Firebase if available, else localStorage), then updates UI
+        window.addMemory = async function({ title, author, year, type, description, link }) {
+            try {
+                if (window.waitForFirebaseAuth && typeof window.waitForFirebaseAuth.then === 'function') {
+                    await window.waitForFirebaseAuth;
+                }
+            } catch (e) { /* ignore and proceed with best-effort */ }
+            const memory = {
+                title: title || '',
+                author: author || '',
+                year: year || '',
+                type: type || '',
+                description: description || '',
+                link: link || '#',
+                code: undefined,
+                timestamp: new Date().toISOString()
+            };
+            // Basic validation similar to UI form
+            if (!memory.title || !memory.author || !memory.year || !memory.type) {
+                editSystem.showNotification('❌ Campos obrigatórios ausentes (título, autor, ano, tipo).', 'error');
+                return null;
+            }
+            if (memory.link && memory.link.trim() && !/^https?:\/\//i.test(memory.link.trim())) {
+                editSystem.showNotification('❌ URL inválida. Use http(s)://', 'error');
+                return null;
+            }
+            try {
+                if (typeof window.firebaseNextCode === 'function') {
+                    memory.code = await window.firebaseNextCode();
+                }
+            } catch (e) { /* fallback below */ }
+            if (!Number.isInteger(memory.code)) {
+                memory.code = editSystem.generateNextCode();
+            }
+            const savedInCloud = await editSystem.saveMemoryToCloud(memory);
+            if (!savedInCloud) {
+                editSystem.saveMemoryToStorage(memory);
+                editSystem.addMemoryToPage(memory);
+                editSystem.addMemoryToTimeline(memory);
+            }
+            editSystem.reapplyActiveFilterIfAny?.();
+            editSystem.reapplyActiveSortIfAny?.();
+            return memory;
+        };
+        
+        // Carregar memórias salvas quando a página carregar
+        document.addEventListener('DOMContentLoaded', async function() {
+            editSystem.loadUserMemories();
+            try {
+              // Notify recent additions (últimas 48h)
+              if (typeof window.firebaseLoadMemories === 'function') {
+                const all = await window.firebaseLoadMemories();
+                const now = Date.now();
+                const recent = (all || []).filter(m => {
+                  const ts = m.timestamp ? Date.parse(m.timestamp) : 0;
+                  return ts && (now - ts) <= 48*60*60*1000;
+                });
+                if (recent.length) {
+                  const lines = recent.map(m => {
+                    const t = m.title || 'Sem título';
+                    const a = m.author || 'Autor desconhecido';
+                    const y = m.year || '';
+                    return `\n• ${t} — ${a} (${y})`;
+                  }).join('');
+                  editSystem.showNotification(`Novas Adições:${lines}`, 'info');
+                }
+              }
+            } catch(_) {}
         });
     </script>
-
-    <!-- ZONAS DE HOVER INVISÍVEIS -->
-    <div class="hover-zone-top"></div>
-    <div class="hover-zone-bottom"></div>
-
-    <!-- SETAS DE NAVEGAÇÃO INTELIGENTES E INVISÍVEIS -->
-    <button id="back-to-top" class="rect-scroll-btn" title="Voltar ao topo">
-      <span></span>
-    </button>
-
-    <button id="scroll-to-bottom" class="rect-scroll-btn" title="Ir para o final">
-      <span></span>
-    </button>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const backToTop = document.getElementById('back-to-top');
-      const scrollToBottom = document.getElementById('scroll-to-bottom');
-      
-      // Configurações
-      const TOP_THRESHOLD = 100; // Pixels do topo para considerar "no topo"
-      const BOTTOM_THRESHOLD = 100; // Pixels do final para considerar "no final"
-
-      // Função para verificar se deve mostrar as setas
-      function updateArrowsAvailability() {
-        const scrollY = window.scrollY;
-        const documentHeight = document.documentElement.scrollHeight;
-        const windowHeight = window.innerHeight;
-        const scrolledToBottom = (scrollY + windowHeight) >= (documentHeight - BOTTOM_THRESHOLD);
-        const isAtTop = scrollY <= TOP_THRESHOLD;
-
-        // SETA "VOLTAR AO TOPO"
-        if (!isAtTop) {
-          // Disponível - pode aparecer no hover
-          backToTop.classList.remove('unavailable');
-          backToTop.classList.add('available');
-        } else {
-          // Indisponível - completamente invisível
-          backToTop.classList.remove('available');
-          backToTop.classList.add('unavailable');
+    
+    <style>
+        /* Estilos para o sistema de console */
+        .auth-modal, .exit-modal {
+            display: none;
+            position: fixed;
+            z-index: 10001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+        
+        .auth-content, .exit-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background:
+              radial-gradient(1000px 300px at 50% -20%, rgba(212,180,95,0.12), transparent 60%),
+              linear-gradient(135deg, #ffffff 0%, #faf9f6 100%);
+            padding: 1.25rem 1.25rem 1rem;
+            border-radius: 14px;
+            box-shadow: 0 18px 36px rgba(0,0,0,0.22);
+            text-align: center;
+            width: min(92vw, 520px);
+            border: 1px solid rgba(212,180,95,0.7);
+            position: relative;
+            overflow: hidden;
         }
 
-        // SETA "IR PARA BAIXO"
-        if (!scrolledToBottom) {
-          // Disponível - pode aparecer no hover
-          scrollToBottom.classList.remove('unavailable');
-          scrollToBottom.classList.add('available');
-        } else {
-          // Indisponível - completamente invisível
-          scrollToBottom.classList.remove('available');
-          scrollToBottom.classList.add('unavailable');
+        /* Decorative corner accent to reduce white feel */
+        .exit-content::after {
+            content: "";
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: radial-gradient(closest-side, rgba(212,180,95,0.2), transparent);
+            pointer-events: none;
+        }
+        
+        .auth-content h2, .exit-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .auth-content input {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 1rem 0;
+            border: 2px solid var(--gold-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .auth-buttons, .exit-buttons {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 0.75rem;
+        }
+        
+        .auth-buttons button, .exit-buttons button {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-buttons button:first-child, .save-btn {
+            background: var(--gold-color);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .auth-buttons button:last-child, .discard-btn {
+            background: #efe7cf;
+            color: var(--primary-color);
+            border: 1px solid var(--gold-color);
+        }
+        
+        .auth-error {
+            color: #dc3545;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        
+        /* Botão flutuante + */
+        .add-memory-floating {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 65px;
+            height: 65px;
+            background-color: var(--gold-color) !important;
+            color: var(--primary-color) !important;
+            border: none !important;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .add-memory-floating:hover {
+            background-color: var(--primary-color) !important;
+            color: var(--gold-color) !important;
+            transform: translateY(-8px);
+        }
+        
+        /* Botão Sair do Console */
+        .exit-console-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: 2px solid var(--gold-color);
+            border-radius: 25px;
+            padding: 10px 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .exit-arrow {
+            color: var(--gold-color);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .exit-console-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            background: var(--gold-color);
+            color: white;
+        }
+        
+        .exit-console-btn:hover .exit-arrow {
+            color: white;
+        }
+        
+        /* Mostrar elementos quando autenticado */
+        body.authenticated .add-memory-floating,
+        body.authenticated .exit-console-btn {
+            display: flex;
+        }
+        
+        /* Estilos de edição */
+        .edit-mode h1,
+        .edit-mode h2,
+        .edit-mode h3,
+        .edit-mode p,
+        .edit-mode .document-author,
+        .edit-mode .document-year,
+        .edit-mode .read-button,
+        .edit-mode .timeline-button-horizontal {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        /* Disable per-field hover highlight */
+        .edit-mode h1:hover,
+        .edit-mode h2:hover,
+        .edit-mode h3:hover,
+        .edit-mode p:hover,
+        .edit-mode .document-author:hover,
+        .edit-mode .document-year:hover,
+        .edit-mode .read-button:hover,
+        .edit-mode .timeline-button-horizontal:hover {
+            background: inherit !important;
+            color: inherit !important;
+            box-shadow: none !important;
+            filter: none !important;
+        }
+        
+        /* Remove per-field pencil bubbles */
+        .edit-mode h1::after,
+        .edit-mode h2::after,
+        .edit-mode h3::after,
+        .edit-mode p::after,
+        .edit-mode .document-author::after,
+        .edit-mode .document-year::after,
+        .edit-mode .read-button::after,
+        .edit-mode .timeline-button-horizontal::after { content: none; }
+        
+        .edit-mode h1:hover::after,
+        .edit-mode h2:hover::after,
+        .edit-mode h3:hover::after,
+        .edit-mode p:hover::after,
+        .edit-mode .document-author:hover::after,
+        .edit-mode .document-year:hover::after,
+        .edit-mode .read-button:hover::after,
+        .edit-mode .timeline-button-horizontal:hover::after { content: none; }
+        
+        /* Estilos do Modal de Adicionar Memória */
+        .add-memory-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .add-memory-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 3px solid var(--gold-color);
+        }
+        
+        .add-memory-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            text-align: center;
+            font-family: 'EB Garamond', serif;
+            font-size: 1.8rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-family: 'EB Garamond', serif;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.6rem;
+            border: 2px solid var(--gold-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: 'EB Garamond', serif;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .required {
+            color: #dc3545;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .modal-btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'EB Garamond', serif;
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-cancel {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+        
+        .btn-cancel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        .user-added {
+            border-left: 4px solid var(--gold-color);
+            position: relative;
+        }
+        
+        .user-added::before { content: none; }
+        
+        /* Remove button: hidden by default; visible only in editor/console mode */
+        .remove-memory-btn {
+            display: none;
+            background: var(--primary-color);
+            color: var(--gold-color);
+            border: 1px solid var(--gold-color);
+            padding: 5px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+
+        /* Edit pencil: floating yellow circle in top-right on hover (console mode) */
+        .edit-card-btn {
+            display:none;
+            position:absolute;
+            top:10px; right:10px;
+            width:56px; height:36px;
+            border-radius:18px; /* oval pill, not a perfect circle */
+            background:#d6a94c; color:#5b3836;
+            border:2px solid #b98e3c;
+            box-shadow: none;
+            font-size:18px; line-height:1;
+            align-items:center; justify-content:center;
+            cursor:pointer;
+        }
+        .document-card { position:relative; }
+        body.edit-mode .document-card:hover .edit-card-btn,
+        body.authenticated .document-card:hover .edit-card-btn {
+            display:flex;
+        }
+        .edit-card-btn:hover { filter:brightness(1.05); }
+
+        /* Show and style when in console/editor mode */
+        body.edit-mode .remove-memory-btn,
+        body.editing .remove-memory-btn {
+            display: inline-block;
+        }
+
+        body.edit-mode .remove-memory-btn:hover,
+        body.editing .remove-memory-btn:hover {
+            background: #5b3836; /* slightly lighter brown hover */
+            color: var(--gold-color);
+            transform: scale(1.1);
+        }
+        
+        @media (max-width: 768px) {
+            .add-memory-content {
+                padding: 1.5rem;
+                margin: 10px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+            }
+        }
+        
+        /* === CONSOLE: sempre visível e independente do scroll === */
+        .auth-modal, .exit-modal, .add-memory-modal {
+          position: fixed !important;
+          inset: 0 !important;
+          z-index: 1000000 !important;
+        }
+
+        /* Botões principais do console */
+        .add-memory-floating, .exit-console-btn {
+          position: fixed !important;
+          z-index: 1000001 !important;
+          pointer-events: auto;
+        }
+
+        .add-memory-floating { bottom: 24px !important; right: 24px !important; }
+        .exit-console-btn    { top: 16px !important;    left: 16px !important;  }
+
+        /* Evita efeitos que "prendam" fixed a contêiner com transform/filtro */
+        .edit-mode, .authenticated, html, body {
+          transform: none !important;
+          filter: none !important;
+        }
+
+        /* Opcional: evita que overlays de vídeo/mídia cubram os botões do console */
+        .video-popup.active,
+        .video-window.maximized {
+          z-index: 900000 !important;
+        }
+    </style>
+
+    <!-- Modal para Adicionar Memória -->
+    <div id="addMemoryModal" class="add-memory-modal">
+        <div class="add-memory-content">
+            <h2>📚 Adicionar Nova Memória</h2>
+            <form id="addMemoryForm">
+                <div class="form-group">
+                    <label for="title">Título <span class="required">*</span></label>
+                    <input type="text" id="title" name="title" required placeholder="Digite o título da obra...">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="author">Autor <span class="required">*</span></label>
+                        <input type="text" id="author" name="author" required placeholder="Nome do autor...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="year">Ano <span class="required">*</span></label>
+                        <input type="number" id="year" name="year" required min="1800" max="2030" placeholder="2024">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="code">Código (opcional)</label>
+                        <input type="number" id="code" name="code" min="1" step="1" placeholder="ex: 401">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="type">Tipo de Obra <span class="required">*</span></label>
+                    <select id="type" name="type" required>
+                        <option value="">Selecione o tipo...</option>
+                        <option value="Livro">Livro</option>
+                        <option value="Conto">Conto</option>
+                        <option value="Poema">Poema</option>
+                        <option value="Documento">Documento</option>
+                        <option value="Mídia">Mídia</option>
+                        <option value="Vídeo">Vídeo</option>
+                        <option value="Antologia">Antologia</option>
+                        <option value="Biografia">Biografia</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Descrição <span class="required">*</span></label>
+                    <textarea id="description" name="description" required placeholder="Descreva brevemente a obra, sua importância ou contexto histórico..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="link">Link/URL (opcional)</label>
+                    <input type="url" id="link" name="link" placeholder="https://exemplo.com/arquivo.pdf">
+                </div>
+                
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn btn-cancel" onclick="editSystem.hideAddMemoryModal()">
+                        ❌ Cancelar
+                    </button>
+                    <button type="button" class="modal-btn btn-save" onclick="editSystem.onSaveMemoryClicked()">
+                        ✅ Salvar Memória
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    /* Reafirma o FIXED se algo sobrescrever e mantém no topo durante scroll/resize */
+    (function enforceConsoleHUD(){
+      const ensure = () => {
+        const plus = document.getElementById('addMemoryFloating');
+        const exit = document.getElementById('exitConsoleBtn');
+        [plus, exit].forEach(el => {
+          if (!el) return;
+          el.style.position = 'fixed';
+          el.style.zIndex = '1000001';
+          el.style.pointerEvents = 'auto';
+        });
+      };
+      window.addEventListener('scroll', ensure, {passive:true});
+      window.addEventListener('resize', ensure, {passive:true});
+      ensure();
+    })();
+    </script>
+    <!-- Firebase Integration -->
+    <script type="module">
+      // ===== Import Firebase SDKs =====
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+      import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+      import { getFirestore, collection, addDoc, getDocs, serverTimestamp, doc, getDoc, setDoc, onSnapshot, updateDoc, deleteDoc, increment, query, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    
+      // ===== Configuração do Firebase =====
+      const firebaseConfig = {
+        apiKey: "AIzaSyB0Pcq3Us_uY281pRJsR2U5-04_pplrH9g",
+        authDomain: "mark-2-111f9.firebaseapp.com",
+        projectId: "mark-2-111f9",
+        storageBucket: "mark-2-111f9.firebasestorage.app",
+        messagingSenderId: "893231291360",
+        appId: "1:893231291360:web:bbe242a0acb635c7e2a985",
+        measurementId: "G-FQYBS18ZX0"
+      };
+    
+      // ===== Inicializa o Firebase =====
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      // Expose a promise to await auth readiness for console operations
+      const _auth = getAuth(app);
+      window.waitForFirebaseAuth = new Promise((resolve) => {
+        const unsub = onAuthStateChanged(_auth, (user) => {
+          if (user) { unsub(); resolve(true); }
+        });
+      });
+    
+      // ===== Função: Carregar todos os conteúdos =====
+      async function carregarConteudos() {
+        const lista = document.getElementById("conteudos-lista");
+        if (!lista) return;
+        lista.innerHTML = ""; // limpa
+        const q = query(collection(db, "conteudos"), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const card = document.createElement("div");
+          card.classList.add("card-conteudo");
+          card.innerHTML = `
+            <h3>${data.titulo}</h3>
+            <p><strong>Ano:</strong> ${data.ano}</p>
+            <p><strong>Autor:</strong> ${data.autor}</p>
+            <p><strong>Descrição:</strong> ${data.descricao}</p>
+            <p><strong>Tipo:</strong> ${data.tipo}</p>
+            <a href="${data.url}" target="_blank">Ver</a>
+          `;
+          lista.appendChild(card);
+        });
+      }
+    
+      // ===== Função: Adicionar novo conteúdo =====
+      async function adicionarConteudo(titulo, ano, autor, descricao, tipo, url) {
+        try {
+          await addDoc(collection(db, "conteudos"), {
+            titulo,
+            ano: Number(ano),
+            autor,
+            descricao,
+            tipo,
+            url,
+            createdAt: serverTimestamp()
+          });
+          console.log("✅ Documento adicionado com sucesso!");
+          carregarConteudos(); // recarrega lista
+        } catch (e) {
+          console.error("❌ Erro ao adicionar documento: ", e);
         }
       }
 
-      // Funcionalidade de clique das setas
-      backToTop.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
+      // Expose Firebase helpers for console usage
+      window.adicionarConteudo = adicionarConteudo;
 
-      scrollToBottom.addEventListener('click', () => {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-      });
+      // Exposed helper functions for EditSystem -> Firebase
+      window.firebaseSaveMemory = async (memory) => {
+        await addDoc(collection(db, "conteudos"), {
+          titulo: memory.title,
+          ano: Number(memory.year),
+          autor: memory.author,
+          descricao: memory.description,
+          tipo: memory.type,
+          url: memory.link,
+          codigo: Number(memory.code),
+          createdAt: serverTimestamp()
+        });
+      };
 
-      // Escutar evento de scroll para atualizar disponibilidade
-      window.addEventListener('scroll', updateArrowsAvailability);
+      window.firebaseLoadMemories = async () => {
+        const list = [];
+        const snap = await getDocs(collection(db, "conteudos"));
+        snap.forEach((docSnap) => {
+          const d = docSnap.data();
+          list.push({
+            id: docSnap.id,
+            title: d.titulo,
+            year: d.ano,
+            author: d.autor,
+            description: d.descricao,
+            type: d.tipo,
+            link: d.url,
+            code: d.codigo || 0,
+            timestamp: d.createdAt?.toDate?.()?.toISOString?.() || ''
+          });
+        });
+        return list;
+      };
+
+      window.firebaseUpdateMemoryCode = async (oldCode, newCode) => {
+        // Naive update: find documents with matching codigo and update
+        const snap = await getDocs(collection(db, "conteudos"));
+        const updates = [];
+        snap.forEach((docSnap) => {
+          const d = docSnap.data();
+          if (Number(d.codigo) === Number(oldCode)) {
+            updates.push(updateDoc(docSnap.ref, { codigo: Number(newCode), updatedAt: serverTimestamp() }));
+          }
+        });
+        await Promise.all(updates);
+      };
+
+      // Update arbitrary fields on a conteudos doc by id
+      window.firebaseUpdateFieldsById = async (id, fields) => {
+        const ref = doc(db, "conteudos", id);
+        await updateDoc(ref, { 
+          titulo: fields.title,
+          ano: Number(fields.year),
+          autor: fields.author,
+          descricao: fields.description,
+          tipo: fields.type,
+          url: fields.link,
+          updatedAt: serverTimestamp()
+        });
+      };
+
+      // Delete by document id or by matching codigo
+      window.firebaseDeleteMemory = async ({ id, code }) => {
+        if (id) {
+          await deleteDoc(doc(db, "conteudos", id));
+          return 1;
+        }
+        if (typeof code !== 'undefined') {
+          const snap = await getDocs(collection(db, "conteudos"));
+          const deletions = [];
+          snap.forEach((docSnap) => {
+            const d = docSnap.data();
+            if (Number(d.codigo) === Number(code)) {
+              deletions.push(deleteDoc(docSnap.ref));
+            }
+          });
+          await Promise.all(deletions);
+          return deletions.length;
+        }
+        return 0;
+      };
+
+      // Live feed: renders cards in real-time
+      function startCardsFeed() {
+        const q = query(collection(db, "conteudos"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snap) => {
+          const cards = [];
+          snap.forEach(docSnap => cards.push({ id: docSnap.id, ...docSnap.data() }));
+          if (window.editSystem && typeof window.editSystem.renderCloudCards === 'function') {
+            window.editSystem.renderCloudCards(cards);
+          }
+        });
+      }
+      // Atomic (best-effort) numeric code allocator using a counters doc
+      window.firebaseNextCode = async () => {
+        const ref = doc(db, 'counters', 'codes');
+        // Initialize if missing
+        await setDoc(ref, { last: 330, updatedAt: serverTimestamp() }, { merge: true });
+        // We do a read then +1 write; for true atomicity, use a transaction; keeping simple here
+        const snap = await getDoc(ref);
+        const last = (snap.exists() && typeof snap.data().last === 'number') ? snap.data().last : 330;
+        const next = last + 1;
+        await setDoc(ref, { last: next, updatedAt: serverTimestamp() }, { merge: true });
+        return next;
+      };
+      startCardsFeed();
+    
+      // ===== Listener do botão "+" =====
+      const botaoAdd = document.getElementById("btn-add-conteudo");
+      if (botaoAdd) {
+        botaoAdd.addEventListener("click", () => {
+          const titulo = prompt("Título:");
+          const ano = prompt("Ano:");
+          const autor = prompt("Autor:");
+          const descricao = prompt("Descrição:");
+          const tipo = prompt("Tipo:");
+          const url = prompt("URL:");
+          if (titulo && ano && autor && descricao && tipo && url) {
+            adicionarConteudo(titulo, ano, autor, descricao, tipo, url);
+          }
+        });
+      }
+    
+      // ===== Inicializa carregamento =====
+      carregarConteudos();
       
-      // Verificar disponibilidade inicial
-      updateArrowsAvailability();
-    });
-    </script>
+      // ===== Visitas: círculo de estatísticas (MOSTRAR VISITAS TOTAIS DA SEMANA) =====
+      const visitsEl = document.querySelector("#visits-stat .stat-number");
+      const setBadge = n => { if (visitsEl) visitsEl.textContent = (n || 0).toLocaleString('pt-BR'); };
+      const visitsLabelEl = document.querySelector("#visits-stat .stat-label");
+      if (visitsLabelEl) visitsLabelEl.textContent = "Visitas";
 
+      // realtime para o círculo: total de visitas do ano de 2025
+      const YEAR_FOR_BADGE = 2025;
+      onSnapshot(collection(db, 'stats_weekly'), snap => {
+        let total = 0;
+        const start = new Date(YEAR_FOR_BADGE,0,1,0,0,0,0);
+        const end   = new Date(YEAR_FOR_BADGE,11,31,23,59,59,999);
+        snap.forEach(ds => {
+          const d = ds.data();
+          let ws = d.week_start?.toDate?.();
+          if (!ws){
+            const m = String(ds.id).match(/(\d{4})-W(\d{2})/);
+            if (m){
+              const y = parseInt(m[1],10), w = parseInt(m[2],10);
+              const jan4 = new Date(y,0,4);
+              const day = jan4.getDay()||7; const monday = new Date(jan4); monday.setDate(jan4.getDate()+1-day + (w-1)*7);
+              ws = monday;
+            }
+          }
+          if (ws && ws >= start && ws <= end){
+            total += (d.visits || 0);
+          }
+        });
+        setBadge(total);
+      });
+
+      // flag de visitante único por navegador
+      const IS_UNIQUE = !localStorage.getItem("rdc_unique_global");
+      if (IS_UNIQUE) localStorage.setItem("rdc_unique_global", "1");
+
+      // patch nos contadores com increment atômico
+      async function bumpCountersOnce() {
+        const ref = doc(db, "stats", "global");
+        try {
+          // Garante o doc e faz +1 em visitas
+          await setDoc(ref, { createdAt: serverTimestamp() }, { merge: true });
+          await updateDoc(ref, {
+            visits_total: increment(1),
+            updatedAt: serverTimestamp()
+          });
+        } catch (e) {
+          // Se não existir, cria com valores iniciais
+          await setDoc(ref, {
+            visits_total: 1,
+            unique_visitors: IS_UNIQUE ? 1 : 0,
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        }
+        if (IS_UNIQUE) {
+          try {
+            await updateDoc(ref, {
+              unique_visitors: increment(1),
+              updatedAt: serverTimestamp()
+            });
+          } catch (e) {
+            await setDoc(ref, {
+              unique_visitors: 1,
+              updatedAt: serverTimestamp()
+            }, { merge: true });
+          }
+        }
+      }
+
+      // autentica e conta visita
+      const auth = getAuth(app);
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          try { await bumpCountersOnce(); } catch (e) { console.error("Falha ao atualizar contadores:", e); }
+        }
+      });
+      signInAnonymously(auth).catch(console.error);
+
+      // ===== Extrato Semanal (MS-DOS) =====
+
+      // Semana ISO
+      function isoWeekKey(d=new Date()){
+        const t = new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+        const day = t.getUTCDay()||7; t.setUTCDate(t.getUTCDate()+4-day);
+        const yStart = new Date(Date.UTC(t.getUTCFullYear(),0,1));
+        const wk = Math.ceil((((t - yStart)/86400000)+1)/7);
+        return `${t.getUTCFullYear()}-W${String(wk).padStart(2,'0')}`;
+      }
+      function weekRange(d=new Date()){
+        const day = (d.getDay() || 7);
+        const start = new Date(d); start.setHours(0,0,0,0); start.setDate(d.getDate() - (day-1));
+        const end   = new Date(start); end.setDate(start.getDate()+6); end.setHours(23,59,59,999);
+        return {start,end};
+      }
+
+      // Range helpers for aggregation
+      function monthRange(d=new Date()){
+        const start = new Date(d.getFullYear(), d.getMonth(), 1, 0,0,0,0);
+        const end = new Date(d.getFullYear(), d.getMonth()+1, 0, 23,59,59,999);
+        return {start,end};
+      }
+
+      // Seed July 2025 totals if not present (only for demo/testing)
+      async function ensureSeedJuly(){
+        const y = 2025; const m = 6; // July index
+        const julyStart = new Date(y, m, 1, 0,0,0,0);
+        const julyEnd = new Date(y, m+1, 0, 23,59,59,999);
+        // Split totals across the ISO weeks intersecting July (approximate)
+        const splits = [80, 60, 50, 47]; // visits sum 237
+        const uniq = [10, 7, 6, 5]; // uniques sum 28
+        const weekKeys = [];
+        let d = new Date(julyStart);
+        while (d <= julyEnd){ weekKeys.push(isoWeekKey(d)); d.setDate(d.getDate()+7); }
+        for (let i=0; i<weekKeys.length && i<splits.length; i++){
+          const k = weekKeys[i];
+          const ref = doc(db,'stats_weekly', k);
+          const s = await getDoc(ref);
+          if (!s.exists()){
+            await setDoc(ref, {
+              week_key:k,
+              week_start: serverTimestamp(),
+              week_end: serverTimestamp(),
+              visits: splits[i],
+              uniques: uniq[i],
+              updatedAt: serverTimestamp()
+            }, { merge:true });
+          }
+        }
+      }
+
+      const wkKey = isoWeekKey();
+      const WK_FLAG = 'rdc_unique_week_'+wkKey;
+      const IS_WEEK_UNIQUE = !localStorage.getItem(WK_FLAG);
+      if (IS_WEEK_UNIQUE) localStorage.setItem(WK_FLAG,'1');
+
+      async function ensureWeeklyCounters(){
+        const r = doc(db,'stats_weekly', wkKey);
+        const s = await getDoc(r);
+        const base = s.exists()? s.data(): {visits:0, uniques:0};
+        await setDoc(r,{
+          week_key:wkKey,
+          week_start: base.week_start || serverTimestamp(),
+          week_end:   base.week_end   || serverTimestamp(),
+          visits:(base.visits||0)+1,
+          uniques:(base.uniques||0),
+          updatedAt: serverTimestamp()
+        }, {merge:true});
+        if (IS_WEEK_UNIQUE){
+          await setDoc(r,{
+            week_key:wkKey,
+            week_start: base.week_start || serverTimestamp(),
+            week_end:   base.week_end   || serverTimestamp(),
+            visits:(base.visits||0)+1,
+            uniques:(base.uniques||0)+1,
+            updatedAt: serverTimestamp()
+          }, {merge:true});
+        }
+      }
+
+      onAuthStateChanged(auth, (user)=>{ if(user) ensureWeeklyCounters().catch(console.error); });
+
+      const $btn = document.getElementById('btn-weekly-extract');
+      const $pre = document.getElementById('weekly-dos');
+      let _lastHeaderLineText = '';
+      let _titleHitEl = null;
+
+      // Format date/time in Brazilian timezone regardless of host TZ
+      const fmtDT = d => new Date(d).toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short', timeZone:'America/Sao_Paulo'});
+      const fmtVisits = v => (Number(v) > 0 ? Number(v) : 'sem registro');
+      const DASH_LINE = '-'.repeat(35);
+      // FLIP helpers to animate surrounding layout during panel expand/collapse
+      function getWeeklyContainer(){ return document.getElementById('weekly-extract'); }
+      function getWeeklySection(){ const c=getWeeklyContainer(); return c? c.parentElement : null; }
+      function getAnimTargets(){
+        const section = getWeeklySection(); const cont = getWeeklyContainer();
+        if (!section || !cont) return [];
+        return Array.from(section.children).filter(el => el !== cont && el.nodeType === 1 && el.offsetParent);
+      }
+      function measureRects(els){
+        const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+        const scrollX = window.scrollX || document.documentElement.scrollLeft || 0;
+        const map = new Map();
+        els.forEach(el => { const r = el.getBoundingClientRect(); map.set(el, { left:r.left+scrollX, top:r.top+scrollY, width:r.width, height:r.height }); });
+        return map;
+      }
+      function playFLIP(before, after){
+        before.forEach((b, el)=>{
+          const a = after.get(el); if (!a) return;
+          const dx = b.left - a.left; const dy = b.top - a.top;
+          if (dx || dy){
+            el.style.willChange = 'transform';
+            el.style.transform = `translate(${dx}px, ${dy}px)`;
+            el.style.transition = 'transform .85s cubic-bezier(0.4, 0, 0.2, 1)';
+            requestAnimationFrame(()=>{
+              el.style.transform = 'translate(0,0)';
+              const cleanup=()=>{ el.style.transition=''; el.style.transform=''; el.style.willChange=''; el.removeEventListener('transitionend', cleanup); };
+              el.addEventListener('transitionend', cleanup);
+            });
+          }
+        });
+      }
+      function animateLayoutDuring(setter){
+        const targets = getAnimTargets();
+        const before = measureRects(targets);
+        setter();
+        requestAnimationFrame(()=>{ const after = measureRects(targets); playFLIP(before, after); });
+      }
+      const MIN_PANEL_HEIGHT = 300; // ensure consistent panel height across modes
+      function centerLine(text, width = 60){
+        try {
+          const baseW = width || DASH_LINE.length;
+          const len = String(text).length;
+          const left = Math.max(0, Math.floor((baseW - len)/2));
+          return ' '.repeat(left) + text;
+        } catch { return String(text); }
+      }
+      // Inline navigation arrows beside centered label + clickable dropdown list
+      function updateInlineNav(labelText){
+        try {
+          const cont = document.getElementById('weekly-extract');
+          if (!cont) return;
+          let L = document.getElementById('inline-left');
+          let R = document.getElementById('inline-right');
+          let HIT = document.getElementById('title-hit');
+          let MENU = document.getElementById('timeframe-list');
+          if (!L) {
+            L = document.createElement('button');
+            L.id = 'inline-left';
+            Object.assign(L.style, {position:'absolute', width:'24px', height:'24px', border:'none', background:'transparent', display:'none', zIndex:10050, cursor:'pointer', padding:'0', color:'#f3d27a'});
+            L.textContent = '◀';
+            cont.appendChild(L);
+          }
+          if (!R) {
+            R = document.createElement('button');
+            R.id = 'inline-right';
+            Object.assign(R.style, {position:'absolute', width:'24px', height:'24px', border:'none', background:'transparent', display:'none', zIndex:10050, cursor:'pointer', padding:'0', color:'#f3d27a'});
+            R.textContent = '▶';
+            cont.appendChild(R);
+          }
+          if (!HIT) {
+            HIT = document.createElement('div');
+            HIT.id = 'title-hit';
+            Object.assign(HIT.style, {position:'absolute', borderRadius:'12px', background:'transparent', display:'block', zIndex:10049, cursor:'pointer'});
+            cont.appendChild(HIT);
+            _titleHitEl = HIT;
+            // hover highlight for the title area
+            HIT.addEventListener('mouseenter', ()=>{ HIT.style.background='rgba(209,168,75,0.22)'; });
+            HIT.addEventListener('mouseleave', ()=>{ HIT.style.background='transparent'; });
+            // click disabled: list functionality removed
+            HIT.addEventListener('click', (ev)=>{ ev.stopPropagation(); });
+          }
+          L.onclick = ()=> shiftPivot(-1);
+          R.onclick = ()=> shiftPivot(1);
+
+          const pre = document.getElementById('weekly-dos');
+          const cs = getComputedStyle(pre);
+          const padTop = parseFloat(cs.paddingTop) || 0;
+          let lineH = parseFloat(cs.lineHeight); if (!lineH || Number.isNaN(lineH)) { const fs = parseFloat(cs.fontSize) || 16; lineH = fs * 1.6; }
+          const baseIndex = 3; // 0 header, 1 range, 2 dash, 3 label
+          // Estimate wrapped lines for the long header/range line so the label index shifts correctly
+          const measHeader = document.createElement('span');
+          measHeader.style.cssText = `position:absolute; visibility:hidden; white-space:pre; font:${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+          document.body.appendChild(measHeader);
+          measHeader.textContent = _lastHeaderLineText || '';
+          const headerW = measHeader.offsetWidth;
+          measHeader.textContent = 'M';
+          const charW = Math.max(1, measHeader.offsetWidth);
+          document.body.removeChild(measHeader);
+          const padLeft = parseFloat(cs.paddingLeft) || 0;
+          const padRight = parseFloat(cs.paddingRight) || 0;
+          const contRect = cont.getBoundingClientRect();
+          const usableWidth = Math.max(1, contRect.width - padLeft - padRight);
+          const headerLines = Math.max(1, Math.ceil(headerW / usableWidth));
+          const extraWraps = headerLines - 1;
+          // Position relative to the container, accounting for the toolbar and any header wraps
+          const preTop = pre?.offsetTop || 0;
+          const top = preTop + padTop + (baseIndex + extraWraps) * lineH; // center baseline for the label line
+          const measLabel = document.createElement('span');
+          measLabel.style.cssText = `position:absolute; visibility:hidden; white-space:pre; font:${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+          measLabel.textContent = labelText || '';
+          document.body.appendChild(measLabel);
+          const labelW = measLabel.offsetWidth; document.body.removeChild(measLabel);
+          const mid = contRect.width / 2; const gap = 12;
+          // Place arrows at the container edges
+          L.style.top = `${top}px`; L.style.left = `8px`; L.style.transform = 'translateY(-50%)';
+          R.style.top = `${top}px`; R.style.left = `auto`; R.style.right = `8px`; R.style.transform = 'translateY(-50%)';
+          // overlay hit area for hover/click, exactly covering the title text area
+          HIT.style.top = `${top - lineH/2}px`;
+          HIT.style.left = `${Math.max(8, mid - (labelW/2))}px`;
+          HIT.style.width = `${labelW}px`;
+          HIT.style.height = `${lineH}px`;
+          // Helper: show only arrows that can navigate within bounds
+          const canNav = (delta)=>{
+            // uses boundsForMode() and currentPivotDate from outer scope
+            const {min,max} = boundsForMode();
+            let cand = new Date(currentPivotDate);
+            if (currentMode === 'week'){
+              cand.setDate(cand.getDate() + delta * 7);
+            } else if (currentMode === 'month'){
+              cand.setMonth(cand.getMonth() + delta, 1); cand.setDate(1);
+            } else {
+              return false; // year mode locked
+            }
+            return !(cand < min || cand > max);
+          };
+          const updateArrowsVisibility = () => {
+            const leftOk = canNav(-1);
+            const rightOk = canNav(1);
+            L.style.display = leftOk ? 'block' : 'none';
+            R.style.display = rightOk ? 'block' : 'none';
+          };
+          // Show arrows when hovering the whole container, hide when leaving
+          if (!cont.dataset.arrowsBound){
+            cont.addEventListener('mouseenter', ()=>{ updateArrowsVisibility(); });
+            cont.addEventListener('mouseleave', ()=>{ L.style.display='none'; R.style.display='none'; if (MENU) MENU.style.display='none'; });
+            cont.dataset.arrowsBound = '1';
+          }
+          // Also refresh arrow availability after each layout calculation
+          updateArrowsVisibility();
+          // Title click disabled: list functionality removed
+        } catch {}
+      }
+      // Smooth panel height + content opacity when switching; supports slide dir -1/1 for left/right
+      let _slideDir = 0;
+      function setPanelContentSmooth(text){
+        if(!$pre) return;
+        const cont = document.getElementById('weekly-extract');
+        const startH = cont.offsetHeight;
+        cont.style.height = startH + 'px';
+        // soft fade for content swap
+        $pre.style.transition = 'opacity .35s ease, transform .65s ease';
+        $pre.style.opacity = '0';
+        $pre.style.transform = _slideDir < 0 ? 'translateX(12px)' : (_slideDir > 0 ? 'translateX(-12px)' : 'translateX(0)');
+        setTimeout(()=>{
+          $pre.textContent = text;
+          requestAnimationFrame(()=>{
+            const targetH = Math.max($pre.scrollHeight + 24, MIN_PANEL_HEIGHT); // uniform min height
+            cont.style.transition = 'height .8s cubic-bezier(0.4, 0, 0.2, 1)';
+            cont.style.height = targetH + 'px';
+            $pre.style.opacity = '1';
+            $pre.style.transform = 'translateX(0)';
+            const cleanup = ()=>{
+              cont.style.transition = '';
+              cont.style.height = '';
+              $pre.style.transition = '';
+              cont.removeEventListener('transitionend', cleanup);
+            };
+            cont.addEventListener('transitionend', cleanup);
+          });
+        }, 160);
+      }
+      function renderDOS(data, rangeLabel){
+        const {start,end} = weekRange(currentPivotDate);
+        const updated = data?.updatedAt?.toDate?.();
+        const wkNum = isoWeek(currentPivotDate).week;
+        const centeredWeek = centerLine(`Semana ${String(wkNum)}`, DASH_LINE.length);
+        const header = `${rangeLabel || `SEMANA: ${wkKey}`}  (${fmtDT(start)}  →  ${fmtDT(end)})`;
+        _lastHeaderLineText = header;
+        const out = [
+          'RDC WEEK.EXE  /CURRENT',
+          header,
+          DASH_LINE,
+          centeredWeek,
+          `VISITAS TOTAIS . . . . . : ${fmtVisits(data?.visits)}`,
+          `VISITANTES ÚNICOS  . . . : ${data?.uniques ?? 0}`,
+          `ATUALIZADO EM . . . . . : ${updated ? fmtDT(updated) : '—'}`
+        ].join('\n');
+        updateInlineNav(`Semana ${String(wkNum)}`);
+        return out;
+      }
+
+      let unsub = null;
+      // period pivot state
+      let currentPivotDate = new Date();
+      let currentMode = 'week'; // 'week' | 'month' | 'year'
+      const ALLOWED_YEAR = 2025; // navigation limited to 2025
+      const MIN_WEEK = 26;       // earliest week available
+      const MIN_MONTH_INDEX = 5; // June (0-based)
+
+      async function toggleWeeklyPanel(){
+        const container = document.getElementById('weekly-extract');
+        if (!container || !$pre) return;
+        const willOpen = !$pre.classList.contains('open');
+        container.style.display = 'block';
+        container.style.textAlign = 'right';
+        $pre.hidden = false;
+        if (willOpen) {
+          animateLayoutDuring(()=>{ $pre.classList.add('open'); const c=getWeeklyContainer(); if(c) c.style.marginBottom='18px'; });
+          // prepare smooth expansion from 0 height
+          container.style.overflow = 'hidden';
+          container.style.height = '0px';
+          container.style.transition = 'height .8s cubic-bezier(0.4, 0, 0.2, 1)';
+          // ensure toolbar exists and is inside the panel element
+          let tb = document.getElementById('weekly-toolbar');
+          if (!tb) {
+            tb = document.createElement('div');
+            tb.id = 'weekly-toolbar';
+            tb.innerHTML = `
+              <button class="seg active">Semanal</button>
+              <button class="mes">Mensal</button>
+              <button class="ano">Anual</button>
+              <span class="tab-spacer"></span>
+            `;
+          }
+          // attach to container so renderPeriod() text updates on <pre> don't remove the toolbar
+          const cont = document.getElementById('weekly-extract');
+          cont.style.position = 'relative';
+          if (tb.parentElement !== cont) cont.appendChild(tb);
+          const setMode = (m)=>{ currentMode=m; tb.querySelectorAll('button').forEach(b=>b.classList.remove('active')); tb.querySelector(m==='week'?'.seg':m==='month'?'.mes':'.ano').classList.add('active'); renderPeriod(); };
+          tb.querySelector('.seg').onclick = ()=> setMode('week');
+          tb.querySelector('.mes').onclick = ()=> setMode('month');
+          tb.querySelector('.ano').onclick = ()=> setMode('year');
+          // geral removed as requested
+          // seed July demo docs once
+          ensureSeedJuly().catch(()=>{});
+          // Make hover behavior and inline nav buttons available immediately on open
+          try {
+            const wk = isoWeek(currentPivotDate).week;
+            const initialLabel = currentMode==='week' ? `Semana ${String(wk)}` : (currentMode==='month' ? (currentPivotDate.toLocaleDateString('pt-BR', { month:'long' })) : String(currentPivotDate.getFullYear()));
+            updateInlineNav(initialLabel);
+          } catch {}
+        } else {
+          animateLayoutDuring(()=>{ $pre.classList.remove('open'); const c=getWeeklyContainer(); if(c) c.style.marginBottom='0px'; });
+          // animate collapse
+          const startH = container.offsetHeight;
+          container.style.height = startH + 'px';
+          requestAnimationFrame(()=>{
+            container.style.transition = 'height .7s cubic-bezier(0.4, 0, 0.2, 1)';
+            container.style.height = '0px';
+            const done=()=>{
+              container.style.transition='';
+              container.style.height='';
+              $pre.hidden = true;
+              container.style.display = 'none';
+              container.style.marginBottom = '0px';
+              container.removeEventListener('transitionend',done);
+            };
+            container.addEventListener('transitionend', done);
+          });
+          return; // não precisa atualizar dados ao fechar
+        }
+
+        renderPeriod();
+        // after first render, animate height to target smoothly
+        requestAnimationFrame(()=>{
+          const targetH = Math.max($pre.scrollHeight + 24, MIN_PANEL_HEIGHT);
+          container.style.height = targetH + 'px';
+          // add gentle space below while expanded to ease surrounding layout
+          container.style.marginBottom = '18px';
+          const done=()=>{
+            container.style.transition='';
+            container.style.height='';
+            container.removeEventListener('transitionend',done);
+          };
+          container.addEventListener('transitionend', done);
+        });
+      }
+
+      function mondayOfIsoWeek(year, week){
+        const jan4 = new Date(year,0,4);
+        const day = jan4.getDay()||7; const monday = new Date(jan4); monday.setDate(jan4.getDate()+1-day + (week-1)*7);
+        monday.setHours(0,0,0,0); return monday;
+      }
+
+      function boundsForMode(){
+        if (currentMode === 'week'){
+          return { min: mondayOfIsoWeek(ALLOWED_YEAR, MIN_WEEK), max: new Date(ALLOWED_YEAR, 11, 31, 23,59,59,999) };
+        }
+        if (currentMode === 'month'){
+          return { min: new Date(ALLOWED_YEAR, MIN_MONTH_INDEX, 1, 0,0,0,0), max: new Date(ALLOWED_YEAR, 11, 31, 23,59,59,999) };
+        }
+        // Year mode locked entirely to 2025
+        return { min: new Date(ALLOWED_YEAR,0,1,0,0,0,0), max: new Date(ALLOWED_YEAR,11,31,23,59,59,999) };
+      }
+
+      function shiftPivot(delta){
+        _slideDir = delta; // remember slide direction
+        const {min,max} = boundsForMode();
+        let candidate = new Date(currentPivotDate);
+        if (currentMode === 'week'){
+          candidate.setDate(candidate.getDate() + delta * 7);
+        } else if (currentMode === 'month'){
+          candidate.setMonth(candidate.getMonth() + delta, 1);
+          candidate.setDate(1);
+        } else {
+          // No navigation outside 2025 in year mode
+          return;
+        }
+        if (candidate < min || candidate > max) { return; }
+        currentPivotDate = candidate;
+        renderPeriod();
+      }
+
+      function isoWeek(date){
+        const t = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const day = t.getUTCDay()||7; t.setUTCDate(t.getUTCDate()+4-day);
+        const yStart = new Date(Date.UTC(t.getUTCFullYear(),0,1));
+        const wk = Math.ceil((((t - yStart)/86400000)+1)/7);
+        return { year: t.getUTCFullYear(), week: wk };
+      }
+
+      async function renderPeriod(){
+        if (currentMode === 'week'){
+          const {year, week} = isoWeek(currentPivotDate);
+          const k = `${year}-W${String(week).padStart(2,'0')}`;
+          const ref = doc(db,'stats_weekly', k);
+          const s = await getDoc(ref);
+          setPanelContentSmooth(renderDOS(s.exists()? s.data() : {visits:0,uniques:0}, `SEMANA: ${k}`));
+          if (unsub) { unsub(); unsub = null; }
+          unsub = onSnapshot(ref, ss => {
+            setPanelContentSmooth(renderDOS(ss.exists()? ss.data() : {visits:0,uniques:0}, `SEMANA: ${k}`));
+          });
+        } else if (currentMode === 'month'){
+          // Aggregate totals from weekly snapshots that fall inside the current month
+          const { start, end } = monthRange(currentPivotDate);
+          const ym = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}`;
+          const snap = await getDocs(collection(db, 'stats_weekly'));
+          let visits = 0, uniques = 0;
+          // Helper to derive week start (Monday) from a doc id like YYYY-WNN
+          const weekStartFromId = (id) => {
+            const m = String(id).match(/(\d{4})-W(\d{2})/);
+            if (!m) return null;
+            const y = parseInt(m[1],10), w = parseInt(m[2],10);
+            const jan4 = new Date(y,0,4);
+            const day = jan4.getDay()||7; const monday = new Date(jan4); monday.setDate(jan4.getDate()+1-day + (w-1)*7);
+            return monday;
+          };
+          snap.forEach(ds => {
+            const d = ds.data();
+            let ws = weekStartFromId(ds.id) || d.week_start?.toDate?.();
+            if (ws && ws >= start && ws <= end) {
+              visits += (d.visits || 0);
+              uniques += (d.uniques || 0);
+            }
+          });
+          const monthNameRaw = start.toLocaleDateString('pt-BR', { month:'long' });
+          const monthName = monthNameRaw.charAt(0).toUpperCase() + monthNameRaw.slice(1);
+          // Build output without stray hyphens/lines
+          const monthBlock = [
+            'RDC MONTH.EXE /CURRENT',
+            `MÊS: ${ym}  (${start.toLocaleDateString('pt-BR')}  →  ${end.toLocaleDateString('pt-BR')})`,
+            DASH_LINE,
+            centerLine(monthName, DASH_LINE.length),
+            `VISITAS TOTAIS . . . . . : ${fmtVisits(visits)}`,
+            `VISITANTES ÚNICOS  . . . : ${uniques}`,
+            `ATUALIZADO EM . . . . . : ${fmtDT(new Date())}`
+          ].filter(Boolean).join('\n');
+          setPanelContentSmooth(monthBlock);
+          updateInlineNav(monthName);
+          if (unsub) { unsub(); unsub = null; }
+        } else if (currentMode === 'year') {
+          // Sum all weekly docs within the selected year (default to 2025)
+          const y = currentPivotDate.getFullYear() || 2025;
+          const start = new Date(y, 0, 1, 0,0,0,0);
+          const end = new Date(y, 11, 31, 23,59,59,999);
+          const snap = await getDocs(collection(db, 'stats_weekly'));
+          let visits = 0, uniques = 0;
+          const weekStartFromId = (id) => {
+            const m = String(id).match(/(\d{4})-W(\d{2})/);
+            if (!m) return null;
+            const yy = parseInt(m[1],10), w = parseInt(m[2],10);
+            const jan4 = new Date(yy,0,4);
+            const day = jan4.getDay()||7; const monday = new Date(jan4); monday.setDate(jan4.getDate()+1-day + (w-1)*7);
+            return monday;
+          };
+          snap.forEach(ds => {
+            const d = ds.data();
+            let ws = weekStartFromId(ds.id) || d.week_start?.toDate?.();
+            if (ws && ws >= start && ws <= end) {
+              visits += (d.visits || 0);
+              uniques += (d.uniques || 0);
+            }
+          });
+          const yearBlock = [
+            'RDC YEAR.EXE /CURRENT',
+            `ANO: ${y}`,
+            DASH_LINE,
+            centerLine(String(y), DASH_LINE.length),
+            `VISITAS TOTAIS . . . . . : ${fmtVisits(visits)}`,
+            `VISITANTES ÚNICOS  . . . : ${uniques}`,
+            `ATUALIZADO EM . . . . . : ${fmtDT(new Date())}`
+          ].join('\n');
+          setPanelContentSmooth(yearBlock);
+          updateInlineNav(String(y));
+          if (unsub) { unsub(); unsub = null; }
+        } else {
+          // all-time (geral)
+          const ref = doc(db, 'stats', 'global');
+          const s = await getDoc(ref);
+          const visits = s.exists()? (s.data().visits_total||0) : 0;
+          setPanelContentSmooth([
+            'GERAL (desde o início)',
+            '--------------------------------------------',
+            `VISITAS TOTAIS . . . . . : ${visits}`
+          ].join('\n'));
+          if (unsub) { unsub(); unsub = null; }
+          unsub = onSnapshot(ref, ss => {
+            const v = ss.exists()? (ss.data().visits_total||0) : 0;
+            setPanelContentSmooth([
+              'GERAL (desde o início)',
+              '--------------------------------------------',
+              `VISITAS TOTAIS . . . . . : ${v}`
+            ].join('\n'));
+          });
+        }
+      }
+
+      // Botão dedicado (somente em console)
+      if (document.body.classList.contains('edit-mode') || document.body.classList.contains('authenticated')) {
+        $btn?.addEventListener('click', toggleWeeklyPanel);
+      }
+      // Tornar todo o badge clicável (somente em console)
+      const $badge = document.getElementById('stat-badge');
+      const enableBadgeClickIfConsole = () => {
+        const isConsole = document.body.classList.contains('edit-mode') || document.body.classList.contains('authenticated');
+        if (isConsole) {
+          $badge?.addEventListener('click', toggleWeeklyPanel);
+        } else {
+          $badge?.removeEventListener('click', toggleWeeklyPanel);
+        }
+      };
+      enableBadgeClickIfConsole();
+      // Reagir a mudanças de modo (quando entrar/sair do console)
+      const observer = new MutationObserver(enableBadgeClickIfConsole);
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    </script>
+    
 </body>
 </html>
