@@ -1966,6 +1966,8 @@ video-synopsis {
         <a href="#timeline">Linha do Tempo</a>
         <a href="#acervo">Acervo</a>
     </div>
+    <!-- Fixed down arrow near header top-right -->
+    <button id="nav-down-arrow" class="nav-down-arrow" title="Ir para o fim">▼</button>
     
     <!-- Voltar (top-right inside Exit Console modal) -->
     <template id="exit-back-button-template">
@@ -2433,7 +2435,7 @@ video-synopsis {
             </style>
             
             <script>
-                document.addEventListener('DOMContentLoaded', function() {
+                document.addEventListener('DOMContentLoaded', function () {
                     const welcomeMessage = document.getElementById('welcome-message');
                     const WELCOME_KEY = 'welcomeShown';
 
@@ -2442,10 +2444,12 @@ video-synopsis {
                         if (localStorage.getItem(WELCOME_KEY) === 'true') return;
                         welcomeMessage.textContent = 'Bem-Vindo!';
                         welcomeMessage.classList.add('show');
-                        setTimeout(function() {
+                        setTimeout(function () {
                             welcomeMessage.classList.remove('show');
                         }, 5000);
-                        try { localStorage.setItem(WELCOME_KEY, 'true'); } catch (e) {}
+                        try {
+                            localStorage.setItem(WELCOME_KEY, 'true');
+                        } catch (e) {}
                     }
 
                     // Show only on the first visit
@@ -2454,12 +2458,12 @@ video-synopsis {
                     // Keep handler for passwordR if present, but do not re-show welcome
                     const passwordR = document.getElementById('password-r');
                     if (passwordR) {
-                        passwordR.addEventListener('click', function() {
+                        passwordR.addEventListener('click', function () {
                             // No-op for welcome
                         });
                     }
-                    
-                    // Funcionalidade de alternância da badge
+
+                    // Badge text toggling
                     const statContent = document.getElementById('stat-content');
                     const statNumber = document.getElementById('stat-number');
                     const statLabel = document.getElementById('stat-label');
@@ -2467,11 +2471,10 @@ video-synopsis {
                     let mostrandoAcessos = false;
 
                     function alternarTexto() {
-                        // Aplicar fade-out com leve deslocamento para a direita
+                        if (!statContent || !statNumber || !statLabel) return;
                         statContent.style.opacity = '0';
                         statContent.style.transform = 'translateX(20px)';
-
-                        setTimeout(() => {
+                        setTimeout(function () {
                             if (mostrandoAcessos) {
                                 statNumber.textContent = '70+';
                                 statLabel.textContent = 'Obras';
@@ -2479,16 +2482,13 @@ video-synopsis {
                                 statNumber.textContent = '+250';
                                 statLabel.textContent = 'Acessos';
                             }
-
                             mostrandoAcessos = !mostrandoAcessos;
-
-                            // Aplicar fade-in e reposicionar de novo com movimento
                             statContent.style.opacity = '1';
                             statContent.style.transform = 'translateX(0)';
-                        }, 500); // tempo do fade-out antes de trocar
+                        }, 500);
                     }
 
-                    setInterval(alternarTexto, 5000); // troca a cada 5 segundos
+                    setInterval(alternarTexto, 5000);
                 });
             </script>
             
@@ -4553,7 +4553,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Botão de voltar ao topo
-            const backToTopButton = document.querySelector('.back-to-top');
+            const backToTopButton = document.getElementById('scrollTopBtn');
             
             window.addEventListener('scroll', function() {
                 if (window.pageYOffset > 300) {
@@ -4563,7 +4563,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            backToTopButton.addEventListener('click', function() {
+            if (backToTopButton) backToTopButton.addEventListener('click', function() {
                 window.scrollTo({
                     top: 0,
                     behavior: 'smooth'
@@ -4749,8 +4749,8 @@ function openVideo(videoId, isProtected) {
     <script>
         // JS-driven hover band near the top of the viewport to reveal the nav
         (function(){
-            const OFFSET = 10;       // start band 10px below very top
-            const BAND = 120;        // 120px tall band
+            const OFFSET = 0;        // start at the very top
+            const BAND = 35;         // 35px hover band
             const CLOSE_DELAY = 500; // ms
             const docEl = document.documentElement;
             const header = document.querySelector('.nav-bar');
@@ -4772,6 +4772,21 @@ function openVideo(videoId, isProtected) {
                 hideTimer = setTimeout(() => docEl.classList.remove('nav-open'), 300);
             });
         })();
+        // Scroll helpers for fixed buttons (ensure DOM is fully parsed)
+        document.addEventListener('DOMContentLoaded', function(){
+          const downArrow = document.getElementById('nav-down-arrow');
+          const toTop = document.getElementById('scrollTopBtn');
+          if (toTop) {
+            toTop.addEventListener('click', function(){
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+          }
+          if (downArrow) {
+            downArrow.addEventListener('click', function(){
+              window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+            });
+          }
+        });
     </script>
     
     
@@ -5722,6 +5737,7 @@ function openVideo(videoId, isProtected) {
     <div id="addMemoryFloating" class="add-memory-floating">
         <span>+</span>
     </div>
+    <button id="scrollTopBtn" class="scroll-top-fixed" title="Voltar ao Início" aria-label="Voltar ao Início">▲</button>
     
     <!-- Botão Sair do Console -->
     <div id="exitConsoleBtn" class="exit-console-btn">
@@ -6268,10 +6284,18 @@ function openVideo(videoId, isProtected) {
                     });
                     localStorage.setItem('userMemories', JSON.stringify(saved));
                 } catch {}
-                // Update in Firebase if possible (by id if we have it)
+                // Update in Firebase: by id when present; otherwise try to locate by codigo
                 try {
+                    if (window.waitForFirebaseAuth && typeof window.waitForFirebaseAuth.then === 'function') {
+                        await window.waitForFirebaseAuth;
+                    }
                     if (id && window.firebaseUpdateFieldsById) {
                         await window.firebaseUpdateFieldsById(id, updated);
+                    } else if (code && typeof window.firebaseUpdateByCode === 'function') {
+                        await window.firebaseUpdateByCode(code, updated);
+                    } else if (code && typeof window.firebaseSaveMemory === 'function') {
+                        // Fallback: create new if not found; include code to keep continuity
+                        await window.firebaseSaveMemory({ ...updated, code });
                     }
                 } catch (e) { console.warn('Falha ao atualizar no Firebase:', e); }
                 this.hideAddMemoryModal();
@@ -7534,6 +7558,7 @@ function openVideo(videoId, isProtected) {
 
         .add-memory-floating { bottom: 24px !important; right: 24px !important; }
         .exit-console-btn    { top: 16px !important;    left: 16px !important;  }
+        .scroll-top-fixed    { bottom: 24px !important; left: 24px !important;  }
 
         /* Evita efeitos que "prendam" fixed a contêiner com transform/filtro */
         .edit-mode, .authenticated, html, body {
@@ -7546,6 +7571,45 @@ function openVideo(videoId, isProtected) {
         .video-window.maximized {
           z-index: 900000 !important;
         }
+
+        /* Always-visible "Voltar ao Início" button */
+        .scroll-top-fixed {
+          position: fixed;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 44px; height: 44px;
+          background: var(--header-bg);
+          color: var(--primary-color);
+          border-radius: 50%;
+          border: 1px solid rgba(0,0,0,0.15);
+          box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+          font-weight: 900;
+          font-size: 28px;
+          cursor: pointer;
+          z-index: 1000001;
+        }
+        .scroll-top-fixed:hover {
+          transform: translateY(-2px);
+        }
+
+        /* Fixed down arrow placed under the header, top-right */
+        .nav-down-arrow {
+          position: fixed;
+          top: 82px; /* just below header height (75px + spacing) */
+          right: 16px;
+          width: 48px; height: 48px;
+          display: inline-flex; align-items:center; justify-content:center;
+          background: var(--header-bg);
+          color: var(--primary-color);
+          border-radius: 50%;
+          border: 1px solid rgba(0,0,0,0.15);
+          box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+          font-size: 28px; font-weight: 900;
+          cursor: pointer;
+          z-index: 1000001;
+        }
+        .nav-down-arrow:hover { transform: translateY(-1px); }
     </style>
 
     <!-- Modal para Adicionar Memória -->
@@ -7716,6 +7780,28 @@ function openVideo(videoId, isProtected) {
           codigo: Number(memory.code),
           createdAt: serverTimestamp()
         });
+      };
+
+      // Update arbitrary fields by codigo when id is unknown
+      window.firebaseUpdateByCode = async (code, fields) => {
+        const snap = await getDocs(collection(db, "conteudos"));
+        const updates = [];
+        snap.forEach((docSnap) => {
+          const d = docSnap.data();
+          if (Number(d.codigo) === Number(code)) {
+            updates.push(updateDoc(docSnap.ref, {
+              titulo: fields.title,
+              ano: Number(fields.year),
+              autor: fields.author,
+              descricao: fields.description,
+              tipo: fields.type,
+              url: fields.link,
+              updatedAt: serverTimestamp()
+            }));
+          }
+        });
+        await Promise.all(updates);
+        return updates.length;
       };
 
       window.firebaseLoadMemories = async () => {
