@@ -100,6 +100,9 @@
             transition: color 0.15s cubic-bezier(0.4,0,0.2,1), text-decoration-color 0.15s cubic-bezier(0.4,0,0.2,1);
         }
         
+        /* Hide basket counters until auth resolves (prevents guest/localStorage flicker) */
+        #basketCount, #basketCountMobile { display: none !important; }
+
         /* Former .nav-hover-trigger removed in favor of JS-based hover band */
         
         /* Hamburger menu styles */
@@ -1989,7 +1992,7 @@ video-synopsis {
                 <div class="stat-badge" id="stat-badge">
                     <div class="stat-content" id="stat-container">
                         <div class="stat-item active" id="obras-stat">
-                            <div class="stat-number">70+</div>
+                            <div class="stat-number">80+</div>
                             <div class="stat-label">Obras</div>
                         </div>
                         <div class="stat-item" id="visits-stat">
@@ -8098,6 +8101,69 @@ function openVideo(videoId, isProtected) {
         }
       });
       signInAnonymously(auth).catch(console.error);
+
+      // ===== Basket badge (avoid guest/localStorage flicker) =====
+      // If the page has basket counters, keep them hidden until auth resolves,
+      // then render the signed-in user's basket instantly. Fallback to guest only if no user.
+      const basketCountEls = [
+        document.getElementById('basketCount'),
+        document.getElementById('basketCountMobile')
+      ].filter(Boolean);
+      const basketDropdownEl = document.getElementById('basketDropdown');
+      function hideBasketCounters(){
+        basketCountEls.forEach(el => { el.style.display = 'none'; });
+      }
+      function showBasketCount(n, forceShowZero = false){
+        basketCountEls.forEach(el => {
+          el.textContent = String(n || 0);
+          el.style.display = (n > 0 || forceShowZero) ? 'inline-block' : 'none';
+        });
+      }
+      async function fetchUserBasketCount(uid){
+        try {
+          const ref = doc(db, 'baskets', uid);
+          const snap = await getDoc(ref);
+          if (!snap.exists()) return 0;
+          const d = snap.data() || {};
+          if (typeof d.count === 'number') return d.count;
+          if (Array.isArray(d.items)){
+            return d.items.reduce((sum, it) => sum + (Number(it.quantity)||1), 0);
+          }
+          return 0;
+        } catch (_) { return 0; }
+      }
+      // Hide immediately to prevent any guest/localStorage blink
+      hideBasketCounters();
+      // Resolve on auth
+      onAuthStateChanged(auth, async (user) => {
+        if (!basketCountEls.length) return; // page without basket UI
+        if (user){
+          // Authenticated: do NOT show any count until Firestore responds
+          try {
+            // Optional: live updates if the doc changes
+            const ref = doc(db, 'baskets', user.uid);
+            onSnapshot(ref, async (snap)=>{
+              if (snap.exists()){
+                const d = snap.data() || {};
+                const n = typeof d.count === 'number' ? d.count : Array.isArray(d.items) ? d.items.reduce((s,it)=> s + (Number(it.quantity)||1), 0) : 0;
+                showBasketCount(n);
+              } else {
+                showBasketCount(0);
+              }
+            });
+          } catch (_) {
+            const n = await fetchUserBasketCount(user.uid);
+            showBasketCount(n);
+          }
+        } else {
+          // No auth: use guest basket from localStorage (but only now, to avoid flicker)
+          try {
+            const guest = JSON.parse(localStorage.getItem('basket') || '[]');
+            const n = Array.isArray(guest) ? guest.reduce((s,it)=> s + (Number(it.quantity)||1), 0) : 0;
+            showBasketCount(n);
+          } catch (_) { showBasketCount(0); }
+        }
+      });
 
       // ===== Extrato Semanal (MS-DOS) =====
 
