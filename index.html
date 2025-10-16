@@ -4657,18 +4657,50 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
             
-            // Gerar linha do tempo com base nos documentos
+            // Gerar linha do tempo com base nos cards do Acervo já presentes no DOM
             function gerarLinhaDoTempo() {
                 const timelineTrack = document.querySelector('.timeline-track');
-                timelineTrack.innerHTML = '';
+                if (!timelineTrack) return [];
+                // timelineTrack.innerHTML = '';
                 
-                // Ordenar documentos por ano
-                const docsPorAno = [...documentos].sort((a, b) => a.ano.localeCompare(b.ano));
+                // Coletar todos os cards de documentos (visíveis, ocultos e adicionados dinamicamente)
+                const cardNodes = Array.from(document.querySelectorAll('#visible-documents .document-card, #hidden-documents .document-card, .documents-grid .document-card'));
+                const items = cardNodes.map(card => {
+                    const codeEl = card.querySelector('.document-code');
+                    const titleEl = card.querySelector('h3');
+                    const authorEl = card.querySelector('.document-author');
+                    const yearEl = card.querySelector('.document-year');
+                    const typeEl = card.querySelector('.document-type');
+                    const linkEl = card.querySelector('.read-button');
+                    return {
+                        codigo: codeEl ? codeEl.textContent.trim() : '',
+                        titulo: titleEl ? titleEl.textContent.trim() : '',
+                        autor: authorEl ? authorEl.textContent.trim() : '',
+                        ano: yearEl ? yearEl.textContent.trim() : '',
+                        genero: typeEl ? typeEl.textContent.trim() : '',
+                        link: linkEl ? (linkEl.getAttribute('href') || '#acervo') : '#acervo'
+                    };
+                }).filter(i => i.titulo || i.codigo);
                 
-                docsPorAno.forEach((doc, index) => {
+                const parseYearValue = (yearText) => {
+                    if (!yearText) return Number.NEGATIVE_INFINITY;
+                    const m = String(yearText).match(/\d{4}/);
+                    return m ? parseInt(m[0], 10) : Number.NEGATIVE_INFINITY;
+                };
+                
+                // Ordenar por ano (ascendente)
+                items.sort((a, b) => parseYearValue(a.ano) - parseYearValue(b.ano));
+                
+                // Construir itens da timeline a partir dos cards
+                items.forEach(doc => {
                     const timelineItem = document.createElement('div');
                     timelineItem.className = 'timeline-item-horizontal';
                     timelineItem.setAttribute('data-year', doc.ano);
+                    if (doc.titulo) timelineItem.setAttribute('data-title', doc.titulo);
+                    
+                    const isExternal = doc.link && /^https?:\/\//i.test(doc.link);
+                    const buttonText = (doc.genero === 'Vídeo' || doc.genero === 'Mídia') ? 'Ver obra' : 'Ler obra';
+                    const targetAttr = isExternal ? ' target="_blank"' : '';
                     
                     const timelineContent = `
                         <div class="timeline-dot"></div>
@@ -4677,8 +4709,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="timeline-year-horizontal">${doc.ano}</div>
                             <div class="timeline-text-horizontal">${doc.titulo}</div>
                             <div class="timeline-author-horizontal">${doc.autor}</div>
-                            <div class="timeline-tag-horizontal">${doc.genero.charAt(0).toUpperCase() + doc.genero.slice(1)}</div>
-                            <a href="#acervo" class="timeline-button-horizontal">Ler obra</a>
+                            <div class="timeline-tag-horizontal">${doc.genero}</div>
+                            <a href="${doc.link}" class="timeline-button-horizontal"${targetAttr}>${buttonText}</a>
                         </div>
                     `;
                     
@@ -6676,12 +6708,17 @@ function openVideo(videoId, isProtected) {
             addMemoryToTimeline(memory) {
                 const track = document.querySelector('#timeline .timeline-track');
                 if (!track) return;
-                // Prevent duplicate insertion in the timeline
+                // Prevent duplicate insertion in the timeline (by user-code and by existing code label)
                 if (track.querySelector(`.timeline-item-horizontal[data-user-code="${String(memory.code)}"]`)) return;
+                const existsByCodeLabel = Array.from(track.querySelectorAll('.timeline-item-horizontal .document-code'))
+                    .some(el => el.textContent.trim() === String(memory.code));
+                if (existsByCodeLabel) return;
 
                 const item = document.createElement('div');
                 item.className = 'timeline-item-horizontal';
                 item.setAttribute('data-user-code', String(memory.code));
+                if (memory.year) item.setAttribute('data-year', String(memory.year));
+                if (memory.title) item.setAttribute('data-title', String(memory.title));
 
                 const normalizedType = this.normalizeType(memory.type);
                 const buttonText = this.getTimelineButtonText(memory.type);
@@ -8715,5 +8752,129 @@ function openVideo(videoId, isProtected) {
       observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     </script>
     
-</body>
+    <script>
+    (function () {
+      // Normalize strings (remove accents, trim, lower)
+      const normalize = s =>
+        String(s || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .trim()
+          .toLowerCase();
+
+      // Create a timeline card element from a record
+      function createTimelineItem(rec) {
+        const year   = rec.year || '';
+        const title  = rec.title || '';
+        const author = rec.author || '';
+        const type   = rec.type || 'Documento';
+        const link   = rec.link || '#';
+
+            const el = document.createElement('div');
+            el.className = 'timeline-item-horizontal';
+        el.dataset.year  = String(year);
+        el.dataset.title = String(title);
+            el.innerHTML = `
+              <div class="timeline-content-horizontal">
+                <div class="timeline-year-horizontal">${year}</div>
+                <div class="timeline-text-horizontal">${title}</div>
+                <div class="timeline-author-horizontal">${author}</div>
+                <div class="timeline-tag-horizontal">${type}</div>
+            <a href="${link}" class="timeline-button-horizontal" target="_blank">Ver obra</a>
+              </div>`;
+        return el;
+      }
+
+      // Collect items from the static timeline already in the DOM
+      function pullFromStaticTimeline(track) {
+        const list = [];
+        track.querySelectorAll('.timeline-item-horizontal').forEach(it => {
+          list.push({
+            year:   it.querySelector('.timeline-year-horizontal')?.textContent?.trim(),
+            title:  it.querySelector('.timeline-text-horizontal')?.textContent?.trim(),
+            author: it.querySelector('.timeline-author-horizontal')?.textContent?.trim(),
+            type:   it.querySelector('.timeline-tag-horizontal')?.textContent?.trim() || 'Documento',
+            link:   it.querySelector('a.timeline-button-horizontal')?.getAttribute('href') || '#'
+          });
+        });
+        return list;
+      }
+
+      // Collect items from the Acervo grid
+      function pullFromAcervo() {
+        const list = [];
+        document.querySelectorAll('.documents-grid .document-card').forEach(card => {
+          list.push({
+            year:   card.querySelector('.document-year')?.textContent?.trim(),
+            title:  card.querySelector('h3')?.textContent?.trim(),
+            author: card.querySelector('.document-author')?.textContent?.trim(),
+            type:   card.querySelector('.document-type')?.textContent?.trim(),
+            link:   card.querySelector('.read-button')?.getAttribute('href') || '#'
+          });
+        });
+        return list;
+      }
+
+      async function pullFromFirebase() {
+        if (typeof window.firebaseLoadMemories !== 'function') return [];
+        try {
+          const items = await window.firebaseLoadMemories();
+          if (!Array.isArray(items)) return [];
+          return items.map(doc => ({
+            year:   doc.ano   ?? doc.year   ?? '',
+            title:  doc.titulo?? doc.title  ?? '',
+            author: doc.autor ?? doc.author ?? '',
+            type:   doc.tipo  ?? doc.type   ?? 'Documento',
+            link:   doc.url   ?? doc.link   ?? '#'
+          }));
+        } catch (e) {
+          console.warn('Falha ao carregar dados do Firebase:', e);
+          return [];
+        }
+      }
+
+      function parseYear(y) {
+        const m = String(y || '').match(/\d{4}/);
+        return m ? parseInt(m[0], 10) : NaN;
+      }
+
+      async function rebuildTimeline() {
+        const track = document.querySelector('.timeline-track');
+        if (!track) return;
+
+        // 1) Collect all sources
+        const staticItems = pullFromStaticTimeline(track);
+        const acervoItems = pullFromAcervo();
+        const firebaseItems = await pullFromFirebase();
+
+        // 2) Merge + de-duplicate by title+year
+        const pool = new Map();
+        const add = (r) => {
+          const y = parseYear(r.year);
+          const t = normalize(r.title);
+          if (!t || !y) return;
+          const key = `${t}|${y}`;
+          if (!pool.has(key)) pool.set(key, { ...r, year: y });
+        };
+        [...staticItems, ...acervoItems, ...firebaseItems].forEach(add);
+
+        // 3) Sort by year (ascending)
+        const items = [...pool.values()].sort((a, b) => a.year - b.year);
+
+        // 4) Rebuild DOM
+        track.innerHTML = '';
+        items.forEach(rec => track.appendChild(createTimelineItem(rec)));
+      }
+
+      // Expose for manual triggering if needed
+      window.rebuildTimeline = rebuildTimeline;
+
+      // Build once after DOM is ready, then try again shortly in case Firebase loads late
+      document.addEventListener('DOMContentLoaded', () => {
+        rebuildTimeline();
+        setTimeout(rebuildTimeline, 1200);
+      });
+    })();
+    </script>
+  </body>
 </html>
