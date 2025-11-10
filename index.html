@@ -321,6 +321,20 @@
             transform: translateX(0);
         }
         
+        /* Ensure uni-directional stat switch: exit right, enter from left */
+        .stat-item.slide-out-right {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        .stat-item.pre-left {
+            opacity: 0;
+            transform: translateX(-100px);
+        }
+        .stat-item.slide-in-left {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
         .stat-number {
             font-size: 1.8rem;
             line-height: 1;
@@ -5725,25 +5739,29 @@ function openVideo(videoId, isProtected) {
             // Função para alternar entre obras e visitas
             function toggleStats() {
                 if (isShowingObras) {
-                    // Slide out obras para a esquerda
-                    obrasstat.classList.remove('active');
-                    obrasstat.classList.add('slide-out-left');
+                    // Exit obras to the right
+                    obrasstat.classList.remove('active', 'slide-out-left', 'slide-in-right', 'pre-left', 'slide-in-left');
+                    obrasstat.classList.add('slide-out-right');
                     
-                    // Aguardar um pouco e slide in visitas da direita
+                    // Prepare visits to enter from the left, then activate
+                    visitsStat.classList.remove('slide-out-left', 'slide-in-right', 'slide-out-right');
+                    visitsStat.classList.add('pre-left');
                     setTimeout(() => {
-                        visitsStat.classList.remove('slide-out-left');
-                        visitsStat.classList.add('active', 'slide-in-right');
+                        visitsStat.classList.remove('pre-left');
+                        visitsStat.classList.add('active', 'slide-in-left');
                     }, 300);
                     
                 } else {
-                    // Slide out visitas para a esquerda
-                    visitsStat.classList.remove('active', 'slide-in-right');
-                    visitsStat.classList.add('slide-out-left');
+                    // Exit visitas to the right
+                    visitsStat.classList.remove('active', 'slide-in-right', 'slide-out-left', 'pre-left', 'slide-in-left');
+                    visitsStat.classList.add('slide-out-right');
                     
-                    // Aguardar um pouco e slide in obras da direita
+                    // Prepare obras to enter from the left, then activate
+                    obrasstat.classList.remove('slide-out-left', 'slide-in-right', 'slide-out-right');
+                    obrasstat.classList.add('pre-left');
                     setTimeout(() => {
-                        obrasstat.classList.remove('slide-out-left');
-                        obrasstat.classList.add('active');
+                        obrasstat.classList.remove('pre-left');
+                        obrasstat.classList.add('active', 'slide-in-left');
                     }, 300);
                 }
                 
