@@ -4578,13 +4578,13 @@ document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('DOMContentLoaded', function() {
             // Botão de voltar ao topo
             const backToTopButton = document.getElementById('scrollTopBtn');
+            if (backToTopButton) backToTopButton.dataset.hover = '0';
             
             window.addEventListener('scroll', function() {
-                if (window.pageYOffset > 300) {
-                    backToTopButton.classList.add('visible');
-                } else {
-                    backToTopButton.classList.remove('visible');
-                }
+                if (!backToTopButton) return;
+                // Do not override visibility if hover logic has it active
+                if (backToTopButton.dataset.hover === '1') return;
+                backToTopButton.classList.toggle('visible', window.pageYOffset > 300);
             });
             
             if (backToTopButton) backToTopButton.addEventListener('click', function() {
@@ -4833,6 +4833,7 @@ function openVideo(videoId, isProtected) {
         document.addEventListener('DOMContentLoaded', function(){
           const btnTop = document.getElementById('scrollTopBtn');
           const btnDown = document.getElementById('nav-down-arrow');
+          if (btnDown) btnDown.dataset.hover = '0';
 
           if (btnTop) btnTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
           if (btnDown) btnDown.addEventListener('click', () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }));
@@ -4846,8 +4847,16 @@ function openVideo(videoId, isProtected) {
             const y = e.clientY;
             const h = window.innerHeight;
             // Inverted: show TOP button on bottom hover, DOWN button on top hover
-            if (btnTop) btnTop.classList.toggle('visible', y >= h - HOVER_BAND);
-            if (btnDown) btnDown.classList.toggle('visible', y <= HOVER_BAND);
+            if (btnTop) {
+              const showTop = y >= h - HOVER_BAND;
+              btnTop.classList.toggle('visible', showTop);
+              btnTop.dataset.hover = showTop ? '1' : '0';
+            }
+            if (btnDown) {
+              const showDown = y <= HOVER_BAND;
+              btnDown.classList.toggle('visible', showDown);
+              btnDown.dataset.hover = showDown ? '1' : '0';
+            }
           }
 
           window.addEventListener('mousemove', updateVisibility, { passive: true });
