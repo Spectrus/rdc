@@ -2083,6 +2083,13 @@ video-synopsis {
                     #weekly-dos::-webkit-scrollbar-thumb{background:transparent;border:0}
                     #weekly-dos::-webkit-scrollbar-thumb:hover{background:transparent}
                 </style>
+                <style>
+                    /* Visits counter roller */
+                    #visits-stat .stat-number { display: inline-block; }
+                    #visits-stat .stat-number .stat-roller { display:inline-block; overflow:hidden; height: 1em; vertical-align: bottom; }
+                    #visits-stat .stat-number .stat-roller .stack { display:block; transform: translateY(0); transition: transform .8s cubic-bezier(0.2, 0.7, 0.2, 1); }
+                    #visits-stat .stat-number .frame { display:block; line-height: 1; }
+                </style>
                 <div id="welcome-message" class="welcome-message"></div>
             </div>
             
@@ -8750,6 +8757,100 @@ function openVideo(videoId, isProtected) {
       // Reagir a mudanças de modo (quando entrar/sair do console)
       const observer = new MutationObserver(enableBadgeClickIfConsole);
       observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    </script>
+    
+    <script>
+    (function(){
+        const CACHE_KEY = 'rdc_visits_last';
+        const SELECTOR = '#visits-stat .stat-number';
+        const nf = (function(){ try { return new Intl.NumberFormat('pt-BR'); } catch(_) { return null; } })();
+        const format = (n) => nf ? nf.format(Number(n)||0) : String(Number(n)||0);
+        const onlyDigits = (s) => { const m = String(s||'').match(/\d+/g); return m ? parseInt(m.join(''),10) : 0; };
+
+        function ensureRoller(el){
+            let roller = el.querySelector('.stat-roller');
+            if (roller) return roller;
+            roller = document.createElement('span');
+            roller.className = 'stat-roller';
+            const stack = document.createElement('span');
+            stack.className = 'stack';
+            const frame = document.createElement('span');
+            frame.className = 'frame';
+            frame.textContent = el.textContent.trim();
+            stack.appendChild(frame);
+            roller.appendChild(stack);
+            el.textContent = '';
+            el.appendChild(roller);
+            return roller;
+        }
+
+        function setImmediateNumber(el, value){
+            const roller = ensureRoller(el);
+            const stack = roller.querySelector('.stack');
+            stack.style.transform = 'translateY(0)';
+            stack.innerHTML = '';
+            const frame = document.createElement('span');
+            frame.className = 'frame';
+            frame.textContent = format(value);
+            stack.appendChild(frame);
+        }
+
+        function rollTo(el, newValue){
+            const roller = ensureRoller(el);
+            const stack = roller.querySelector('.stack');
+            const next = document.createElement('span');
+            next.className = 'frame';
+            next.textContent = format(newValue);
+            stack.appendChild(next);
+            // animate stack upwards to reveal new frame
+            requestAnimationFrame(()=>{ stack.style.transform = 'translateY(-100%)'; });
+            const onDone = ()=>{
+                stack.style.transition = '';
+                stack.style.transform = 'translateY(0)';
+                stack.innerHTML = '';
+                const finalFrame = document.createElement('span');
+                finalFrame.className = 'frame';
+                finalFrame.textContent = format(newValue);
+                stack.appendChild(finalFrame);
+                stack.removeEventListener('transitionend', onDone);
+                // restore transition for future rolls
+                requestAnimationFrame(()=>{ stack.style.transition = 'transform .8s cubic-bezier(0.2, 0.7, 0.2, 1)'; });
+            };
+            stack.style.transition = 'transform .8s cubic-bezier(0.2, 0.7, 0.2, 1)';
+            stack.addEventListener('transitionend', onDone);
+        }
+
+        async function fetchVisits(){
+            try {
+                if (typeof doc !== 'function' || typeof getDoc !== 'function' || typeof db === 'undefined') return null;
+                const ref = doc(db, 'stats', 'global');
+                const snap = await getDoc(ref);
+                if (!snap.exists()) return null;
+                const data = snap.data() || {};
+                const v = typeof data.visits_total === 'number' ? data.visits_total : 0;
+                return v;
+            } catch(_) { return null; }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function(){
+            const el = document.querySelector(SELECTOR);
+            if (!el) return;
+            // preload from cache
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached != null) {
+                setImmediateNumber(el, Number(cached));
+            }
+            // fetch live and animate
+            const live = await fetchVisits();
+            if (typeof live === 'number' && !Number.isNaN(live)) {
+                localStorage.setItem(CACHE_KEY, String(live));
+                const currentVal = onlyDigits(el.textContent);
+                if (currentVal !== live) {
+                    rollTo(el, live);
+                }
+            }
+        });
+    })();
     </script>
     
     <script>
