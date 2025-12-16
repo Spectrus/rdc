@@ -351,11 +351,13 @@
             margin: 2rem auto;
             max-width: 500px;
             border: 10px solid var(--gold-color);
-            padding: 5px;
+            padding: 5px 5px 20px 5px;
             background-color: #fff;
-            transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
             overflow: hidden;
+            perspective: 1500px;
+            transition: height 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-sizing: border-box;
         }
         
         .historical-photo.expanded {
@@ -365,19 +367,119 @@
             min-height: 500px;
             aspect-ratio: 16/9;
             transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
         }
         
-        .historical-photo.expanded img,
-        .historical-photo.expanded .historical-photo-caption {
+        .historical-photo.expanded .historical-photo-page,
+        .historical-photo.expanded .historical-photo-page-front,
+        .historical-photo.expanded .historical-photo-page-back {
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        /* 3D Spin/Rotate Animation */
+        .historical-photo-page {
+            position: relative;
+            width: 100%;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform-origin: center center;
+        }
+        
+        /* First image spins for 4 seconds */
+        .historical-photo-page.spin-slow {
+            transition: transform 4s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+        
+        /* Second image spins for 9 seconds on first animation */
+        .historical-photo-page.spin-very-slow {
+            transition: transform 9s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+        
+        .historical-photo-page-front {
+            position: relative;
+            width: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            transform: rotateY(0deg);
+            z-index: 2;
+        }
+        
+        .historical-photo-page-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            transform: rotateY(180deg);
+            z-index: 1;
+            opacity: 1;
+        }
+        
+        /* When flipped, ensure back is visible */
+        .historical-photo-page.flipped .historical-photo-page-back {
+            z-index: 3;
+        }
+        
+        .historical-photo-page.flipped .historical-photo-page-front {
+            z-index: 1;
+        }
+        
+        /* Ensure images are visible and properly sized */
+        .historical-photo-page-front img,
+        .historical-photo-page-back img {
+            max-width: 100%;
+            width: 100%;
+            height: auto;
+            display: block;
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Crop bottom 35px from PaieMae2.jpeg */
+        .historical-photo-page-back img {
+            margin-bottom: 15px;
+            clip-path: inset(0 0 35px 0);
+            -webkit-clip-path: inset(0 0 35px 0);
+        }
+        
+        /* Ensure back page container shows white space */
+        .historical-photo-page-back {
+            padding-bottom: 0;
+            box-sizing: border-box;
         }
         
         .historical-photo img {
             max-width: 100%;
             height: auto;
             display: block;
+        }
+        
+        /* Ensure captions are visible */
+        .historical-photo-page-front .historical-photo-caption,
+        .historical-photo-page-back .historical-photo-caption {
+            display: block;
+            width: 100%;
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Raise the caption on back image to fill the gap from cropped image */
+        .historical-photo-page-back .historical-photo-caption {
+            margin-top: -35px;
+        }
+        
+        /* Remove margin-bottom from caption since padding is on container */
+        .historical-photo-page-front .historical-photo-caption {
+            margin-bottom: 0;
+        }
+        
+        /* Make sure the page container maintains proper dimensions */
+        .historical-photo-page-front,
+        .historical-photo-page-back {
+            min-height: 200px;
         }
         
         .historical-photo-caption {
@@ -789,10 +891,11 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            min-height: 280px;
             position: relative;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            opacity: 0;
-            animation: fadeIn 0.5s ease forwards;
+            opacity: 1;
+            animation: fadeIn 0.3s ease forwards;
             margin-bottom: 0;
         }
         
@@ -803,8 +906,8 @@
         
         @keyframes fadeIn {
             from {
-                opacity: 0;
-                transform: translateY(20px);
+                opacity: 0.3;
+                transform: translateY(10px);
             }
             to {
                 opacity: 1;
@@ -914,6 +1017,7 @@
             border: 1px solid #e0e0e0;
             background-color: #fff;
             overflow: hidden;
+            min-height: 300px;
         }
         
         .timeline-title {
@@ -1541,13 +1645,14 @@
             display: flex;
             gap: 2rem;
             min-width: max-content;
+            min-height: 200px;
             padding: 0 1rem;
         }
         
         .timeline-item-horizontal {
             flex: 0 0 auto;
-            opacity: 0;
-            animation: slideInFromLeft 0.8s ease forwards;
+            opacity: 1;
+            animation: slideInFromLeft 0.5s ease forwards;
         }
         
         .timeline-content-horizontal {
@@ -2460,6 +2565,185 @@ video-synopsis {
             
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
+                    // Photo Album Book Page Flip with Sliding Animation (Infinite Loop)
+                    const historicalPhotoPage = document.getElementById('historical-photo-page');
+                    const photoFront = document.getElementById('historical-photo-front');
+                    const photoBack = document.getElementById('historical-photo-back');
+                    
+                    if (historicalPhotoPage && photoFront && photoBack) {
+                        // Sync back page height with front page
+                        function syncHeights() {
+                            const frontHeight = photoFront.offsetHeight;
+                            if (frontHeight > 0) {
+                                photoBack.style.height = frontHeight + 'px';
+                            }
+                        }
+                        
+                        // Sync heights initially and on window resize
+                        syncHeights();
+                        window.addEventListener('resize', syncHeights);
+                        
+                        // Also sync after images load
+                        const frontImg = photoFront.querySelector('img');
+                        const backImg = photoBack.querySelector('img');
+                        if (frontImg) {
+                            frontImg.addEventListener('load', syncHeights);
+                        }
+                        if (backImg) {
+                            backImg.addEventListener('load', syncHeights);
+                        }
+                        
+                        let isFlipped = false;
+                        let currentRotation = 0; // Track rotation angle for continuous clockwise spin
+                        const historicalPhoto = document.getElementById('historical-photo');
+                        let frontHeight = 0;
+                        let backHeight = 0;
+                        let isFirstAnimation = true; // Track if this is the first animation
+                        
+                        // Calculate heights of both images
+                        function calculateHeights() {
+                            // Get front image height (with caption)
+                            const frontCaption = photoFront.querySelector('.historical-photo-caption');
+                            if (frontImg && frontCaption) {
+                                // Image + caption + 15px white space + 5px top padding + 20px bottom padding
+                                frontHeight = frontImg.offsetHeight + frontCaption.offsetHeight + 15 + 5 + 20;
+                            }
+                            
+                            // Get back image height (cropped, no caption)
+                            if (backImg) {
+                                // Account for the 35px crop, add 15px blank space, plus padding
+                                backHeight = backImg.offsetHeight - 35 + 15 + 5 + 20; // -35 for crop, +15 for blank space, +5 top, +20 bottom
+                            }
+                        }
+                        
+                        // Initialize heights after images load
+                        function initializeHeights() {
+                            calculateHeights();
+                            // Set initial height to front image
+                            if (frontHeight > 0) {
+                                historicalPhoto.style.height = frontHeight + 'px';
+                            }
+                        }
+                        
+                        // Wait for images to load and initialize
+                        if (frontImg && backImg) {
+                            if (frontImg.complete && backImg.complete) {
+                                initializeHeights();
+                            } else {
+                                frontImg.addEventListener('load', initializeHeights);
+                                backImg.addEventListener('load', initializeHeights);
+                            }
+                        }
+                        
+                        // Also recalculate on window resize
+                        window.addEventListener('resize', () => {
+                            calculateHeights();
+                            // Update to current visible image height
+                            if (isFlipped && backHeight > 0) {
+                                historicalPhoto.style.height = backHeight + 'px';
+                            } else if (!isFlipped && frontHeight > 0) {
+                                historicalPhoto.style.height = frontHeight + 'px';
+                            }
+                        });
+                        
+                        function animatePhotos() {
+                            syncHeights(); // Ensure height is synced
+                            calculateHeights(); // Recalculate heights in case images changed
+                            
+                            // Determine spin and readjustment durations
+                            const spinDuration = isFirstAnimation ? (isFlipped ? 9000 : 4000) : 1200;
+                            const readjustDuration = isFirstAnimation ? 2000 : 1200;
+                            const totalAnimationDuration = spinDuration + readjustDuration;
+                            
+                            if (isFlipped) {
+                                // Showing back image (second image): SPIN FIRST, then readjust
+                                if (isFirstAnimation) {
+                                    // First time: 9 second spin
+                                    historicalPhotoPage.classList.remove('spin-slow');
+                                    historicalPhotoPage.classList.add('spin-very-slow');
+                                } else {
+                                    // After first: 1.2 second spin (swift and smooth)
+                                    historicalPhotoPage.style.transition = 'transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                                    historicalPhotoPage.classList.remove('spin-slow', 'spin-very-slow');
+                                }
+                                
+                                // Step 1: Start the spin animation
+                                currentRotation += 180;
+                                historicalPhotoPage.style.transform = `rotateY(${currentRotation}deg)`;
+                                historicalPhotoPage.classList.remove('flipped');
+                                isFlipped = false;
+                                
+                                // Step 2: After spin completes, adjust the frame size
+                                setTimeout(() => {
+                                    // Now showing front image - expand frame to front image height
+                                    if (frontHeight > 0) {
+                                        historicalPhoto.style.height = frontHeight + 'px';
+                                    }
+                                    
+                                    // Wait for readjustment, then wait 4 seconds before starting next animation
+                                    setTimeout(() => {
+                                        startNextAnimation();
+                                    }, readjustDuration);
+                                }, spinDuration);
+                            } else {
+                                // Showing front image (first image): READJUST FIRST, then spin
+                                if (isFirstAnimation) {
+                                    // First time: 4 second spin
+                                    historicalPhotoPage.classList.add('spin-slow');
+                                    historicalPhotoPage.classList.remove('spin-very-slow');
+                                } else {
+                                    // After first: 1.2 second spin (swift and smooth)
+                                    historicalPhotoPage.style.transition = 'transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                                    historicalPhotoPage.classList.remove('spin-slow', 'spin-very-slow');
+                                }
+                                
+                                // Step 1: Adjust the frame size first
+                                if (backHeight > 0) {
+                                    historicalPhoto.style.height = backHeight + 'px';
+                                }
+                                
+                                // Step 2: After readjustment completes, start the spin
+                                setTimeout(() => {
+                                    currentRotation += 180;
+                                    historicalPhotoPage.style.transform = `rotateY(${currentRotation}deg)`;
+                                    historicalPhotoPage.classList.add('flipped');
+                                isFlipped = true;
+                                    
+                                    // After spin completes, wait 4 seconds before starting next animation
+                                    setTimeout(() => {
+                                        startNextAnimation();
+                                    }, spinDuration);
+                                }, readjustDuration);
+                            }
+                            
+                            // Mark that first animation is complete
+                            if (isFirstAnimation) {
+                                isFirstAnimation = false;
+                            }
+                        }
+                        
+                        // Animation timer - starts only after animations complete
+                        let animationTimer = null;
+                        let isFirstRun = true;
+                        
+                        function startNextAnimation() {
+                            // Clear any existing timer
+                            if (animationTimer) {
+                                clearTimeout(animationTimer);
+                            }
+                            
+                            // Always wait 4 seconds after picture is fully visible before starting next animation
+                            const delay = 4000;
+                            
+                            animationTimer = setTimeout(() => {
+                                animatePhotos();
+                            }, delay);
+                        }
+                        
+                        // Start the first animation immediately
+                        animatePhotos();
+                    }
+                    
                     const welcomeMessage = document.getElementById('welcome-message');
                     const WELCOME_KEY = 'welcomeShown';
 
@@ -2520,8 +2804,19 @@ video-synopsis {
             <p>Todos os arquivos estão agora de livre acesso para apreciação e revisitação dos momentos históricos preservados.</p>
             
             <div class="historical-photo" id="historical-photo">
-                <img src="historical_couple.jpg" alt="Foto histórica da cidade">
-                <p class="historical-photo-caption">Álvaro e Maria - meus pais</p>
+                <div class="historical-photo-page" id="historical-photo-page">
+                    <!-- Front of page (Álvaro e Maria) -->
+                    <div class="historical-photo-page-front" id="historical-photo-front">
+                        <img src="historical_couple.jpg" alt="Foto histórica da cidade">
+                        <p class="historical-photo-caption">Álvaro e Maria - meus pais</p>
+                    </div>
+                    <!-- Back of page (PaieMae2) -->
+                    <div class="historical-photo-page-back" id="historical-photo-back">
+                        <img src="PaieMae2.jpeg" alt="PaieMae2">
+                        <p class="historical-photo-caption">Álvaro e Maria - meus pais
+                        </p>
+                    </div>
+                </div>
                 
                 <!-- Curator Video Content (initially hidden inside the same container) -->
                 <div class="curator-video-content" id="curator-video-content" style="display: none;">
@@ -2586,17 +2881,6 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <!-- 1878 - Carta de meu Bisavô para meu Avô -->
-                    <div class="timeline-item-horizontal" style="animation-delay: 0.2s;">
-                        <div class="timeline-content-horizontal">
-                            <div class="timeline-year-horizontal">1878</div>
-                            <div class="timeline-text-horizontal">Carta de meu bisavô José Antonio Duraes Castanheira</div>
-                            <div class="timeline-author-horizontal">Francisco Augusto Durães Castanheira</div>
-                            <div class="timeline-tag-horizontal">Documento</div>
-                            <a href="Carta de 1878 do Bisavô  para Vovô por Elisa Lima.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
-                        </div>
-                    </div>
-                    
                     <!-- 1900 - O Livro da Vovó Magdalena -->
                     <div class="timeline-item-horizontal" style="animation-delay: 0.3s;">
                         <div class="timeline-content-horizontal">
@@ -2604,7 +2888,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">O Livro da Vovó Magdalena</div>
                             <div class="timeline-author-horizontal">Maria Magdalena Moura Costa Castanheira</div>
                             <div class="timeline-tag-horizontal">Livro</div>
-                            <a href="O Livro da Vovó Magdalena.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
+                            <a href="https://drive.google.com/file/d/1DujHUHIWimep6EIRjEzrc8cudFOi8niW/view?usp=sharing" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
                     
@@ -3201,7 +3485,7 @@ video-synopsis {
                             <div class="timeline-year-horizontal">2020</div>
                             <div class="timeline-text-horizontal">Antologia Lafaiete em Prosa e Verso</div>
                             <div class="timeline-author-horizontal">Reuber Lana Antoniazzi</div>
-                            <div class="timeline-tag-horizontal">Antologia</div>
+                            <div class="timeline-tag-horizontal">Livro/div>
                             <a href="Antologia Lafaiete em Prosa e Verso.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
@@ -3289,7 +3573,7 @@ video-synopsis {
                             <div class="timeline-year-horizontal">2021</div>
                             <div class="timeline-text-horizontal">Catálogo de Autores de Conselheiro Lafaiete</div>
                             <div class="timeline-author-horizontal">Câmara Municipal de Conselheiro Lafaiete</div>
-                            <div class="timeline-tag-horizontal">Documento</div>
+                            <div class="timeline-tag-horizontal">Livro</div>
                             <a href="https://www.conselheirolafaiete.mg.leg.br/institucional/biblioteca/CATALOGO2023.pdf" class="timeline-button-horizontal">Ver obra</a>
                         </div>
                     </div>
@@ -3396,6 +3680,118 @@ video-synopsis {
             </div>
         </div>
         
+        <section id="contos-e-poesia">
+            <div class="documents-grid">
+                <div class="document-card" style="animation-delay: 0.1s;">
+                    <div class="document-code">306</div>
+                    <h3>Amigos que ganhei de meu Pai</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2024</div>
+                    <p>Narrativa pessoal sobre amizades que herdei de meu Pai, destacando valores de amizade, carinho e sabedoria transmitidos entre gerações.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href="Amigos que ganhei de meu Pai.pdf" class="read-button" target="_blank">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.2s;">
+                    <div class="document-code">307</div>
+                    <h3>A história da Cachaça - Pinga e Água Ardente</h3>
+                    <div class="document-author">Youtube</div>
+                    <div class="document-year">2018</div>
+                    <p>Lenda da história da cachaça no Brasil, sua produção artesanal e importância cultural na sociedade brasileira.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href="https://docs.google.com/document/d/1KxWtuRCEYjzgt7S59QuqvvfpVhDjDo5xSggH0A2d51M/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.3s;">
+                    <div class="document-code">320</div>
+                    <h3>O Segredo da Vida</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2021</div>
+                    <p>Reflexões filosóficas sobre o sentido da vida e os segredos para uma existência plena e significativa.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href="O segredo da vida.pdf" class="read-button" target="_blank">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.4s;">
+                    <div class="document-code">330</div>
+                    <h3>Uma lição de cidadania</h3>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
+                    <div class="document-year">2012</div>
+                    <p>Um presente que Deus me deu. Uma história real, que vivi, e que me permitiu ajudar um "cidadão de rua", a reconquistar sua cidadania espanhola e ter um final de vida com dignidade.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href=" https://drive.google.com/file/d/1nQZ-b6bnlsSecaI-OLb3S4XOtENIWH0r/view?usp=sharing" class="read-button" target="_blank">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.5s;">
+                    <div class="document-code">343</div>
+                    <h3>Deus me livre não ser mineira</h3>
+                    <div class="document-author">Fernanda Grey</div>
+                    <div class="document-year">2024</div>
+                    <p>Divertida crônica que a autora destaca com bom humor e descreve, de forma carinhosa, as características dos mineiros</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href="#" class="read-button" target="_blank">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.6s;">
+                    <div class="document-code">344</div>
+                    <h3>Ser Mineiro</h3>
+                    <div class="document-author">José Batista Queiroz</div>
+                    <div class="document-year">1985</div>
+                    <p>O Poema que diz do mineiro: da simplicidade e pureza, humildade e modéstia, coragem e bravura, fidalguia e elegância. Foi publicado originalmente por José Batista Queiroz. É publicado posteriormente como de autoria de Carlos Drummond de Andrade e também por Fernando Sabino.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href="#" class="read-button" target="_blank">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.7s;">
+                    <div class="document-code">345</div>
+                    <h3>Envelhecer</h3>
+                    <div class="document-author">Internet</div>
+                    <div class="document-year">2025</div>
+                    <p>Um vídeo abordando mensagens do tema envelhecer. Vale a pena assistir</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href="#" class="read-button" target="_blank">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.8s;">
+                    <div class="document-code">347</div>
+                    <h3>Compra e Venda de Escravos</h3>
+                    <div class="document-author">Documentos antigos</div>
+                    <div class="document-year">1874</div>
+                    <p>Quando meu avô chegou ao Brasil, levou anos até assumir aquela fazenda. Ao chegar, descobriu que a propriedade tivera outros donos e que, em tempos passados, haviam sido guardados documentos de um período histórico que não deve ser esquecido. Hoje, mantenho esses registros para que possamos lembrar e aprender com essa parte da história.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href="#" class="read-button" target="_blank">Ler</a>
+                    </div>
+                </div>
+                
+                <div class="document-card" style="animation-delay: 0.9s;">
+                    <div class="document-code">348</div>
+                    <h3>Galos de Briga</h3>
+                    <div class="document-author">Beatriz Marques Castanheira</div>
+                    <div class="document-year">2020</div>
+                    <p>Um divertido conto, envolvendo galos de briga contado com bom humor pela Beatriz. Vale a pena a leitura.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href="#" class="read-button" target="_blank">Ler</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
         <section id="acervo">
             <h2 class="acervo-title">Acervo</h2>
             <p class="acervo-subtitle">Explore as obras e documentos históricos dos autores de nossa cidade</p>
@@ -3410,8 +3806,8 @@ video-synopsis {
             <div class="filter-container">
                 <button class="filter-button active" data-filter="todos">Todos</button>
                 <button class="filter-button" data-filter="livro">Livros</button>
-                <button class="filter-button" data-filter="conto">Contos</button>
-                <button class="filter-button" data-filter="poema">Poesia</button>
+                <button class="filter-button" data-filter="conto">Pessoas&Famílias</button>
+                <button class="filter-button" data-filter="poema">Contos&Poesia</button>
                 <button class="filter-button" data-filter="documento">Documentos</button>
                 <button class="filter-button" data-filter="mídia">Mídia</button>
             </div>
@@ -3435,7 +3831,7 @@ video-synopsis {
                     <p>Memórias, contos e histórias registradas, de forma manuscrita, por minha Avó. Preserva tradições e valores de forma pessoal e crítica.</p>
                     <div class="document-footer">
                         <span class="document-type">Livro</span>
-                        <a href="O Livro da Vovó Magdalena.pdf" class="read-button" target="_blank">Ler</a>
+                        <a href="https://drive.google.com/file/d/1DujHUHIWimep6EIRjEzrc8cudFOi8niW/view?usp=sharing" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -3464,30 +3860,6 @@ video-synopsis {
                 </div>
                 
                 <div class="document-card" style="animation-delay: 0.4s;">
-                    <div class="document-code">306</div>
-                    <h3>Amigos que ganhei de meu Pai</h3>
-                    <div class="document-author">Reinaldo Duarte Castanheira</div>
-                    <div class="document-year">2024</div>
-                    <p>Narrativa pessoal sobre amizades que herdei de meu Pai, destacando valores de amizade, carinho e sabedoria transmitidos entre gerações.</p>
-                    <div class="document-footer">
-                        <span class="document-type">Conto</span>
-                        <a href="Amigos que ganhei de meu Pai.pdf" class="read-button" target="_blank">Ler</a>
-                    </div>
-                </div>
-                
-                <div class="document-card" style="animation-delay: 0.5s;">
-                    <div class="document-code">307</div>
-                    <h3>A história da Cachaça - Pinga e Água Ardente</h3>
-                    <div class="document-author">Youtube</div>
-                    <div class="document-year">2018</div>
-                    <p>Lenda da história da cachaça no Brasil, sua produção artesanal e importância cultural na sociedade brasileira.</p>
-                    <div class="document-footer">
-                        <span class="document-type">Conto</span>
-                        <a href="https://docs.google.com/document/d/1KxWtuRCEYjzgt7S59QuqvvfpVhDjDo5xSggH0A2d51M/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
-                    </div>
-                </div>
-                
-                <div class="document-card" style="animation-delay: 0.6s;">
                     <div class="document-code">309</div>
                     <h3>Queluzíadas</h3>
                     <div class="document-author">Alberto Libanio Rodrigues</div>
@@ -3598,7 +3970,7 @@ video-synopsis {
                     <div class="document-year">1990</div>
                     <p>Antonio Durães Castanheira, irmão de meu avô Francisco Augusto, veio de Portugal por volta do ano de 1900. Com ele veio um amigo e vizinho lá de Fiais da Telha. Seguiram para Ponte Nova.</p>
                     <div class="document-footer">
-                        <span class="document-type">Conto</span>
+                        <span class="document-type">Pessoas&Famílias</span>
                         <a href="História do Tio Antonio.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
@@ -3615,17 +3987,6 @@ video-synopsis {
                     </div>
                 </div>
                 <div class="document-card" style="animation-delay: 1.9s;">
-                    <div class="document-code">320</div>
-                    <h3>O Segredo da Vida</h3>
-                    <div class="document-author">Reinaldo Duarte Castanheira</div>
-                    <div class="document-year">2021</div>
-                    <p>Reflexões filosóficas sobre o sentido da vida e os segredos para uma existência plena e significativa.</p>
-                    <div class="document-footer">
-                        <span class="document-type">Conto</span>
-                        <a href="O segredo da vida.pdf" class="read-button" target="_blank">Ler</a>
-                    </div>
-                </div>
-                <div class="document-card" style="animation-delay: 2.0s;">
                     <div class="document-code">321</div>
                     <h3>Missão – Homenagem a Luiza Izabel Biagioni</h3>
                     <div class="document-author">Pedro de Lima Belisário</div>
@@ -3643,7 +4004,7 @@ video-synopsis {
                     <div class="document-year">2020</div>
                     <p>A vida é feita de degraus como uma pirâmide que tem a pretensão de alcançar o infinito. É quando a Fênix sobrevoa Lafaiete através dos tempos e deixa o legado para o futuro.</p>
                     <div class="document-footer">
-                        <span class="document-type">Antologia</span>
+                        <span class="document-type">Livro</span>
                         <a href="Antologia Lafaiete em Prosa e Verso.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
@@ -3731,18 +4092,6 @@ video-synopsis {
                 </div>
                 
                 <div class="document-card" style="animation-delay: 2.7s;">
-                    <div class="document-code">330</div>
-                    <h3>Uma lição de cidadania</h3>
-                    <div class="document-author">Reinaldo Duarte Castanheira</div>
-                    <div class="document-year">2012</div>
-                    <p>Um presente que Deus me deu. Uma história real, que vivi, e que me permitiu ajudar um "cidadão de rua", a reconquistar sua cidadania espanhola e ter um final de vida com dignidade.</p>
-                    <div class="document-footer">
-                        <span class="document-type">Conto</span>
-                        <a href=" https://drive.google.com/file/d/1nQZ-b6bnlsSecaI-OLb3S4XOtENIWH0r/view?usp=sharing" class="read-button" target="_blank">Ler</a>
-                    </div>
-                </div>
-                
-                <div class="document-card" style="animation-delay: 2.8s;">
                     <div class="document-code">331</div>
                     <h3>Pessoas e personalidades I</h3>
                     <div class="document-author">Mauro Dutra de Faria</div>
@@ -3825,6 +4174,7 @@ video-synopsis {
               protegido: false,
               codigo: "105",
               ano: "2011",
+              tipo: "Pessoas&Famílias",
               sinopse: "José Álvaro vai fazer curso em Madrid e numa excursão de ônibus, se conhecem. A partir de então tudo acontece."
           },
           {
@@ -3833,6 +4183,7 @@ video-synopsis {
             protegido: false,
             codigo: "106",
             ano: "2010",
+            tipo: "Pessoas&Famílias",
             sinopse: "Celebração das Bodas de Ouro, com retrospecto da cerimônia em Madrid e comemorações no páteo da casa em Lafaiete. "
         },
           {
@@ -3866,6 +4217,7 @@ video-synopsis {
         codigo: "110",
         ano: "2010",
         autor: "RDC",
+        tipo: "Pessoas&Famílias",
         sinopse: "Professora Avelina conversa na sala de sua casa, contando um pouco de momentos e aventuras vividas."
     },
     {
@@ -3874,6 +4226,7 @@ video-synopsis {
         protegido: false,
         codigo: "111",
         ano: "2010",
+        tipo: "Pessoas&Famílias",
         sinopse: "Sempre atuante nas áreas de educação e cultura."
     },
     {
@@ -3883,6 +4236,7 @@ video-synopsis {
         codigo: "112",
         ano: "2001",
         autor: "",
+        tipo: "Pessoas&Famílias",
         sinopse: "Precursora dos cursos de Jardim de Infância na cidade. Muito admirada e respeitada. Atuou como artista em peças de teatro."
     },
     {
@@ -3892,6 +4246,7 @@ video-synopsis {
         codigo: "113",
         ano: "2021",
         autor: "",
+        tipo: "Pessoas&Famílias",
         sinopse: "Este vídeo conta um pouco de história da Família DUARTE, de minha Mãe Maria: Pai, Mãe, irmãs e irmãos. Destaque especial a figura marcante de seu Tio Cônego João Pio."
     },
     {
@@ -3910,6 +4265,7 @@ video-synopsis {
         codigo: "115",
         ano: "2015",
         autor: "",
+        tipo: "Pessoas&Famílias",
         sinopse: "Entrevista com o estimado e popular homem público - Geraldo de Assis Zebral  - que teve sua presença gravada na história da cidade: cinemas, futebol e área assistencial."
     },
     {
@@ -4011,6 +4367,7 @@ video-synopsis {
         codigo: "126",
         ano: "2001",
         autor: "",
+        tipo: "Pessoas&Famílias",
         sinopse: "Pessoa estimada, professora do Grupo Escolar Domingos Bebiano, onde lecionou por 32 anos, tendo exercido também o cargo de Diretora."
     },
     {
@@ -4020,6 +4377,7 @@ video-synopsis {
         codigo: "127",
         ano: "2001",
         autor: "",
+        tipo: "Pessoas&Famílias",
         sinopse: "Professora do Grupo Escolar Domingos Bebiano tendo também lecionado nos colégios Nazaré e Monsenhor Horta."
     },
     {
@@ -4047,6 +4405,7 @@ video-synopsis {
         codigo: "130",
         ano: "2003",
         autor: "",
+        tipo: "Pessoas&Famílias",
         sinopse: "Uma singela homenagem que fiz, momentos com as Primas Mariinha, Cecília, Carmem e Lenita, trazendo emoções. Tem também uma mensagem da Tia Carmita"
     },
     {
@@ -4056,6 +4415,7 @@ video-synopsis {
         codigo: "131",
         ano: "2020",
         autor: "Reinaldo Duarte Castanheira ",
+        tipo: "Pessoas&Famílias",
         sinopse: "Luiza conta um pouco de sua história. Uma mulher que viveu para servir ao próximo."
     },
     {
@@ -4110,6 +4470,7 @@ video-synopsis {
         codigo: "137",
         ano: "2007",
         autor: "Reinaldo DuartE Castanheira",
+        tipo: "Pessoas&Famílias",
         sinopse: "Importante e destacado homem público, engenheiro que implantou, implementou e dirigiu a Cia Siderúrgica Nacional em Lafaiete e Casa de Pedra."
     },
     {
@@ -4119,6 +4480,7 @@ video-synopsis {
         codigo: "138",
         ano: "2007",
         autor: "",
+        tipo: "Pessoas&Famílias",
         sinopse: "Constituiu expressiva família, muito estimada na sociedade. O vídeo foi produzido pela filha Mônica com o irmão Pedrinho, comemorando o centenário de seu nascimento."
     },
     {
@@ -4180,7 +4542,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                  <div class="document-year">${v.ano}</div>
                 ${v.sinopse ? `<div class="video-synopsis">${v.sinopse}</div>` : ''}
-                <div class="document-footer"><span class="document-type">Mídia</span></div>
+                <div class="document-footer"><span class="document-type">${v.tipo || 'Mídia'}</span></div>
             </div>`
         ));
         const mediaCovers = {
@@ -4413,8 +4775,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const t = String(typeText || '').toLowerCase().trim();
             if (filter === 'todos') return true;
             if (filter === 'livro') return t === 'livro';
-            if (filter === 'conto') return t === 'conto';
-            if (filter === 'poema') return t === 'poema' || t === 'poesia';
+            if (filter === 'conto') {
+              // Pessoas&Famílias: only matches Pessoas&Famílias, NOT regular Conto
+              return t === 'pessoas&famílias' || t === 'pessoas&familias';
+            }
+            if (filter === 'poema') {
+              // Contos&Poesia: matches poema, poesia, or conto, but NOT Pessoas&Famílias
+              return (t === 'poema' || t === 'poesia' || t === 'conto') && 
+                     t !== 'pessoas&famílias' && t !== 'pessoas&familias';
+            }
             if (filter === 'documento') return t === 'documento';
             if (filter === 'mídia') return (
               t === 'mídia' || t === 'midia' || t === 'vídeo' || t === 'video' || t === 'áudio' || t === 'audio'
@@ -4709,11 +5078,55 @@ document.addEventListener('DOMContentLoaded', function() {
                     return m ? parseInt(m[0], 10) : Number.NEGATIVE_INFINITY;
                 };
                 
-                // Ordenar por ano (ascendente)
-                items.sort((a, b) => parseYearValue(a.ano) - parseYearValue(b.ano));
+                // Remover duplicatas baseado no código do documento
+                const seenCodes = new Set();
+                const uniqueItems = items.filter(doc => {
+                    if (!doc.codigo) return true; // Mantém itens sem código
+                    if (seenCodes.has(doc.codigo)) {
+                        return false; // Remove duplicata
+                    }
+                    seenCodes.add(doc.codigo);
+                    return true;
+                });
                 
-                // Construir itens da timeline a partir dos cards
-                items.forEach(doc => {
+                // Ordenar por ano (ascendente)
+                uniqueItems.sort((a, b) => parseYearValue(a.ano) - parseYearValue(b.ano));
+                
+                // Coletar códigos e títulos/anos já existentes na timeline para evitar duplicatas
+                const existingCodes = new Set();
+                const existingItems = new Set(); // Para verificar por título + ano
+                Array.from(timelineTrack.querySelectorAll('.timeline-item-horizontal')).forEach(item => {
+                    const codeEl = item.querySelector('.document-code');
+                    const titleEl = item.querySelector('.timeline-text-horizontal');
+                    const yearEl = item.querySelector('.timeline-year-horizontal');
+                    if (codeEl) {
+                        const code = codeEl.textContent.trim();
+                        if (code) existingCodes.add(code);
+                    }
+                    // Também verificar por título + ano para itens sem código
+                    if (titleEl && yearEl) {
+                        const title = titleEl.textContent.trim().toLowerCase();
+                        const year = yearEl.textContent.trim();
+                        if (title && year) {
+                            existingItems.add(`${title}|${year}`);
+                        }
+                    }
+                });
+                
+                // Construir itens da timeline a partir dos cards (apenas se não existirem)
+                uniqueItems.forEach(doc => {
+                    // Verificar se já existe na timeline pelo código
+                    if (doc.codigo && existingCodes.has(doc.codigo)) {
+                        return; // Pular se já existe
+                    }
+                    
+                    // Verificar se já existe por título + ano (para itens sem código ou duplicatas)
+                    const titleKey = doc.titulo ? doc.titulo.toLowerCase().trim() : '';
+                    const yearKey = doc.ano ? doc.ano.trim() : '';
+                    if (titleKey && yearKey && existingItems.has(`${titleKey}|${yearKey}`)) {
+                        return; // Pular se já existe por título + ano
+                    }
+                    
                     const timelineItem = document.createElement('div');
                     timelineItem.className = 'timeline-item-horizontal';
                     timelineItem.setAttribute('data-year', doc.ano);
@@ -4737,6 +5150,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     timelineItem.innerHTML = timelineContent;
                     timelineTrack.appendChild(timelineItem);
+                    
+                    // Adicionar código e título+ano à lista de existentes
+                    if (doc.codigo) existingCodes.add(doc.codigo);
+                    if (titleKey && yearKey) existingItems.add(`${titleKey}|${yearKey}`);
                 });
                 
                 return document.querySelectorAll('.timeline-item-horizontal');
@@ -5543,8 +5960,8 @@ function openVideo(videoId, isProtected) {
                 
                 // Step 2: After container expansion starts, fade out photo elements with better timing
                 setTimeout(() => {
-                    const photoImg = historicalPhoto.querySelector('img');
-                    const photoCaption = historicalPhoto.querySelector('.historical-photo-caption');
+                    const photoImg = historicalPhoto.querySelector('.historical-photo-page-front img');
+                    const photoCaption = historicalPhoto.querySelector('.historical-photo-page-front .historical-photo-caption');
                     
                     photoImg.style.transition = 'opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                     photoCaption.style.transition = 'opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
@@ -5621,11 +6038,17 @@ function openVideo(videoId, isProtected) {
                     curatorVideoContent.classList.remove('active');
                     
                     // Show photo elements again with smooth fade-in
+                    const photoImg = historicalPhoto.querySelector('.historical-photo-page-front img');
+                    const photoCaption = historicalPhoto.querySelector('.historical-photo-page-front .historical-photo-caption');
                     requestAnimationFrame(() => {
-                        photoImg.style.transition = 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                        photoCaption.style.transition = 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                        photoImg.style.opacity = '1';
-                        photoCaption.style.opacity = '1';
+                        if (photoImg) {
+                            photoImg.style.transition = 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                            photoImg.style.opacity = '1';
+                        }
+                        if (photoCaption) {
+                            photoCaption.style.transition = 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                            photoCaption.style.opacity = '1';
+                        }
                     });
                     
                     // Contract the container back to original size with natural delay
@@ -7822,11 +8245,6 @@ function openVideo(videoId, isProtected) {
                         <option value="Mídia">Mídia</option>
                         <option value="Vídeo">Vídeo</option>
                         <option value="Antologia">Antologia</option>
-                        <option value="Biografia">Biografia</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
                     <label for="description">Descrição <span class="required">*</span></label>
                     <textarea id="description" name="description" required placeholder="Descreva brevemente a obra, sua importância ou contexto histórico..."></textarea>
                 </div>
