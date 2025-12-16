@@ -1017,7 +1017,6 @@
             border: 1px solid #e0e0e0;
             background-color: #fff;
             overflow: hidden;
-            min-height: 300px;
         }
         
         .timeline-title {
@@ -9375,14 +9374,17 @@ function openVideo(videoId, isProtected) {
         return m ? parseInt(m[0], 10) : NaN;
       }
 
-      async function rebuildTimeline() {
+      async function rebuildTimeline(includeFirebase = true) {
         const track = document.querySelector('.timeline-track');
         if (!track) return;
 
-        // 1) Collect all sources
+        // 1) Collect all sources (build immediately with static + acervo, Firebase optional)
         const staticItems = pullFromStaticTimeline(track);
         const acervoItems = pullFromAcervo();
-        const firebaseItems = await pullFromFirebase();
+        let firebaseItems = [];
+        if (includeFirebase) {
+          firebaseItems = await pullFromFirebase();
+        }
 
         // 2) Merge + de-duplicate by title+year
         const pool = new Map();
@@ -9406,10 +9408,11 @@ function openVideo(videoId, isProtected) {
       // Expose for manual triggering if needed
       window.rebuildTimeline = rebuildTimeline;
 
-      // Build once after DOM is ready, then try again shortly in case Firebase loads late
+      // Build immediately with static + acervo items (no Firebase wait), then update when Firebase loads
       document.addEventListener('DOMContentLoaded', () => {
-        rebuildTimeline();
-        setTimeout(rebuildTimeline, 1200);
+        rebuildTimeline(false); // Build immediately without Firebase
+        // Update with Firebase items when they load (non-blocking)
+        rebuildTimeline(true).catch(() => {}); // Silently fail if Firebase not available
       });
     })();
     </script>
