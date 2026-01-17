@@ -3100,7 +3100,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">FUMEC 30 anos de formados - Parte 1</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Vídeo</div>
-                            <a href="https://drive.google.com/file/d/1rMHV5lU2aGBGLImUNwOcv8-c9xXsaNvn/view?usp=drive_link" class="timeline-button-horizontal" target="_blank">Ver vídeo</a>
+                            <a href="https://drive.google.com/file/d/1qcR3wKVy9qwbaQ_4eXKwjj_eOIqpMQWf/view?usp=sharing" class="timeline-button-horizontal" target="_blank">Ver vídeo</a>
                         </div>
                     </div>
                     
@@ -3111,7 +3111,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">FUMEC 30 anos de formados - Parte 2</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Vídeo</div>
-                            <a href="https://drive.google.com/file/d/1rULjsWBnNOJgjBElxeS2vujsl751jo_t/view?usp=sharing" class="timeline-button-horizontal" target="_blank">Ver vídeo</a>
+                            <a href="https://drive.google.com/file/d/1EUX5oEe-HEzHdnLjR4L2Q9W-OarWbAtl/view?usp=sharing" class="timeline-button-horizontal" target="_blank">Ver vídeo</a>
                         </div>
                     </div>
                     
@@ -4301,7 +4301,7 @@ video-synopsis {
     },
     {
         titulo: "FUMEC 30 anos de formados - Parte 1",
-        link: "https://drive.google.com/file/d/1rMHV5lU2aGBGLImUNwOcv8-c9xXsaNvn/view?usp=drive_link",
+        link: "https://drive.google.com/file/d/1qcR3wKVy9qwbaQ_4eXKwjj_eOIqpMQWf/view?usp=sharing",
         protegido: false,
         codigo: "118",
         ano: "2000",
@@ -4311,7 +4311,7 @@ video-synopsis {
     },
     {
         titulo: "FUMEC 30 anos de formados - Parte 2",
-        link: "https://drive.google.com/file/d/1rULjsWBnNOJgjBElxeS2vujsl751jo_t/view?usp=sharing",
+        link: "https://drive.google.com/file/d/1EUX5oEe-HEzHdnLjR4L2Q9W-OarWbAtl/view?usp=sharing",
         protegido: false,
         codigo: "119",
         ano: "2000",
@@ -8525,8 +8525,8 @@ function openVideo(videoId, isProtected) {
       const visitsLabelEl = document.querySelector("#visits-stat .stat-label");
       if (visitsLabelEl) visitsLabelEl.textContent = "Visitas";
 
-      // realtime para o círculo: total de visitas do ano de 2025
-      const YEAR_FOR_BADGE = 2025;
+      // realtime para o círculo: total de visitas do ano corrente
+      const YEAR_FOR_BADGE = new Date().getFullYear();
       onSnapshot(collection(db, 'stats_weekly'), snap => {
         let total = 0;
         const start = new Date(YEAR_FOR_BADGE,0,1,0,0,0,0);
