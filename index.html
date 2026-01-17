@@ -48,6 +48,35 @@
                 opacity: 1;
             }
         }
+
+        .confetti-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1000004;
+            overflow: hidden;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            top: -10vh;
+            width: 8px;
+            height: 12px;
+            opacity: 0.95;
+            border-radius: 2px;
+            animation-name: confetti-fall;
+            animation-timing-function: linear;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translate3d(0, -10vh, 0) rotate(0deg);
+            }
+            100% {
+                transform: translate3d(var(--drift, 0px), 110vh, 0) rotate(360deg);
+            }
+        }
         
         .nav-bar {
             background-color: var(--header-bg);
@@ -2110,7 +2139,7 @@ video-synopsis {
                 <div class="stat-badge" id="stat-badge">
                     <div class="stat-content" id="stat-container">
                         <div class="stat-item active" id="obras-stat">
-                            <div class="stat-number">90+</div>
+                            <div class="stat-number">100+</div>
                             <div class="stat-label">Obras</div>
                         </div>
                         <div class="stat-item" id="visits-stat">
@@ -8525,27 +8554,12 @@ function openVideo(videoId, isProtected) {
       const visitsLabelEl = document.querySelector("#visits-stat .stat-label");
       if (visitsLabelEl) visitsLabelEl.textContent = "Visitas";
 
-      // realtime para o círculo: total de visitas do ano corrente
-      const YEAR_FOR_BADGE = new Date().getFullYear();
+      // realtime para o círculo: total de visitas de todos os anos
       onSnapshot(collection(db, 'stats_weekly'), snap => {
         let total = 0;
-        const start = new Date(YEAR_FOR_BADGE,0,1,0,0,0,0);
-        const end   = new Date(YEAR_FOR_BADGE,11,31,23,59,59,999);
         snap.forEach(ds => {
           const d = ds.data();
-          let ws = d.week_start?.toDate?.();
-          if (!ws){
-            const m = String(ds.id).match(/(\d{4})-W(\d{2})/);
-            if (m){
-              const y = parseInt(m[1],10), w = parseInt(m[2],10);
-              const jan4 = new Date(y,0,4);
-              const day = jan4.getDay()||7; const monday = new Date(jan4); monday.setDate(jan4.getDate()+1-day + (w-1)*7);
-              ws = monday;
-            }
-          }
-          if (ws && ws >= start && ws <= end){
-            total += (d.visits || 0);
-          }
+          total += (d.visits || 0);
         });
         setBadge(total);
       });
@@ -8839,7 +8853,7 @@ function openVideo(videoId, isProtected) {
           const cs = getComputedStyle(pre);
           const padTop = parseFloat(cs.paddingTop) || 0;
           let lineH = parseFloat(cs.lineHeight); if (!lineH || Number.isNaN(lineH)) { const fs = parseFloat(cs.fontSize) || 16; lineH = fs * 1.6; }
-          const baseIndex = 3; // 0 header, 1 range, 2 dash, 3 label
+          const baseIndex = currentMode === 'year' ? 1 : 3; // 0 header, 1 range/year, 2 dash, 3 label
           // Estimate wrapped lines for the long header/range line so the label index shifts correctly
           const measHeader = document.createElement('span');
           measHeader.style.cssText = `position:absolute; visibility:hidden; white-space:pre; font:${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
@@ -8863,13 +8877,33 @@ function openVideo(videoId, isProtected) {
           measLabel.textContent = labelText || '';
           document.body.appendChild(measLabel);
           const labelW = measLabel.offsetWidth; document.body.removeChild(measLabel);
-          const mid = contRect.width / 2; const gap = 12;
-          // Place arrows at the container edges
+          const mid = contRect.width / 2; const gap = 8;
+          const buttonW = 24;
+          // Place arrows at the container edges by default
           L.style.top = `${top}px`; L.style.left = `8px`; L.style.transform = 'translateY(-50%)';
           R.style.top = `${top}px`; R.style.left = `auto`; R.style.right = `8px`; R.style.transform = 'translateY(-50%)';
+          // For year mode, place arrows inline: "ANO: ◀ 2026" and "ANO: 2025 ▶"
+          if (currentMode === 'year') {
+            // Measure "ANO: " prefix width
+            const prefixText = 'ANO: ';
+            const measPrefix = document.createElement('span');
+            measPrefix.style.cssText = `position:absolute; visibility:hidden; white-space:pre; font:${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+            measPrefix.textContent = prefixText;
+            document.body.appendChild(measPrefix);
+            const prefixW = measPrefix.offsetWidth;
+            document.body.removeChild(measPrefix);
+            // Left arrow right after "ANO: " (before year number)
+            const leftPos = padLeft + prefixW + gap;
+            L.style.left = `${leftPos}px`;
+            L.style.right = 'auto';
+            // Right arrow right after the full label (after year number)
+            const rightPos = padLeft + labelW + gap;
+            R.style.left = `${rightPos}px`;
+            R.style.right = 'auto';
+          }
           // overlay hit area for hover/click, exactly covering the title text area
           HIT.style.top = `${top - lineH/2}px`;
-          HIT.style.left = `${Math.max(8, mid - (labelW/2))}px`;
+          HIT.style.left = `${currentMode === 'year' ? Math.max(8, padLeft) : Math.max(8, mid - (labelW/2))}px`;
           HIT.style.width = `${labelW}px`;
           HIT.style.height = `${lineH}px`;
           // Helper: show only arrows that can navigate within bounds
@@ -8882,7 +8916,7 @@ function openVideo(videoId, isProtected) {
             } else if (currentMode === 'month'){
               cand.setMonth(cand.getMonth() + delta, 1); cand.setDate(1);
             } else {
-              return false; // year mode locked
+              cand.setFullYear(cand.getFullYear() + delta, 0, 1);
             }
             return !(cand < min || cand > max);
           };
@@ -8956,9 +8990,10 @@ function openVideo(videoId, isProtected) {
       // period pivot state
       let currentPivotDate = new Date();
       let currentMode = 'week'; // 'week' | 'month' | 'year'
-      const ALLOWED_YEAR = 2025; // navigation limited to 2025
-      const MIN_WEEK = 26;       // earliest week available
-      const MIN_MONTH_INDEX = 5; // June (0-based)
+      const MIN_YEAR = 2025;
+      const MAX_YEAR = 2026;
+      const MIN_WEEK = 1;        // earliest week available
+      const MIN_MONTH_INDEX = 0; // January (0-based)
 
       async function toggleWeeklyPanel(){
         const container = document.getElementById('weekly-extract');
@@ -8999,7 +9034,7 @@ function openVideo(videoId, isProtected) {
           // Make hover behavior and inline nav buttons available immediately on open
           try {
             const wk = isoWeek(currentPivotDate).week;
-            const initialLabel = currentMode==='week' ? `Semana ${String(wk)}` : (currentMode==='month' ? (currentPivotDate.toLocaleDateString('pt-BR', { month:'long' })) : String(currentPivotDate.getFullYear()));
+            const initialLabel = currentMode==='week' ? `Semana ${String(wk)}` : (currentMode==='month' ? (currentPivotDate.toLocaleDateString('pt-BR', { month:'long' })) : `ANO: ${String(currentPivotDate.getFullYear())}`);
             updateInlineNav(initialLabel);
           } catch {}
         } else {
@@ -9046,14 +9081,16 @@ function openVideo(videoId, isProtected) {
       }
 
       function boundsForMode(){
+        const minYear = Math.min(MIN_YEAR, MAX_YEAR);
+        const maxYear = Math.max(MIN_YEAR, MAX_YEAR);
         if (currentMode === 'week'){
-          return { min: mondayOfIsoWeek(ALLOWED_YEAR, MIN_WEEK), max: new Date(ALLOWED_YEAR, 11, 31, 23,59,59,999) };
+          return { min: mondayOfIsoWeek(minYear, MIN_WEEK), max: new Date(maxYear, 11, 31, 23,59,59,999) };
         }
         if (currentMode === 'month'){
-          return { min: new Date(ALLOWED_YEAR, MIN_MONTH_INDEX, 1, 0,0,0,0), max: new Date(ALLOWED_YEAR, 11, 31, 23,59,59,999) };
+          return { min: new Date(minYear, MIN_MONTH_INDEX, 1, 0,0,0,0), max: new Date(maxYear, 11, 31, 23,59,59,999) };
         }
-        // Year mode locked entirely to 2025
-        return { min: new Date(ALLOWED_YEAR,0,1,0,0,0,0), max: new Date(ALLOWED_YEAR,11,31,23,59,59,999) };
+        // Year mode: allow navigation across the configured range
+        return { min: new Date(minYear,0,1,0,0,0,0), max: new Date(maxYear,11,31,23,59,59,999) };
       }
 
       function shiftPivot(delta){
@@ -9066,8 +9103,8 @@ function openVideo(videoId, isProtected) {
           candidate.setMonth(candidate.getMonth() + delta, 1);
           candidate.setDate(1);
         } else {
-          // No navigation outside 2025 in year mode
-          return;
+          // Year mode: allow navigation across configured range
+          candidate.setFullYear(candidate.getFullYear() + delta, 0, 1);
         }
         if (candidate < min || candidate > max) { return; }
         currentPivotDate = candidate;
@@ -9164,7 +9201,7 @@ function openVideo(videoId, isProtected) {
             `ATUALIZADO EM . . . . . : ${fmtDT(new Date())}`
           ].join('\n');
           setPanelContentSmooth(yearBlock);
-          updateInlineNav(String(y));
+          updateInlineNav(`ANO: ${String(y)}`);
           if (unsub) { unsub(); unsub = null; }
         } else {
           // all-time (geral)
@@ -9208,6 +9245,83 @@ function openVideo(videoId, isProtected) {
       observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     </script>
     
+    <script>
+    (function(){
+        const CONFETTI_KEY = 'rdc_confetti_100_obras';
+        const getThemeColors = () => {
+            const styles = getComputedStyle(document.documentElement);
+            const pick = (v) => styles.getPropertyValue(v).trim();
+            return [
+                pick('--header-bg'),
+                pick('--secondary-color'),
+                pick('--gold-color'),
+                pick('--primary-color')
+            ].filter(Boolean);
+        };
+
+        function launchConfettiOnce() {
+            if (localStorage.getItem(CONFETTI_KEY)) return false;
+            const target = document.querySelector('#obras-stat .stat-number');
+            if (!target) return false;
+            const text = (target.textContent || target.innerText || '').trim();
+            if (!text.includes('100')) return false;
+
+            localStorage.setItem(CONFETTI_KEY, '1');
+            const colors = getThemeColors();
+            const container = document.createElement('div');
+            container.className = 'confetti-container';
+            document.body.appendChild(container);
+
+            const pieces = 90;
+            for (let i = 0; i < pieces; i++) {
+                const piece = document.createElement('span');
+                piece.className = 'confetti-piece';
+                const size = 6 + Math.random() * 6;
+                const left = Math.random() * 100;
+                const drift = (Math.random() * 120 - 60).toFixed(0);
+                const duration = (2.8 + Math.random() * 1.8).toFixed(2);
+                const delay = (Math.random() * 0.6).toFixed(2);
+                piece.style.width = `${size}px`;
+                piece.style.height = `${size + 4}px`;
+                piece.style.left = `${left}vw`;
+                piece.style.setProperty('--drift', `${drift}px`);
+                piece.style.animationDuration = `${duration}s`;
+                piece.style.animationDelay = `${delay}s`;
+                piece.style.backgroundColor = colors[i % colors.length] || '#d4b45f';
+                piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+                container.appendChild(piece);
+            }
+
+            setTimeout(() => {
+                container.remove();
+            }, 5200);
+            return true;
+        }
+
+        function watchFor100Plus() {
+            const target = document.querySelector('#obras-stat .stat-number');
+            if (!target) return;
+            if (launchConfettiOnce()) return;
+            const obs = new MutationObserver(() => {
+                if (launchConfettiOnce()) obs.disconnect();
+            });
+            obs.observe(target, { childList: true, characterData: true, subtree: true });
+        }
+
+        // Reset confetti flag to ensure it shows on this page load
+        localStorage.removeItem(CONFETTI_KEY);
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                // Small delay to ensure DOM is fully painted
+                requestAnimationFrame(() => setTimeout(watchFor100Plus, 300));
+            }, { once: true });
+        } else {
+            requestAnimationFrame(() => setTimeout(watchFor100Plus, 300));
+        }
+    })();
+    </script>
+
     <script>
     (function(){
         const CACHE_KEY = 'rdc_visits_last';
