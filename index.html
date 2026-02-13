@@ -66,7 +66,7 @@
             border-radius: 2px;
             animation-name: confetti-fall;
             animation-timing-function: linear;
-            animation-fill-mode: forwards;
+            animation-iteration-count: 1;
         }
 
         @keyframes confetti-fall {
@@ -74,7 +74,7 @@
                 transform: translate3d(0, -10vh, 0) rotate(0deg);
             }
             100% {
-                transform: translate3d(var(--drift, 0px), 110vh, 0) rotate(360deg);
+                transform: translate3d(var(--drift, 0px), 130vh, 0) rotate(360deg);
             }
         }
         
@@ -5103,7 +5103,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const authorEl = card.querySelector('.document-author');
                     const yearEl = card.querySelector('.document-year');
                     const typeEl = card.querySelector('.document-type');
-                    const linkEl = card.querySelector('.read-button');
+                    // Some media cards (e.g., 145/146) expose the URL only in thumbnail anchor.
+                    const linkEl = card.querySelector('.read-button') || card.querySelector('.video-thumbnail a');
                     return {
                         codigo: codeEl ? codeEl.textContent.trim() : '',
                         titulo: titleEl ? titleEl.textContent.trim() : '',
@@ -9289,12 +9290,14 @@ function openVideo(videoId, isProtected) {
                 piece.style.animationDelay = `${delay}s`;
                 piece.style.backgroundColor = colors[i % colors.length] || '#d4b45f';
                 piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+                piece.addEventListener('animationend', () => {
+                    piece.remove();
+                    if (!container.hasChildNodes()) {
+                        container.remove();
+                    }
+                }, { once: true });
                 container.appendChild(piece);
             }
-
-            setTimeout(() => {
-                container.remove();
-            }, 5200);
             return true;
         }
 
