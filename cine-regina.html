@@ -247,7 +247,14 @@
 </head>
 <body class="bg-cinema-dark text-gray-200 font-sans min-h-screen relative overflow-hidden flex items-center justify-center">
 
-    <div id="cinema-countdown">
+    <!-- SPLASH SCREEN: Black screen with centered button -->
+    <div id="splash-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:99999;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+        <button id="splash-btn" style="background:none;border:2px solid #D4AF37;color:#D4AF37;font-family:'Playfair Display',serif;font-size:clamp(1.2rem,3vw,2rem);padding:1rem 2.5rem;border-radius:6px;cursor:pointer;letter-spacing:0.08em;transition:all 0.3s ease;text-align:center;line-height:1.6;" onmouseover="this.style.background='rgba(212,175,55,0.15)'" onmouseout="this.style.background='none'">
+            Clique Aqui!<br><span style="font-size:0.7em;font-style:italic;opacity:0.8;">O filme já vai começar.</span>
+        </button>
+    </div>
+
+    <div id="cinema-countdown" style="display:none;">
         <div class="film-grain" style="opacity: 0.8; z-index: 200;"></div>
         
         <div class="film-scratch scratch-1"></div>
@@ -329,7 +336,7 @@
                         { parte: "", titulo: "Palavra do autor", tempo: "0:56'", url: "https://drive.google.com/file/d/15pSyn-tZwZJom0_dnfzpeCYexOYGm1g0/view?usp=sharing" },
                         { parte: "Parte I", titulo: "A construção do Cinema", tempo: "6:22'", url: "https://drive.google.com/file/d/1mKS_Ho3mHqWGCD4rpVcaVSyD6WpBdK2g/view?usp=sharing" },
                         { parte: "Parte II", titulo: "A ligação com o Geraldo Zebral", tempo: "3:41'", url: "https://drive.google.com/file/d/1KQoKHLcBVOEsqc5EKkZZXkQgKpHFpdUM/view?usp=sharing" },
-                        { parte: "Parte III", titulo: "Um Brinde", tempo: "3:36'", url: "https://drive.google.com/file/d/1vEQ8UslHDjNR0WA68mUPBmxsfpaDzTAg/view?usp=sharing" },
+                        { parte: "Parte III", titulo: "Um Brinde", tempo: "3:36'", url: "https://drive.google.com/file/d/15YQyp8gMbbk8GcRB3u1kZbzWbm2zde9h/view" },
                         { parte: "Parte IV", titulo: "O discurso de inauguração", tempo: "5:32'", url: "https://drive.google.com/file/d/1ma4NCmTlWbTJJVPNQdrkjo9GSXbgWHJJ/view?usp=sharing" },
                         { parte: "Parte V", titulo: "A Inauguração: Melodia Imortal", tempo: "13:01'", url: "https://drive.google.com/file/d/16oqfQqT9C1yE71_OZn4maYvVKDDvFMNA/view?usp=sharing" },
                         { parte: "Parte VI", titulo: "O Baile do Clube Carijós – Parte I", tempo: "17:14'", url: "https://drive.google.com/file/d/19gLO3MfQ-IE_RPjF2gyaZtK75HaJNZl_/view?usp=sharing" },
@@ -368,84 +375,54 @@
         src="chopin-nocturne-op9-no2.mp3"
         preload="auto"
         loop
-        autoplay
-        playsinline
     ></audio>
 
     <script>
-        // Start playing the music immediately without waiting for DOM
-        (function() {
-            const forceAutoplay = new URLSearchParams(window.location.search).get('autoplay') === '1';
-            const tryPlay = () => {
-                const bgMusic = document.getElementById('cine-regina-bg-music');
-                if (bgMusic) {
-                    bgMusic.volume = 0.12;
-                    bgMusic.playbackRate = 0.985;
-                    let p = bgMusic.play();
-                    if (p && p.catch) p.catch(() => {});
-                }
-            };
-            if (forceAutoplay) {
-                // Polling to force play the instant the audio element exists
-                const audioPoll = setInterval(() => {
-                    if (document.getElementById('cine-regina-bg-music')) {
-                        tryPlay();
-                        clearInterval(audioPoll);
-                    }
-                }, 10);
-            }
-        })();
-
         document.addEventListener("DOMContentLoaded", () => {
+            const splash = document.getElementById('splash-screen');
+            const splashBtn = document.getElementById('splash-btn');
             const countdownOverlay = document.getElementById('cinema-countdown');
             const numberEl = document.getElementById('countdown-number');
             const flashEl = document.getElementById('frame-flash');
-            const menuContainer = document.querySelector('.menu-scroll');
             const bgMusic = document.getElementById('cine-regina-bg-music');
             const MUSIC_POS_KEY = 'cineReginaMusicPosition';
             const MUSIC_STATE_KEY = 'cineReginaMusicShouldResume';
             const TARGET_VOLUME = 0.12;
-            let count = 3;
-            let fadeFrameId = null;
-
-            // Auto-click the body to help trigger interactions right as the page loads
-            document.body.click();
 
             bgMusic.volume = TARGET_VOLUME;
             bgMusic.playbackRate = 0.985;
 
-            async function fadeOutAndPause() {
+            function pauseMusic() {
                 if (bgMusic.paused) return;
                 sessionStorage.setItem(MUSIC_POS_KEY, String(bgMusic.currentTime || 0));
                 bgMusic.pause();
                 sessionStorage.setItem(MUSIC_STATE_KEY, '1');
             }
 
-            async function fadeInAndResume() {
+            function resumeMusic() {
                 const savedTime = parseFloat(sessionStorage.getItem(MUSIC_POS_KEY) || '0');
                 if (Number.isFinite(savedTime) && savedTime > 0) {
                     try { bgMusic.currentTime = savedTime; } catch (_) {}
                 }
+                bgMusic.volume = TARGET_VOLUME;
+                bgMusic.play().catch(() => {});
+                sessionStorage.setItem(MUSIC_STATE_KEY, '1');
+            }
 
-                try {
-                    bgMusic.volume = TARGET_VOLUME;
-                    await bgMusic.play();
-                    sessionStorage.setItem(MUSIC_STATE_KEY, '1');
-                } catch (_) {
-                    // Autoplay can be blocked; start on first gesture.
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    pauseMusic();
+                } else if (sessionStorage.getItem(MUSIC_STATE_KEY) === '1') {
+                    resumeMusic();
                 }
-            }
+            });
 
-            function handleFirstGesture() {
-                fadeInAndResume();
-                window.removeEventListener('click', handleFirstGesture);
-                window.removeEventListener('keydown', handleFirstGesture);
-                window.removeEventListener('touchstart', handleFirstGesture);
-            }
-
-            window.addEventListener('click', handleFirstGesture, { once: true });
-            window.addEventListener('keydown', handleFirstGesture, { once: true });
-            window.addEventListener('touchstart', handleFirstGesture, { once: true });
+            window.addEventListener('blur', () => { pauseMusic(); });
+            window.addEventListener('focus', () => {
+                if (sessionStorage.getItem(MUSIC_STATE_KEY) === '1') {
+                    resumeMusic();
+                }
+            });
 
             bgMusic.addEventListener('timeupdate', () => {
                 if (!bgMusic.paused) {
@@ -453,51 +430,48 @@
                 }
             });
 
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    fadeOutAndPause();
-                } else if (sessionStorage.getItem(MUSIC_STATE_KEY) === '1') {
-                    fadeInAndResume();
-                }
-            });
+            function startEverything() {
+                // Remove splash
+                splash.style.display = 'none';
 
-            window.addEventListener('blur', () => {
-                fadeOutAndPause();
-            });
+                // Show countdown
+                countdownOverlay.style.display = 'flex';
 
-            window.addEventListener('focus', () => {
-                if (sessionStorage.getItem(MUSIC_STATE_KEY) === '1') {
-                    fadeInAndResume();
-                }
-            });
+                // Start music immediately (user just clicked, so autoplay is allowed)
+                bgMusic.volume = TARGET_VOLUME;
+                bgMusic.play().catch(() => {});
+                sessionStorage.setItem(MUSIC_STATE_KEY, '1');
 
-            // Start music immediately (including during countdown).
-            fadeInAndResume();
+                // Start countdown
+                let count = 3;
+                flashEl.classList.add('flash-active');
 
-            flashEl.classList.add('flash-active');
-
-            const timer = setInterval(() => {
-                count--;
-                
-                if (count >= 1) {
-                    numberEl.innerText = count;
-                    flashEl.classList.remove('flash-active');
-                    void flashEl.offsetWidth;
-                    flashEl.classList.add('flash-active');
-                } else {
-                    clearInterval(timer);
-                    flashEl.style.opacity = '1';
+                const timer = setInterval(() => {
+                    count--;
                     
-                    setTimeout(() => {
-                        countdownOverlay.style.opacity = '0';
+                    if (count >= 1) {
+                        numberEl.innerText = count;
+                        flashEl.classList.remove('flash-active');
+                        void flashEl.offsetWidth;
+                        flashEl.classList.add('flash-active');
+                    } else {
+                        clearInterval(timer);
+                        flashEl.style.opacity = '1';
+                        
                         setTimeout(() => {
-                            if (countdownOverlay.parentNode) {
-                                countdownOverlay.parentNode.removeChild(countdownOverlay);
-                            }
-                        }, 600);
-                    }, 150);
-                }
-            }, 1000);
+                            countdownOverlay.style.opacity = '0';
+                            setTimeout(() => {
+                                if (countdownOverlay.parentNode) {
+                                    countdownOverlay.parentNode.removeChild(countdownOverlay);
+                                }
+                            }, 600);
+                        }, 150);
+                    }
+                }, 1000);
+            }
+
+            // Click the button or anywhere on splash to start
+            splash.addEventListener('click', startEverything);
         });
     </script>
 </body>
