@@ -3662,6 +3662,17 @@ video-synopsis {
                             <a href="https://docs.google.com/document/d/1k3WIBGl-WN5BJSHP8FQ0f41d8DcyPaygiLLIhMnsDao/edit?usp=sharing" class="timeline-button-horizontal">Ler obra</a>
                         </div>
                     </div>
+
+                    <!-- 2026 - Cine Regina -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 6.6s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2026</div>
+                            <div class="timeline-text-horizontal">Cine Regina</div>
+                            <div class="timeline-author-horizontal">RDC </div>
+                            <div class="timeline-tag-horizontal">Mídia</div>
+                            <a href="cine-regina.html?autoplay=1" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ver</a>
+                        </div>
+                    </div>
                     
                 </div>
             </div>
@@ -3898,6 +3909,18 @@ video-synopsis {
                     <div class="document-footer">
                         <span class="document-type">Livro</span>
                         <a href="Queluzíadas .pdf autor - Alberto Libanio Rodrigues.pdf" class="read-button" target="_blank">Ler</a>
+                    </div>
+                </div>
+
+                <div class="document-card video-card" style="animation-delay: 0.5s;">
+                    <div class="document-code">100</div>
+                    <h3>Cine Regina</h3>
+                    <div class="document-author">RDC </div>
+                    <div class="document-year">2026</div>
+                    <p>Uma cápsula do tempo que celebra a história e o esplendor do Cine Regina. Através de registos raros e memórias preservadas, esta obra percorre os anos dourados do cinema, homenageando os seus protagonistas e transformando a nostalgia em legado. Uma jornada imperdível pelos momentos que ficaram guardados para sempre na película da nossa história.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Mídia</span>
+                        <a href="cine-regina.html?autoplay=1" class="read-button" target="_blank" rel="noopener noreferrer">Ver</a>
                     </div>
                 </div>
             </div>
@@ -4639,7 +4662,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 codigo: "145",
                 titulo: "Interior de nossa casa e vistas de Lafaiete do passado - Vídeo 1",
-                autor: "João Pio Duarte Castanheira",
+                autor: "João Pio Duarte Castanheira",  
                 ano: "1986",
                 descricao: "Vídeo mostrando alguns móveis de nossa casa, sua fachada e um passeio pelo quintal, ainda coberto de vegetação (hoje repleto de construções).",
                 tipo: "Mídia",
@@ -9528,8 +9551,19 @@ function openVideo(videoId, isProtected) {
         };
         [...staticItems, ...acervoItems, ...firebaseItems].forEach(add);
 
-        // 3) Sort by year (ascending)
-        const items = [...pool.values()].sort((a, b) => a.year - b.year);
+        // 3) Sort by year (ascending), but force "Cine Regina" as last item.
+        const items = [...pool.values()].sort((a, b) => {
+          const ta = normalize(a.title);
+          const tb = normalize(b.title);
+          const isCineA = ta === 'cine regina';
+          const isCineB = tb === 'cine regina';
+          if (isCineA && !isCineB) return 1;
+          if (!isCineA && isCineB) return -1;
+          
+          if (a.year !== b.year) return a.year - b.year;
+
+          return ta.localeCompare(tb, 'pt-BR');
+        });
 
         // 4) Rebuild DOM
         track.innerHTML = '';

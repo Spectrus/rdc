@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acervo Cine Regina | RDC Guardando Momentos</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,300&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'classic': ['"Playfair Display"', 'serif'],
+                        'sans': ['Lato', 'sans-serif'],
+                    },
+                    colors: {
+                        'cinema-gold': '#D4AF37',
+                        'cinema-dark': '#0a0a0a',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .film-grain {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+        }
+
+        .vignette {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 1;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,0.8) 100%);
+        }
+
+        .menu-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 0px;
+        }
+        .menu-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        .menu-scroll::-webkit-scrollbar-thumb {
+            background: rgba(212, 175, 55, 0.5);
+            border-radius: 4px;
+        }
+        .menu-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(212, 175, 55, 0.8);
+        }
+
+        .menu-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .menu-item:hover {
+            transform: translateX(10px);
+            background: linear-gradient(90deg, rgba(212,175,55,0.1) 0%, rgba(0,0,0,0) 100%);
+            border-left: 2px solid #D4AF37;
+        }
+        
+        .menu-item:hover .item-title {
+            color: #D4AF37;
+        }
+
+        .decorative-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #D4AF37, transparent);
+            width: 80%;
+            margin: 0 auto;
+            opacity: 0.5;
+        }
+
+        #cinema-countdown {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #ccb265 0%, #786038 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: opacity 0.6s ease-out;
+            animation: subtleGateWeave 0.6s infinite alternate ease-in-out, filmFlicker 0.2s infinite alternate;
+        }
+
+        #frame-flash {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            z-index: 9990;
+            pointer-events: none;
+        }
+
+        .leader-line-v, .leader-line-h {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2;
+        }
+        .leader-line-v { width: 0.3vmin; height: 100vh; left: 50%; top: 0; transform: translateX(-50%); }
+        .leader-line-h { height: 0.3vmin; width: 100vw; top: 50%; left: 0; transform: translateY(-50%); }
+
+        .leader-container {
+            position: relative;
+            width: 70vmin;
+            height: 70vmin;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+        }
+
+        .leader-ring-outer {
+            position: absolute;
+            width: 100%; height: 100%;
+            border: 0.5vmin solid rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+        }
+
+        .leader-ring-inner {
+            position: absolute;
+            width: 80%; height: 80%;
+            border: 0.3vmin solid rgba(0, 0, 0, 0.55);
+            border-radius: 50%;
+        }
+
+        .leader-sweep-container {
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            animation: radarSweep 1s linear infinite;
+        }
+        .leader-sweep-wedge {
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, rgba(0, 0, 0, 0.45) 0deg, rgba(0, 0, 0, 0.45) 90deg, transparent 90deg, transparent 360deg);
+        }
+
+        .countdown-number {
+            position: relative;
+            z-index: 10;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 50vmin;
+            line-height: 1;
+            color: #0b0b0b;
+            font-weight: bold;
+            text-align: center;
+            transform: translateY(-2%);
+            text-shadow: 0 0 5vmin rgba(0, 0, 0, 0.9);
+        }
+
+        .film-scratch {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: rgba(204, 178, 101, 0.44);
+            z-index: 100;
+        }
+        .scratch-1 { left: 20%; animation: scratchMove 0.8s infinite linear; }
+        .scratch-2 { left: 60%; background: rgba(0, 0, 0, 0.28); animation: scratchMove 1.2s infinite linear 0.5s; }
+        .scratch-3 { left: 85%; animation: scratchMove 0.5s infinite linear 0.2s; }
+
+        @keyframes radarSweep {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes filmFlicker {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(204, 178, 101, 0.13); }
+            100% { background-color: rgba(204, 178, 101, 0.24); }
+        }
+        @keyframes scratchMove {
+            0% { transform: translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(5vw); opacity: 0; }
+        }
+        @keyframes popFlash {
+            0% { opacity: 0.8; }
+            20% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+        .flash-active {
+            animation: popFlash 1s ease-out;
+        }
+
+        .sprocket-track {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 10vw;
+            background-color: rgba(176, 148, 82, 0.84);
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='25' y='15' width='50' height='70' rx='8' fill='rgba(0,0,0,0.22)'/%3E%3C/svg%3E");
+            background-size: 100% 12vh;
+            animation: sprocketRoll 0.5s linear infinite;
+            z-index: 20;
+            pointer-events: none;
+            box-shadow: inset 0 0 20px rgba(204, 178, 101, 0.58);
+        }
+        .sprocket-track.left { left: 0; border-right: 2px solid rgba(0, 0, 0, 0.25); }
+        .sprocket-track.right { right: 0; border-left: 2px solid rgba(0, 0, 0, 0.25); }
+
+        @keyframes sprocketRoll {
+            from { background-position-y: 0; }
+            to { background-position-y: 12vh; }
+        }
+
+        .global-flicker {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 49;
+            pointer-events: none;
+            background-color: rgba(0, 0, 0, 0.1);
+            animation: projectorFlicker 0.15s infinite alternate;
+        }
+        .global-scratch {
+            position: fixed;
+            pointer-events: none;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .subtle-weave {
+            animation: subtleGateWeave 0.6s infinite alternate ease-in-out;
+        }
+        @keyframes projectorFlicker {
+            0% { opacity: 0; }
+            100% { opacity: 0.4; }
+        }
+        @keyframes subtleGateWeave {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(0.5px, -0.5px); }
+            100% { transform: translate(-0.5px, 0.5px); }
+        }
+    </style>
+</head>
+<body class="bg-cinema-dark text-gray-200 font-sans min-h-screen relative overflow-hidden flex items-center justify-center">
+
+    <div id="cinema-countdown">
+        <div class="film-grain" style="opacity: 0.8; z-index: 200;"></div>
+        
+        <div class="film-scratch scratch-1"></div>
+        <div class="film-scratch scratch-2"></div>
+        <div class="film-scratch scratch-3"></div>
+
+        <div id="frame-flash"></div>
+
+        <div class="sprocket-track left"></div>
+        <div class="sprocket-track right"></div>
+
+        <div class="leader-line-v"></div>
+        <div class="leader-line-h"></div>
+
+        <div class="leader-container">
+            <div class="leader-ring-outer"></div>
+            <div class="leader-ring-inner"></div>
+            
+            <div class="leader-sweep-container">
+                <div class="leader-sweep-wedge"></div>
+            </div>
+            
+            <span id="countdown-number" class="countdown-number">3</span>
+        </div>
+    </div>
+
+    <video 
+        autoplay 
+        loop 
+        muted 
+        playsinline 
+        class="absolute inset-0 w-full h-full object-cover opacity-30 z-0 mix-blend-luminosity"
+        poster="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop"
+    >
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-vintage-cinema-projector-rolling-a-film-407-large.mp4" type="video/mp4">
+    </video>
+
+    <div class="film-grain"></div>
+    <div class="vignette"></div>
+    <div class="global-flicker"></div>
+    <div class="film-scratch global-scratch scratch-1"></div>
+    <div class="film-scratch global-scratch scratch-2" style="background: rgba(0,0,0,0.3);"></div>
+    <div class="film-scratch global-scratch scratch-3"></div>
+
+    <main class="relative z-10 w-full max-w-6xl mx-auto p-2 sm:p-4 md:p-8 flex flex-col md:flex-row gap-4 md:gap-8 h-[95vh] md:h-[85vh] subtle-weave">
+        
+        <section class="flex-none md:flex-1 flex flex-col justify-center items-center text-center space-y-2 md:space-y-6 md:pr-8 md:border-r md:border-white/10 shrink-0 mt-4 md:mt-0">
+            <div class="space-y-1 md:space-y-2">
+                <p class="text-cinema-gold tracking-[0.2em] md:tracking-[0.3em] text-[10px] md:text-sm uppercase font-light">Acervo Documental</p>
+                <h1 class="font-classic text-3xl sm:text-4xl md:text-6xl text-white drop-shadow-lg">Cine Regina</h1>
+            </div>
+            
+            <div class="relative group">
+                <div class="absolute inset-0 bg-cinema-gold opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-sm"></div>
+                <img 
+                    src="38 j.jpg"
+                    onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='file:///C:/Users/Felipe%20Sampaio%20C/.cursor/projects/c-Users-Felipe-Sampaio-C-Pictures-Saved-Pictures-Copy-Copy-2-Copy-New-Folder-5-New-folder-New-folder-2-New-folder-4/assets/c__Users_Felipe_Sampaio_C_AppData_Roaming_Cursor_User_workspaceStorage_beee22416e8289dcd2bf0796eee2307d_images_image-e91b474a-75ad-4ca2-bfbf-edddafb94371.png';}"
+                    alt="Fachada do Cine Regina" 
+                    class="w-32 sm:w-48 h-auto md:w-80 object-cover rounded-sm shadow-2xl sepia-[.3] contrast-125 transition-all duration-500 group-hover:sepia-0"
+                />
+            </div>
+            
+            <p class="font-light text-gray-400 max-w-md italic text-xs sm:text-sm md:text-lg font-classic leading-relaxed hidden sm:block">
+                "Uma jornada pela história, pelos bastidores e pelos anos dourados do nosso cinema."
+            </p>
+            <div class="decorative-line mt-2 md:mt-4"></div>
+        </section>
+
+        <section class="flex-1 flex flex-col bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-2 md:p-6 shadow-2xl overflow-hidden min-h-0">
+            
+            <header class="mb-3 md:mb-6 px-2 md:px-4 pt-2 md:pt-4">
+                <h2 class="font-classic text-xl md:text-2xl text-white mb-1">Selecione o Capítulo</h2>
+                <p class="text-[10px] md:text-xs text-gray-500 uppercase tracking-widest">RDC Guardando Momentos</p>
+            </header>
+
+            <div class="menu-scroll overflow-y-auto overflow-x-hidden pr-2 pb-4 space-y-1 flex-1">
+                <script>
+                    const menuItems = [
+                        { parte: "", titulo: "Palavra do autor", tempo: "0:56'", url: "https://drive.google.com/file/d/15pSyn-tZwZJom0_dnfzpeCYexOYGm1g0/view?usp=sharing" },
+                        { parte: "Parte I", titulo: "A construção do Cinema", tempo: "6:22'", url: "https://drive.google.com/file/d/1mKS_Ho3mHqWGCD4rpVcaVSyD6WpBdK2g/view?usp=sharing" },
+                        { parte: "Parte II", titulo: "A ligação com o Geraldo Zebral", tempo: "3:41'", url: "https://drive.google.com/file/d/1KQoKHLcBVOEsqc5EKkZZXkQgKpHFpdUM/view?usp=sharing" },
+                        { parte: "Parte III", titulo: "Um Brinde", tempo: "3:36'", url: "https://drive.google.com/file/d/1vEQ8UslHDjNR0WA68mUPBmxsfpaDzTAg/view?usp=sharing" },
+                        { parte: "Parte IV", titulo: "O discurso de inauguração", tempo: "5:32'", url: "https://drive.google.com/file/d/1ma4NCmTlWbTJJVPNQdrkjo9GSXbgWHJJ/view?usp=sharing" },
+                        { parte: "Parte V", titulo: "A Inauguração: Melodia Imortal", tempo: "13:01'", url: "https://drive.google.com/file/d/16oqfQqT9C1yE71_OZn4maYvVKDDvFMNA/view?usp=sharing" },
+                        { parte: "Parte VI", titulo: "O Baile do Clube Carijós – Parte I", tempo: "17:14'", url: "https://drive.google.com/file/d/19gLO3MfQ-IE_RPjF2gyaZtK75HaJNZl_/view?usp=sharing" },
+                        { parte: "Parte VII", titulo: "O Baile do Clube Carijós – Parte II", tempo: "16:33'", url: "https://drive.google.com/file/d/10nvqvQqpPKDyDDEpkf8pVTMiYMJJmiGR/view?usp=sharing" },
+                        { parte: "Parte VIII", titulo: "Crônica: Cine Regina", tempo: "6:27'", url: "https://drive.google.com/file/d/18VHiTeHzNzzvuvwa4V6lClH4hi79zQes/view" },
+                        { parte: "Parte IX", titulo: "Anos Dourados do Cinema", tempo: "5:50'", url: "https://drive.google.com/file/d/1s3OI0O8-cCAiZorO-7O_WEXcFxMoD3Kt/view?usp=sharing" }
+                    ];
+
+                    document.write(menuItems.map(item => `
+                        <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="menu-item block group px-2 py-2 md:px-4 md:py-3 rounded-r-lg border-l-2 border-transparent no-underline">
+                            <div class="flex items-center justify-between">
+                                <div class="flex flex-col justify-center">
+                                    ${item.parte ? `<span class="text-[10px] md:text-xs text-cinema-gold tracking-widest uppercase font-semibold mb-0.5 md:mb-1 opacity-80">${item.parte}</span>` : ''}
+                                    <span class="item-title font-classic text-sm sm:text-base md:text-lg text-gray-200 transition-colors">${item.titulo}</span>
+                                </div>
+                                <div class="text-gray-500 font-mono text-xs md:text-sm group-hover:text-cinema-gold transition-colors ml-2">
+                                    <span class="flex items-center gap-1">
+                                        ${item.tempo}
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    `).join(''));
+                </script>
+            </div>
+
+            <div class="mt-1 md:mt-2 pt-1 md:pt-2 border-t border-white/10 px-2 md:px-4">
+                <div class="h-2 md:h-3 invisible" aria-hidden="true">.</div>
+            </div>
+
+        </section>
+    </main>
+
+    <audio
+        id="cine-regina-bg-music"
+        src="chopin-nocturne-op9-no2.mp3"
+        preload="auto"
+        loop
+        autoplay
+        playsinline
+    ></audio>
+
+    <script>
+        // Start playing the music immediately without waiting for DOM
+        (function() {
+            const forceAutoplay = new URLSearchParams(window.location.search).get('autoplay') === '1';
+            const tryPlay = () => {
+                const bgMusic = document.getElementById('cine-regina-bg-music');
+                if (bgMusic) {
+                    bgMusic.volume = 0.12;
+                    bgMusic.playbackRate = 0.985;
+                    let p = bgMusic.play();
+                    if (p && p.catch) p.catch(() => {});
+                }
+            };
+            if (forceAutoplay) {
+                // Polling to force play the instant the audio element exists
+                const audioPoll = setInterval(() => {
+                    if (document.getElementById('cine-regina-bg-music')) {
+                        tryPlay();
+                        clearInterval(audioPoll);
+                    }
+                }, 10);
+            }
+        })();
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const countdownOverlay = document.getElementById('cinema-countdown');
+            const numberEl = document.getElementById('countdown-number');
+            const flashEl = document.getElementById('frame-flash');
+            const menuContainer = document.querySelector('.menu-scroll');
+            const bgMusic = document.getElementById('cine-regina-bg-music');
+            const MUSIC_POS_KEY = 'cineReginaMusicPosition';
+            const MUSIC_STATE_KEY = 'cineReginaMusicShouldResume';
+            const TARGET_VOLUME = 0.12;
+            let count = 3;
+            let fadeFrameId = null;
+
+            // Auto-click the body to help trigger interactions right as the page loads
+            document.body.click();
+
+            bgMusic.volume = TARGET_VOLUME;
+            bgMusic.playbackRate = 0.985;
+
+            async function fadeOutAndPause() {
+                if (bgMusic.paused) return;
+                sessionStorage.setItem(MUSIC_POS_KEY, String(bgMusic.currentTime || 0));
+                bgMusic.pause();
+                sessionStorage.setItem(MUSIC_STATE_KEY, '1');
+            }
+
+            async function fadeInAndResume() {
+                const savedTime = parseFloat(sessionStorage.getItem(MUSIC_POS_KEY) || '0');
+                if (Number.isFinite(savedTime) && savedTime > 0) {
+                    try { bgMusic.currentTime = savedTime; } catch (_) {}
+                }
+
+                try {
+                    bgMusic.volume = TARGET_VOLUME;
+                    await bgMusic.play();
+                    sessionStorage.setItem(MUSIC_STATE_KEY, '1');
+                } catch (_) {
+                    // Autoplay can be blocked; start on first gesture.
+                }
+            }
+
+            function handleFirstGesture() {
+                fadeInAndResume();
+                window.removeEventListener('click', handleFirstGesture);
+                window.removeEventListener('keydown', handleFirstGesture);
+                window.removeEventListener('touchstart', handleFirstGesture);
+            }
+
+            window.addEventListener('click', handleFirstGesture, { once: true });
+            window.addEventListener('keydown', handleFirstGesture, { once: true });
+            window.addEventListener('touchstart', handleFirstGesture, { once: true });
+
+            bgMusic.addEventListener('timeupdate', () => {
+                if (!bgMusic.paused) {
+                    sessionStorage.setItem(MUSIC_POS_KEY, String(bgMusic.currentTime || 0));
+                }
+            });
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    fadeOutAndPause();
+                } else if (sessionStorage.getItem(MUSIC_STATE_KEY) === '1') {
+                    fadeInAndResume();
+                }
+            });
+
+            window.addEventListener('blur', () => {
+                fadeOutAndPause();
+            });
+
+            window.addEventListener('focus', () => {
+                if (sessionStorage.getItem(MUSIC_STATE_KEY) === '1') {
+                    fadeInAndResume();
+                }
+            });
+
+            // Start music immediately (including during countdown).
+            fadeInAndResume();
+
+            flashEl.classList.add('flash-active');
+
+            const timer = setInterval(() => {
+                count--;
+                
+                if (count >= 1) {
+                    numberEl.innerText = count;
+                    flashEl.classList.remove('flash-active');
+                    void flashEl.offsetWidth;
+                    flashEl.classList.add('flash-active');
+                } else {
+                    clearInterval(timer);
+                    flashEl.style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        countdownOverlay.style.opacity = '0';
+                        setTimeout(() => {
+                            if (countdownOverlay.parentNode) {
+                                countdownOverlay.parentNode.removeChild(countdownOverlay);
+                            }
+                        }, 600);
+                    }, 150);
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
