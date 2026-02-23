@@ -6704,14 +6704,9 @@ function openVideo(videoId, isProtected) {
                         }
                     }, 400);
                 };
-                // Auto-dismiss with smooth fade-out after 12s
-                let autoTimer = setTimeout(() => {
-                    performDismiss();
-                }, 12000);
-                // manual close
+                // manual close only (no auto-dismiss)
                 closeBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (autoTimer) clearTimeout(autoTimer);
                     performDismiss();
                 });
             }
