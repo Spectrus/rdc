@@ -377,6 +377,13 @@
         loop
     ></audio>
 
+    <audio
+        id="projector-noise"
+        src="projector-noise.mp3"
+        preload="auto"
+        loop
+    ></audio>
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const splash = document.getElementById('splash-screen');
@@ -385,9 +392,11 @@
             const numberEl = document.getElementById('countdown-number');
             const flashEl = document.getElementById('frame-flash');
             const bgMusic = document.getElementById('cine-regina-bg-music');
+            const projectorNoise = document.getElementById('projector-noise');
             const MUSIC_POS_KEY = 'cineReginaMusicPosition';
             const MUSIC_STATE_KEY = 'cineReginaMusicShouldResume';
-            const TARGET_VOLUME = 1.0;
+            const TARGET_VOLUME = 0.65;
+            const PROJECTOR_VOLUME = 0.3;
 
             bgMusic.volume = TARGET_VOLUME;
             bgMusic.playbackRate = 0.985;
@@ -430,19 +439,34 @@
                 }
             });
 
+            function fadeOutProjector() {
+                let vol = projectorNoise.volume;
+                const fade = setInterval(() => {
+                    vol -= 0.05;
+                    if (vol <= 0) {
+                        clearInterval(fade);
+                        projectorNoise.pause();
+                        projectorNoise.volume = 0;
+                    } else {
+                        projectorNoise.volume = vol;
+                    }
+                }, 50);
+            }
+
             function startEverything() {
-                // Remove splash
                 splash.style.display = 'none';
 
-                // Show countdown
                 countdownOverlay.style.display = 'flex';
 
-                // Start music immediately (user just clicked, so autoplay is allowed)
+                // Start projector noise during countdown
+                projectorNoise.volume = PROJECTOR_VOLUME;
+                projectorNoise.play().catch(() => {});
+
+                // Start Nocturne
                 bgMusic.volume = TARGET_VOLUME;
                 bgMusic.play().catch(() => {});
                 sessionStorage.setItem(MUSIC_STATE_KEY, '1');
 
-                // Start countdown
                 let count = 3;
                 flashEl.classList.add('flash-active');
 
@@ -457,6 +481,9 @@
                     } else {
                         clearInterval(timer);
                         flashEl.style.opacity = '1';
+
+                        // Fade out projector noise as countdown ends
+                        fadeOutProjector();
                         
                         setTimeout(() => {
                             countdownOverlay.style.opacity = '0';
