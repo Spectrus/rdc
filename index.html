@@ -7776,17 +7776,6 @@ function openVideo(videoId, isProtected) {
                 }
               }
             } catch(_) {}
-
-            // Notificação de lançamento: Cine Regina
-            try {
-              const cineKey = 'cineReginaNotificationSeen';
-              if (!sessionStorage.getItem(cineKey)) {
-                sessionStorage.setItem(cineKey, '1');
-                setTimeout(() => {
-                  editSystem.showNotification('Novo lançamento!\n• Cine Regina', 'info');
-                }, 2500);
-              }
-            } catch(_) {}
         });
     </script>
     
