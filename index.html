@@ -57,6 +57,15 @@
             overflow: hidden;
         }
 
+        .fireworks-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1000003;
+        }
+
         .confetti-piece {
             position: absolute;
             top: -10vh;
@@ -2937,8 +2946,8 @@ video-synopsis {
                             <div class="timeline-year-horizontal">1934</div>
                             <div class="timeline-text-horizontal">Pasta de Registro</div>
                             <div class="timeline-author-horizontal">Álvaro Lobo Castanheira e Maria Duarte Castanheira</div>
-                            <div class="timeline-tag-horizontal">Mídia</div>
-                            <a href="PaieMae3.jpeg" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ver obra</a>
+                    <div class="timeline-tag-horizontal">Documento</div>
+                    <a href="PaieMae2.jpeg" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ver obra</a>
                         </div>
                     </div>
                     
@@ -4167,20 +4176,15 @@ video-synopsis {
                     </div>
                 </div>
                 
-                <div class="document-card video-card" style="animation-delay: 2.75s;">
+                <div class="document-card" style="animation-delay: 2.75s;">
                     <div class="document-code">368</div>
                     <h3>Pasta de Registro</h3>
                     <div class="document-author">Álvaro Lobo Castanheira e Maria Duarte Castanheira</div>
-                    <div class="video-thumbnail">
-                        <a href="PaieMae3.jpeg" target="_blank" rel="noopener noreferrer">
-                            <img src="PaieMae3.jpeg" alt="Pasta de Registro">
-                        </a>
-                    </div>
                     <div class="document-year">1934</div>
                     <div class="video-synopsis">Imagem colorizada de Álvaro Lobo Castanheira e Maria Duarte Castanheira usada na Inauguração desta Biblioteca Digital.</div>
                     <div class="document-footer">
-                        <span class="document-type">Mídia</span>
-                        <a href="PaieMae3.jpeg" class="read-button" target="_blank" rel="noopener noreferrer">Ver</a>
+                        <span class="document-type">Documento</span>
+                        <a href="PaieMae2.jpeg" class="read-button" target="_blank" rel="noopener noreferrer" onclick="window.open('PaieMae2.jpeg', '_blank', 'noopener,noreferrer'); return false;">Ver</a>
                     </div>
                 </div>
                 
@@ -9306,15 +9310,7 @@ function openVideo(videoId, isProtected) {
             ].filter(Boolean);
         };
 
-        function launchConfettiOnce() {
-            if (localStorage.getItem(CONFETTI_KEY)) return false;
-            const target = document.querySelector('#obras-stat .stat-number');
-            if (!target) return false;
-            const text = (target.textContent || target.innerText || '').trim();
-            if (!text.includes('100')) return false;
-
-            localStorage.setItem(CONFETTI_KEY, '1');
-            const colors = getThemeColors();
+        function createConfetti(colors) {
             const container = document.createElement('div');
             container.className = 'confetti-container';
             document.body.appendChild(container);
@@ -9344,15 +9340,214 @@ function openVideo(videoId, isProtected) {
                 }, { once: true });
                 container.appendChild(piece);
             }
+        }
+
+        function launchFireworks(colors) {
+            const canvas = document.createElement('canvas');
+            canvas.className = 'fireworks-canvas';
+            document.body.appendChild(canvas);
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                canvas.remove();
+                return;
+            }
+
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const particles = [];
+            let rafId = 0;
+            let finishedScheduling = false;
+
+            const resize = () => {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                canvas.width = Math.floor(width * dpr);
+                canvas.height = Math.floor(height * dpr);
+                canvas.style.width = `${width}px`;
+                canvas.style.height = `${height}px`;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            };
+
+            const rand = (min, max) => min + Math.random() * (max - min);
+
+            function burst(x, y, count, speedMin, speedMax) {
+                for (let i = 0; i < count; i++) {
+                    const angle = (Math.PI * 2 * i) / count + rand(-0.08, 0.08);
+                    const speed = rand(speedMin, speedMax);
+                    particles.push({
+                        kind: 'burst',
+                        x,
+                        y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        size: rand(1.8, 3.8),
+                        color: colors[i % colors.length] || '#d4b45f',
+                        life: 0,
+                        maxLife: rand(42, 72),
+                        gravity: rand(0.028, 0.045)
+                    });
+                }
+            }
+
+            function getTextPoints(text) {
+                const offscreen = document.createElement('canvas');
+                offscreen.width = 900;
+                offscreen.height = 260;
+                const offCtx = offscreen.getContext('2d');
+                if (!offCtx) return [];
+
+                offCtx.clearRect(0, 0, offscreen.width, offscreen.height);
+                offCtx.fillStyle = '#fff';
+                offCtx.textAlign = 'center';
+                offCtx.textBaseline = 'middle';
+                offCtx.font = "bold 210px 'Playfair Display', serif";
+                offCtx.fillText(text, offscreen.width / 2, offscreen.height / 2 + 10);
+
+                const data = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
+                const points = [];
+                const sample = 5;
+                const scale = Math.min(window.innerWidth / offscreen.width, 0.82);
+                const offsetX = window.innerWidth / 2 - (offscreen.width * scale) / 2;
+                const offsetY = window.innerHeight * 0.18;
+
+                for (let y = 0; y < offscreen.height; y += sample) {
+                    for (let x = 0; x < offscreen.width; x += sample) {
+                        const alpha = data[(y * offscreen.width + x) * 4 + 3];
+                        if (alpha > 90) {
+                            points.push({
+                                x: offsetX + x * scale,
+                                y: offsetY + y * scale
+                            });
+                        }
+                    }
+                }
+
+                return points;
+            }
+
+            function textBurst(text) {
+                const originX = window.innerWidth / 2;
+                const originY = window.innerHeight * 0.28;
+                burst(originX, originY, 55, 2.2, 5.2);
+
+                getTextPoints(text).forEach((point, index) => {
+                    particles.push({
+                        kind: 'text',
+                        x: originX,
+                        y: originY,
+                        vx: rand(-5.5, 5.5),
+                        vy: rand(-6.5, 2.5),
+                        tx: point.x,
+                        ty: point.y,
+                        size: rand(1.2, 2.6),
+                        color: colors[index % colors.length] || '#d4b45f',
+                        life: 0,
+                        maxLife: rand(115, 145)
+                    });
+                });
+            }
+
+            function updateParticle(p) {
+                p.life += 1;
+
+                if (p.kind === 'text') {
+                    const progress = p.life / p.maxLife;
+                    if (progress < 0.26) {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += 0.045;
+                        p.vx *= 0.985;
+                    } else {
+                        p.x += (p.tx - p.x) * 0.1;
+                        p.y += (p.ty - p.y) * 0.1;
+                    }
+
+                    if (progress > 0.82) {
+                        p.size *= 0.992;
+                    }
+
+                    p.alpha = progress < 0.2 ? 1 : Math.max(0, 1 - Math.max(0, progress - 0.7) / 0.3);
+                } else {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += p.gravity;
+                    p.vx *= 0.988;
+                    p.alpha = Math.max(0, 1 - p.life / p.maxLife);
+                }
+
+                return p.life < p.maxLife && p.alpha > 0.02;
+            }
+
+            function drawParticle(p) {
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = p.kind === 'text' ? 10 : 14;
+                ctx.shadowColor = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    if (!updateParticle(p)) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+                    drawParticle(p);
+                }
+
+                if (!finishedScheduling || particles.length) {
+                    rafId = requestAnimationFrame(animate);
+                } else {
+                    cleanup();
+                }
+            }
+
+            function cleanup() {
+                cancelAnimationFrame(rafId);
+                window.removeEventListener('resize', resize);
+                canvas.remove();
+            }
+
+            resize();
+            window.addEventListener('resize', resize);
+
+            setTimeout(() => burst(window.innerWidth * 0.2, window.innerHeight * 0.32, 42, 2.2, 4.8), 150);
+            setTimeout(() => burst(window.innerWidth * 0.76, window.innerHeight * 0.24, 48, 2.4, 5.0), 650);
+            setTimeout(() => burst(window.innerWidth * 0.34, window.innerHeight * 0.18, 44, 2.0, 4.6), 1150);
+            setTimeout(() => textBurst('3000'), 1650);
+            setTimeout(() => burst(window.innerWidth * 0.82, window.innerHeight * 0.36, 40, 2.0, 4.4), 2500);
+            setTimeout(() => { finishedScheduling = true; }, 3200);
+
+            animate();
+        }
+
+        function launchCelebrationOnce() {
+            if (localStorage.getItem(CONFETTI_KEY)) return false;
+            const target = document.querySelector('#obras-stat .stat-number');
+            if (!target) return false;
+            const text = (target.textContent || target.innerText || '').trim();
+            const obrasCount = parseInt(text.replace(/[^\d]/g, ''), 10);
+            if (!Number.isFinite(obrasCount) || obrasCount < 100) return false;
+
+            localStorage.setItem(CONFETTI_KEY, '1');
+            const colors = getThemeColors();
+            createConfetti(colors);
+            launchFireworks(colors);
             return true;
         }
 
         function watchFor100Plus() {
             const target = document.querySelector('#obras-stat .stat-number');
             if (!target) return;
-            if (launchConfettiOnce()) return;
+            if (launchCelebrationOnce()) return;
             const obs = new MutationObserver(() => {
-                if (launchConfettiOnce()) obs.disconnect();
+                if (launchCelebrationOnce()) obs.disconnect();
             });
             obs.observe(target, { childList: true, characterData: true, subtree: true });
         }
