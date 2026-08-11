@@ -33,8 +33,8 @@
             color: var(--text-color);
             line-height: 1.6;
             padding-top: 40px; /* Increased from 20px to account for larger hover area */
-            opacity: 0;
-            animation: fadeIn 1.5s ease-in-out forwards;
+            /* Do NOT animate opacity/transform on body — it makes position:fixed
+               descendants stick to the document instead of the viewport. */
             /* Garantir que as setas não sejam cortadas */
             overflow-x: visible !important;
             overflow-y: visible !important;
@@ -49,44 +49,6 @@
             }
         }
 
-        .confetti-container {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 1000004;
-            overflow: hidden;
-        }
-
-        .fireworks-canvas {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 1000003;
-        }
-
-        .confetti-piece {
-            position: absolute;
-            top: -10vh;
-            width: 8px;
-            height: 12px;
-            opacity: 0.95;
-            border-radius: 2px;
-            animation-name: confetti-fall;
-            animation-timing-function: linear;
-            animation-iteration-count: 1;
-        }
-
-        @keyframes confetti-fall {
-            0% {
-                transform: translate3d(0, -10vh, 0) rotate(0deg);
-            }
-            100% {
-                transform: translate3d(var(--drift, 0px), 130vh, 0) rotate(360deg);
-            }
-        }
-        
         .nav-bar {
             background-color: var(--header-bg);
             padding: 0 0 0 0;
@@ -244,6 +206,8 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem 1rem;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
         }
         
         .intro {
@@ -902,6 +866,228 @@
             background-color: var(--gold-color);
             color: var(--primary-color);
         }
+
+        .view-mode-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin: -0.5rem 0 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .view-mode-label {
+            font-family: 'EB Garamond', serif;
+            color: #666;
+            margin-right: 0.25rem;
+        }
+
+        .view-mode-button {
+            background-color: #fff;
+            border: 1px solid var(--gold-color);
+            padding: 0.45rem 1.25rem;
+            font-family: 'EB Garamond', serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-mode-button.active {
+            background-color: var(--primary-color);
+            color: var(--gold-color);
+            font-weight: bold;
+        }
+
+        .view-mode-button:hover {
+            background-color: var(--gold-color);
+            color: var(--primary-color);
+        }
+
+        .list-back-button {
+            display: none;
+            margin: 0 auto 1.25rem;
+            background-color: var(--primary-color);
+            color: var(--gold-color);
+            border: 1px solid var(--gold-color);
+            padding: 0.65rem 1.5rem;
+            font-family: 'EB Garamond', serif;
+            font-size: 1.05rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .list-back-button:hover {
+            background-color: var(--gold-color);
+            color: var(--primary-color);
+        }
+
+        #acervo.list-detail-open .list-back-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Compact single-column listing: code, title, author — no synopsis/stills */
+        #acervo.view-list .documents-grid {
+            grid-template-columns: 1fr;
+            gap: 0.55rem;
+            max-width: 720px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #acervo.view-list .document-card,
+        #acervo.view-list .document-card.video-card {
+            min-height: 0;
+            height: auto;
+            padding: 0.65rem 0.9rem 0.65rem 3.4rem;
+            border: 1px solid #e0d2b4;
+            border-left: 3px solid var(--gold-color);
+            border-radius: 2px;
+            cursor: pointer;
+            aspect-ratio: auto;
+            justify-content: center;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.15rem 0.75rem;
+        }
+
+        #acervo.view-list .document-card:hover {
+            transform: none;
+            box-shadow: 0 2px 8px rgba(74, 44, 42, 0.1);
+            background: #fffdf8;
+        }
+
+        #acervo.view-list .document-card p,
+        #acervo.view-list .document-card .document-footer,
+        #acervo.view-list .document-card .video-synopsis,
+        #acervo.view-list .document-card .video-thumbnail,
+        #acervo.view-list .document-card .media-thumbnail,
+        #acervo.view-list .document-card .media-thumbnail-container,
+        #acervo.view-list .document-card .play-button,
+        #acervo.view-list .document-card .media-play-button {
+            display: none !important;
+        }
+
+        #acervo.view-list .document-card h3 {
+            margin: 0;
+            flex: 1 1 auto;
+            min-width: 0;
+            max-width: calc(100% - 4.5rem);
+            font-size: 1.05rem;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 0.5rem;
+        }
+
+        #acervo.view-list .document-author {
+            margin: 0;
+            flex: 1 1 100%;
+            max-width: calc(100% - 4.5rem);
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #666;
+            padding-right: 0.5rem;
+        }
+
+        #acervo.view-list .document-year {
+            display: block !important;
+            position: absolute;
+            right: 0.85rem;
+            bottom: 0.55rem;
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--gold-color);
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        #acervo.view-list .document-code {
+            top: 50%;
+            left: 0.55rem;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            padding: 2px 6px;
+        }
+
+        /* List item opened: show full synopsis card again (incl. video stills) */
+        #acervo.view-list.list-detail-open .documents-grid {
+            grid-template-columns: minmax(280px, 640px);
+            justify-content: center;
+            max-width: none;
+        }
+
+        #acervo.view-list.list-detail-open .document-card.list-detail-active {
+            aspect-ratio: auto;
+            min-height: 280px;
+            cursor: default;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            align-items: stretch;
+            padding: 1.5rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 0;
+            gap: 0;
+        }
+
+        #acervo.view-list.list-detail-open .document-card.list-detail-active p,
+        #acervo.view-list.list-detail-open .document-card.list-detail-active .document-footer,
+        #acervo.view-list.list-detail-open .document-card.list-detail-active .document-year,
+        #acervo.view-list.list-detail-open .document-card.list-detail-active .video-synopsis {
+            display: block !important;
+        }
+
+        #acervo.view-list.list-detail-open .document-card.list-detail-active .video-thumbnail,
+        #acervo.view-list.list-detail-open .document-card.list-detail-active .media-thumbnail-container {
+            display: block !important;
+        }
+
+        #acervo.view-list.list-detail-open .document-card.list-detail-active .document-footer {
+            display: flex !important;
+        }
+
+        #acervo.view-list.list-detail-open .document-card.list-detail-active h3,
+        #acervo.view-list.list-detail-open .document-card.list-detail-active .document-author {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+            flex: none;
+            max-width: none;
+            padding-right: 0;
+        }
+
+        #acervo.view-list.list-detail-open .document-card.list-detail-active h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #acervo.view-list.list-detail-open .document-card.list-detail-active .document-author {
+            margin-bottom: 0.3rem;
+        }
+
+        #acervo.view-list.list-detail-open .document-card.list-detail-active .document-year {
+            position: static;
+            right: auto;
+            bottom: auto;
+            margin-bottom: 1rem;
+            font-size: inherit;
+        }
+
+        #acervo.view-list.list-detail-open .document-card.list-detail-active .document-code {
+            top: 10px;
+            left: 10px;
+            transform: none;
+        }
+
+        #acervo.view-list.list-detail-open .document-card:not(.list-detail-active) {
+            display: none !important;
+        }
         
         .sort-container {
             display: flex;
@@ -1017,44 +1203,14 @@
             color: var(--gold-color);
         }
         
-        .toggle-button {
-            background-color: var(--gold-color);
-            color: #fff;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 1.5rem auto;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 10;
-        }
-        
-        .toggle-button:hover {
-            background-color: var(--primary-color);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-        }
-        
-        .recolher-button {
-            display: none;
-            margin-top: 1.5rem;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
         .timeline-section {
             margin: 3rem 0;
             padding: 2rem;
             border: 1px solid #e0e0e0;
             background-color: #fff;
-            overflow: hidden;
+            /* Keep scrubber thumb visible; only clip horizontal bleed from the track */
+            overflow-x: clip;
+            overflow-y: visible;
         }
         
         .timeline-title {
@@ -1675,15 +1831,140 @@
         .horizontal-timeline {
             position: relative;
             overflow-x: auto;
-            padding: 2rem 0;
+            overflow-y: hidden;
+            padding: 2.5rem 0 1rem;
+            cursor: grab;
+            /* Instant scroll: global `* { scroll-behavior: smooth }` makes scrubber/drag fight
+               the animated scrollLeft and jump violently. */
+            scroll-behavior: auto !important;
+            /* Native scrollbar removed: it looked like a faint overlay under the drag area.
+               Scrubbing stays via drag-to-scroll + the fat year scrubber below. */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .horizontal-timeline::-webkit-scrollbar {
+            display: none;
+            height: 0;
+            width: 0;
+        }
+
+        .horizontal-timeline.is-dragging {
+            cursor: grabbing;
+            user-select: none;
+        }
+
+        .horizontal-timeline.is-dragging a {
+            pointer-events: none;
+        }
+
+        .timeline-scrubber {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            margin: 1rem 0.5rem 0.5rem;
+            padding: 0.85rem 0.35rem 0.65rem;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            position: relative;
+            z-index: 3;
+            flex-shrink: 0;
+        }
+
+        .timeline-scrubber-label {
+            font-family: 'EB Garamond', serif;
+            font-weight: bold;
+            color: var(--primary-color);
+            white-space: nowrap;
+            min-width: 4.5rem;
+            font-size: 1.15rem;
+            flex-shrink: 0;
+        }
+
+        .timeline-scrubber-input {
+            -webkit-appearance: none;
+            appearance: none;
+            flex: 1 1 auto;
+            width: 100%;
+            height: 44px;
+            background: #d4b45f;
+            border-radius: 999px;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            /* Kill default OS range fill/overlay that can look like a translucent rectangle */
+            background-image: none;
+            box-shadow: none;
+            position: relative;
+            z-index: 3;
+        }
+
+        .timeline-scrubber-input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .timeline-scrubber-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #f7f4ef;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.16);
+            cursor: grab;
+            margin-top: -6px;
+            position: relative;
+            z-index: 4;
+        }
+
+        .timeline-scrubber-input::-webkit-slider-thumb:active {
+            cursor: grabbing;
+        }
+
+        .timeline-scrubber-input::-moz-range-thumb {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #f7f4ef;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.16);
+            cursor: grab;
+        }
+
+        .timeline-scrubber-input::-moz-range-thumb:active {
+            cursor: grabbing;
+        }
+
+        .timeline-scrubber-input::-webkit-slider-runnable-track {
+            height: 44px;
+            border-radius: 999px;
+            background: #d4b45f;
+            border: none;
+        }
+
+        .timeline-scrubber-input::-moz-range-track {
+            height: 44px;
+            border-radius: 999px;
+            background: #d4b45f;
+            border: none;
+        }
+
+        .timeline-scrubber-input::-moz-range-progress {
+            background: transparent;
+            height: 44px;
+            border-radius: 999px;
         }
         
         .timeline-track {
             display: flex;
-            gap: 2rem;
+            gap: 2.25rem;
             min-width: max-content;
-            min-height: 200px;
-            padding: 0 1rem;
+            min-height: 280px;
+            padding: 0 1.25rem 0.5rem;
         }
         
         .timeline-item-horizontal {
@@ -1696,9 +1977,9 @@
             background: #fff;
             border: 2px solid var(--gold-color);
             border-radius: 10px;
-            padding: 1.5rem;
-            width: 250px;
-            min-height: 200px;
+            padding: 1.75rem;
+            width: 300px;
+            min-height: 260px;
             display: flex;
             flex-direction: column;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -1714,8 +1995,8 @@
             background: var(--gold-color);
             color: var(--primary-color);
             font-weight: bold;
-            font-size: 1.2rem;
-            padding: 0.5rem;
+            font-size: 1.4rem;
+            padding: 0.65rem;
             text-align: center;
             border-radius: 5px;
             margin-bottom: 1rem;
@@ -1726,13 +2007,14 @@
             margin-bottom: 0.5rem;
             color: var(--primary-color);
             flex-grow: 1;
+            font-size: 1.15rem;
         }
         
         .timeline-author-horizontal {
             font-style: italic;
             color: #666;
             margin-bottom: 0.5rem;
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
         
         .timeline-tag-horizontal {
@@ -1857,25 +2139,14 @@
             }
         }
         
-        /* === New expand/collapse transitions === */
-        
-        /* collapse by default */
+        /* Always show the full document list (no expand/collapse) */
         #hidden-documents {
-            display: grid; /* keep grid layout */
+            display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
-            max-height: 0;          /* collapsed */
-            opacity: 0;             /* invisible */
-            overflow: hidden;       /* hide overflow */
-            transition:
-                max-height 0.6s ease,  /* slide open/closed */
-                opacity    0.4s ease;  /* fade in/out */
-        }
-        
-        /* when expanded… */
-        #hidden-documents.expanded {
             max-height: none;
             opacity: 1;
+            overflow: visible;
         }
         /* …your existing .read-button rules… */
 
@@ -2054,8 +2325,32 @@
     }
     
     .timeline-content-horizontal {
-        width: 200px;
-        min-height: 180px;
+        width: 260px;
+        min-height: 240px;
+    }
+
+    .timeline-scrubber-input {
+        height: 52px;
+    }
+
+    .timeline-scrubber-input::-webkit-slider-runnable-track {
+        height: 52px;
+    }
+
+    .timeline-scrubber-input::-moz-range-track,
+    .timeline-scrubber-input::-moz-range-progress {
+        height: 52px;
+    }
+
+    .timeline-scrubber-input::-webkit-slider-thumb {
+        width: 60px;
+        height: 60px;
+        margin-top: -6px;
+    }
+
+    .timeline-scrubber-input::-moz-range-thumb {
+        width: 60px;
+        height: 60px;
     }
 }
               
@@ -2126,7 +2421,7 @@ video-synopsis {
         <a href="#acervo">Acervo</a>
     </div>
     <!-- Fixed down arrow near header top-right -->
-    <button id="nav-down-arrow" class="nav-down-arrow" title="Ir para o fim"><span class="arrow-icon">▼</span></button>
+    <button id="nav-down-arrow" class="nav-down-arrow" title="Ir para o fim" aria-hidden="true" tabindex="-1"><span class="arrow-icon">▼</span></button>
     
     <!-- Voltar (top-right inside Exit Console modal) -->
     <template id="exit-back-button-template">
@@ -3533,7 +3828,7 @@ video-synopsis {
                             <div class="timeline-year-horizontal">2020</div>
                             <div class="timeline-text-horizontal">Antologia Lafaiete em Prosa e Verso</div>
                             <div class="timeline-author-horizontal">Reuber Lana Antoniazzi</div>
-                            <div class="timeline-tag-horizontal">Livro/div>
+                            <div class="timeline-tag-horizontal">Livro</div>
                             <a href="Antologia Lafaiete em Prosa e Verso.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
@@ -3688,33 +3983,27 @@ video-synopsis {
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2026</div>
                             <div class="timeline-text-horizontal">Cine Regina</div>
-                            <div class="timeline-author-horizontal">RDC </div>
+                            <div class="timeline-author-horizontal">RDC</div>
                             <div class="timeline-tag-horizontal">Mídia</div>
-                            <a href="cine-regina.html?autoplay=1" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ver</a>  
-
-                            <div class="timeline-item-horizontal" style="animation-delay: 6.6s;">
-                                <div class="timeline-content-horizontal">
-                                    <div class="timeline-year-horizontal">2026</div>
-                                    <div class="timeline-text-horizontal">Cine Regina</div>
-                                    <div class="timeline-author-horizontal">RDC </div>
-                                    <div class="timeline-tag-horizontal">Mídia</div>
-                                    <a href="cine-regina.html?autoplay=1" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ver</a>  
-
-
-                                    <div class="timeline-item-horizontal" style="animation-delay: 6.6s;">
-                                        <div class="timeline-content-horizontal">
-                                            <div class="timeline-year-horizontal">2026</div>
-                                            <div class="timeline-text-horizontal">Meu Encantamento por Paris</div>
-                                            <div class="timeline-author-horizontal">RDC</div>
-                                            <div class="timeline-tag-horizontal">Conto</div>
-                                            <a href="https://drive.google.com/file/d/1veDIpHQ02Xcd3hghPmGhaF2BUcv3DZqs/view" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler</a>  
-                                            
-
-                        
+                            <a href="cine-regina.html?autoplay=1" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ver</a>
                         </div>
                     </div>
-                    
+
+                    <!-- 2026 - Meu Encantamento por Paris -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 6.7s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2026</div>
+                            <div class="timeline-text-horizontal">Meu Encantamento por Paris</div>
+                            <div class="timeline-author-horizontal">RDC</div>
+                            <div class="timeline-tag-horizontal">Conto</div>
+                            <a href="https://drive.google.com/file/d/1veDIpHQ02Xcd3hghPmGhaF2BUcv3DZqs/view" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler</a>
+                        </div>
+                    </div>
                 </div>
+            </div>
+            <div class="timeline-scrubber" id="timeline-scrubber">
+                <span class="timeline-scrubber-label" id="timeline-scrubber-year">Ano</span>
+                <input type="range" class="timeline-scrubber-input" id="timeline-scrubber-input" min="0" max="1000" value="0" step="1" aria-label="Arrastar linha do tempo por ano">
             </div>
         </section>
         
@@ -3892,6 +4181,13 @@ video-synopsis {
                 <button class="filter-button" data-filter="documento">Documentos</button>
                 <button class="filter-button" data-filter="mídia">Mídia</button>
             </div>
+
+            <div class="view-mode-container" id="view-mode-container">
+                <span class="view-mode-label">Ver por:</span>
+                <button type="button" class="view-mode-button active" data-view="sinopses" title="Vista em grade com sinopses">Grade</button>
+                <button type="button" class="view-mode-button" data-view="lista" title="Listagem compacta">Listagem</button>
+            </div>
+            <button type="button" class="list-back-button" id="list-back-button">← Voltar à lista</button>
             
             <div class="sort-container">
                 <select class="sort-select">
@@ -3903,7 +4199,7 @@ video-synopsis {
             </div>
             
             <div class="documents-grid" id="visible-documents">
-                <!-- Primeiros 9 itens visíveis -->
+                <!-- Documentos do acervo -->
                 <div class="document-card" style="animation-delay: 0.1s;">
                     <div class="document-code">301</div>
                     <h3>O Livro da Vovó Magdalena</h3>
@@ -3965,11 +4261,8 @@ video-synopsis {
                 </div>
             </div>
             
-            <button class="toggle-button" id="explore-button">&#9660;</button>  <!-- ▼ down arrow -->
-           
-            
-            <div class="documents-grid hidden-documents" id="hidden-documents">
-                <!-- Itens ocultos que serão exibidos ao clicar no botão "+" -->
+            <div class="documents-grid" id="hidden-documents">
+                <!-- Continuação do acervo (sempre visível) -->
                 <div class="document-card" style="animation-delay: 0.1s;">
                     <div class="document-code">310</div>
                     <h3>Carta de meu Bisavô para meu Avô</h3>
@@ -4239,12 +4532,8 @@ video-synopsis {
                 <!-- Vídeos serão renderizados aqui pelo JavaScript -->
                  
             </div>
-            <button class="toggle-button recolher-button" id="recolher-button">&#9650;</button>  <!-- ▲ up arrow -->
-            
-    
           
         </section>
-        <button class="toggle-button recolher-button" id="recolher-button">&#9650;</button>  <!-- ▲ up arrow -->
         <script>document.addEventListener('DOMContentLoaded', function() {
             renderizarVideos()})</script>
         
@@ -4654,9 +4943,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('DOMContentLoaded', function() {
            
 
-            // Botões de expandir e recolher
-            const exploreButton   = document.getElementById('explore-button');
-            const recolherButton  = document.getElementById('recolher-button');
             const hiddenDocuments = document.getElementById('hidden-documents');
             videos.forEach(v => hiddenDocuments.insertAdjacentHTML('beforeend',
             `<div class="document-card video-card">
@@ -4774,21 +5060,6 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         });
 
-            
-            // → Smooth expand/collapse via CSS class
-            exploreButton.addEventListener('click', function() {
-              hiddenDocuments.classList.add('expanded');
-              exploreButton.style.display  = 'none';
-              recolherButton.style.display = 'flex';
-            });
-        
-            recolherButton.addEventListener('click', function() {
-              hiddenDocuments.classList.remove('expanded');
-              exploreButton.style.display  = 'flex';
-              recolherButton.style.display = 'none';
-            });
-            
-        
             // Busca
             const searchInput  = document.querySelector('.search-input');
             const searchButton = document.querySelector('.search-button');
@@ -4814,11 +5085,6 @@ document.addEventListener('DOMContentLoaded', function() {
                   const matches = fields.includes(term) || code.includes(term);
                   card.style.display = matches ? 'flex' : 'none';
                 });
-              
-                // (optional) expand hidden section
-                hiddenDocuments.classList.add('expanded');
-                exploreButton.style.display  = 'none';
-                recolherButton.style.display = 'flex';
               }
               
         
@@ -4850,11 +5116,10 @@ document.addEventListener('DOMContentLoaded', function() {
               const visible = document.getElementById('visible-documents');
               const hidden  = document.getElementById('hidden-documents');
               visible.innerHTML = '';
-              hidden .innerHTML = '';
+              if (hidden) hidden.innerHTML = '';
         
-              allDocs.forEach((doc, i) => {
-                if (i < 9) visible.appendChild(doc);
-                else      hidden.appendChild(doc);
+              allDocs.forEach((doc) => {
+                visible.appendChild(doc);
               });
             });
         
@@ -4880,23 +5145,6 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (e) {
               console.warn('renderizarDocumentos/documentos indisponíveis, seguindo sem renderização inicial.');
             }
-          // Botões de expandir e recolher
-          const exploreButton   = document.getElementById('explore-button');
-          const recolherButton  = document.getElementById('recolher-button');
-          const hiddenDocuments = document.getElementById('hidden-documents');
-      
-          // → Smooth expand/collapse via CSS class
-          exploreButton.addEventListener('click', function() {
-            hiddenDocuments.classList.add('expanded');
-            exploreButton.style.display  = 'none';
-            recolherButton.style.display = 'flex';
-          });
-      
-          recolherButton.addEventListener('click', function() {
-            hiddenDocuments.classList.remove('expanded');
-            exploreButton.style.display  = 'flex';
-            recolherButton.style.display = 'none';
-          });
       
           // Filtros
           const filterButtons = document.querySelectorAll('.filter-button');
@@ -4923,6 +5171,14 @@ document.addEventListener('DOMContentLoaded', function() {
           }
 
           function applyFilter(filter) {
+            const acervoEl = document.getElementById('acervo');
+            if (acervoEl) {
+              acervoEl.classList.remove('list-detail-open');
+              document.querySelectorAll('.document-card.list-detail-active').forEach(card => {
+                card.classList.remove('list-detail-active');
+              });
+            }
+
             const allCards = Array.from(document.querySelectorAll('.document-card'));
             const filtered = allCards.filter(card => {
               const typeText = card.querySelector('.document-type')?.textContent || '';
@@ -4936,16 +5192,10 @@ document.addEventListener('DOMContentLoaded', function() {
             hidden.innerHTML  = '';
 
             const matchedSet = new Set(filtered);
-            let visibleCount = 0;
             allCards.forEach(card => {
               if (matchedSet.has(card)) {
                 card.style.display = 'flex';
-                if (visibleCount < 9) {
-                  visible.appendChild(card);
-                } else {
-                  hidden.appendChild(card);
-                }
-                visibleCount += 1;
+                visible.appendChild(card);
               } else {
                 card.style.display = 'none';
                 hidden.appendChild(card);
@@ -4953,17 +5203,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (filter === 'todos') {
-              // Restore initial collapsed state and default sort by code
-              hidden.classList.remove('expanded');
-              exploreButton.style.display  = 'flex';
-              recolherButton.style.display = 'none';
               const sortSelect = document.querySelector('.sort-select');
               if (sortSelect) sortSelect.value = 'Ordenar por Código';
               if (typeof applySort === 'function') applySort('Ordenar por Código');
-            } else {
-              hidden.classList.add('expanded');
-              exploreButton.style.display  = 'none';
-              recolherButton.style.display = 'flex';
             }
           }
 
@@ -4990,6 +5232,67 @@ document.addEventListener('DOMContentLoaded', function() {
           applyFilter(initialFilter);
           // Apply default sort (by Código) so cards appear in numeric order on open
           applySort('Ordenar por Código');
+
+          // Two viewing options: Grade (current cards) and Listagem (title/author/code/year)
+          const acervoSection = document.getElementById('acervo');
+          const viewModeButtons = document.querySelectorAll('.view-mode-button');
+          const listBackButton = document.getElementById('list-back-button');
+          let currentViewMode = 'sinopses';
+
+          function clearListDetail() {
+            if (!acervoSection) return;
+            acervoSection.classList.remove('list-detail-open');
+            document.querySelectorAll('.document-card.list-detail-active').forEach(card => {
+              card.classList.remove('list-detail-active');
+            });
+          }
+
+          function setViewMode(mode) {
+            currentViewMode = mode === 'lista' ? 'lista' : 'sinopses';
+            if (!acervoSection) return;
+            clearListDetail();
+            acervoSection.classList.toggle('view-list', currentViewMode === 'lista');
+            viewModeButtons.forEach(btn => {
+              btn.classList.toggle('active', btn.getAttribute('data-view') === currentViewMode);
+            });
+          }
+
+          viewModeButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+              e.preventDefault();
+              setViewMode(this.getAttribute('data-view'));
+            });
+          });
+
+          if (listBackButton) {
+            listBackButton.addEventListener('click', function(e) {
+              e.preventDefault();
+              clearListDetail();
+              const listAnchor = document.getElementById('view-mode-container');
+              if (listAnchor) listAnchor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+          }
+
+          document.addEventListener('click', function(e) {
+            if (currentViewMode !== 'lista' || !acervoSection) return;
+            if (acervoSection.classList.contains('list-detail-open')) return;
+            const card = e.target.closest('#acervo .document-card');
+            if (!card || card.style.display === 'none') return;
+            // Keep direct read/ver links working even in list mode
+            if (e.target.closest('a, button, input, select, textarea')) return;
+            e.preventDefault();
+            clearListDetail();
+            card.classList.add('list-detail-active');
+            acervoSection.classList.add('list-detail-open');
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          });
+
+          // Leaving a filter while in detail should return to the compact list
+          filterButtonsFresh.forEach(button => {
+            button.addEventListener('click', function() {
+              clearListDetail();
+            });
+          });
       
           // Busca
           const searchInput  = document.querySelector('.search-input');
@@ -5019,11 +5322,6 @@ document.addEventListener('DOMContentLoaded', function() {
               const matches = fields.includes(term) || code.includes(term);
               card.style.display = matches ? 'flex' : 'none';
             });
-          
-            // (optional) expand hidden section
-            hiddenDocuments.classList.add('expanded');
-            exploreButton.style.display  = 'none';
-            recolherButton.style.display = 'flex';
           }
           
   
@@ -5058,11 +5356,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const hidden  = document.getElementById('hidden-documents');
             if (!visible || !hidden) return;
             visible.innerHTML = '';
-            hidden .innerHTML = '';
+            hidden.innerHTML = '';
 
-            allDocs.forEach((doc, i) => {
-              if (i < 9) visible.appendChild(doc);
-              else      hidden.appendChild(doc);
+            allDocs.forEach((doc) => {
+              visible.appendChild(doc);
             });
           }
 
@@ -5076,47 +5373,6 @@ document.addEventListener('DOMContentLoaded', function() {
       </script>
       <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Botão de voltar ao topo
-            const backToTopButton = document.getElementById('scrollTopBtn');
-            
-            window.addEventListener('scroll', function() {
-                if (window.pageYOffset > 300) {
-                    backToTopButton.classList.add('visible');
-                } else {
-                    backToTopButton.classList.remove('visible');
-                }
-            });
-            
-            if (backToTopButton) backToTopButton.addEventListener('click', function() {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            });
-            
-            // Funcionalidade de expandir e recolher documentos
-            const exploreButton = document.getElementById('explore-button');
-            const recolherButton = document.getElementById('recolher-button');
-            const hiddenDocuments = document.getElementById('hidden-documents');
-            let isExpanded = false;
-            
-            exploreButton.addEventListener('click', function() {
-                hiddenDocuments.classList.remove('hidden-documents');
-                exploreButton.style.display = 'none';
-                recolherButton.style.display = 'flex';
-                isExpanded = true;
-            });
-            
-            recolherButton.addEventListener('click', function() {
-                hiddenDocuments.classList.add('hidden-documents');
-                exploreButton.style.display = 'flex';
-                recolherButton.style.display = 'none';
-                isExpanded = false;
-                
-                // Rolar para o topo da seção de acervo
-                document.getElementById('acervo').scrollIntoView({ behavior: 'smooth' });
-            });
-            
             // Funcionalidade de busca
             const searchButton = document.querySelector('.search-button');
             const searchInput = document.querySelector('.search-input');
@@ -5128,14 +5384,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 const allDocuments = document.querySelectorAll('.document-card');
-                
-                // Se estiver buscando por código, expandir a seção oculta
-                if (searchTerm.match(/^\d{3}$/)) {
-                    hiddenDocuments.classList.remove('hidden-documents');
-                    exploreButton.style.display = 'none';
-                    recolherButton.style.display = 'flex';
-                    isExpanded = true;
-                }
                 
                 allDocuments.forEach(function(doc) {
                     const code = doc.querySelector('.document-code').textContent;
@@ -5309,14 +5557,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const acervoSection = document.getElementById('acervo');
                     acervoSection.scrollIntoView({ behavior: 'smooth' });
                     
-                    // Expandir a seção oculta se necessário
-                    if (hiddenDocuments.classList.contains('hidden-documents')) {
-                        hiddenDocuments.classList.remove('hidden-documents');
-                        exploreButton.style.display = 'none';
-                        recolherButton.style.display = 'flex';
-                        isExpanded = true;
-                    }
-                    
                     // Buscar o documento correspondente no acervo
                     const searchInput = document.querySelector('.search-input');
                     searchInput.value = title;
@@ -5378,28 +5618,166 @@ function openVideo(videoId, isProtected) {
                 hideTimer = setTimeout(() => docEl.classList.remove('nav-open'), 300);
             });
         })();
-        // Scroll helpers + hover reveal for top/bottom buttons
+        // Scroll arrows: hidden by default on fine-hover desktops. Reveal when
+        // pointer is near VIEWPORT top/bottom. On touch / no-hover / coarse
+        // pointer, keep both arrows always visible and clickable.
         document.addEventListener('DOMContentLoaded', function(){
           const btnTop = document.getElementById('scrollTopBtn');
           const btnDown = document.getElementById('nav-down-arrow');
+          if (!btnTop && !btnDown) return;
 
-          if (btnTop) btnTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-          if (btnDown) btnDown.addEventListener('click', () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }));
+          const HOVER_BAND = 210; // generous px band from viewport edges
+          const REVEAL_CLASS = 'arrow-revealed';
+          let hideTimer = null;
+          let keepVisible = false; // while pointer is over a revealed button
 
-          // Show buttons only when hovering near top/bottom edges
-          const HOVER_BAND = 200; // how many pixels from the top/bottom edge to trigger
-          const canHover = window.matchMedia && matchMedia('(hover: hover)').matches;
-          if (!canHover) return; // skip on touch devices
-
-          function updateVisibility(e){
-            const y = e.clientY;
-            const h = window.innerHeight;
-            // Inverted: show TOP button on bottom hover, DOWN button on top hover
-            if (btnTop) btnTop.classList.toggle('visible', y >= h - HOVER_BAND);
-            if (btnDown) btnDown.classList.toggle('visible', y <= HOVER_BAND);
+          function prefersAlwaysVisible() {
+            try {
+              return (
+                window.matchMedia('(hover: none)').matches ||
+                window.matchMedia('(pointer: coarse)').matches ||
+                window.matchMedia('(max-width: 768px)').matches
+              );
+            } catch (_) {
+              return false;
+            }
           }
 
-          window.addEventListener('mousemove', updateVisibility, { passive: true });
+          function maxScrollY() {
+            const doc = document.documentElement;
+            const body = document.body;
+            const height = Math.max(
+              doc.scrollHeight, body.scrollHeight,
+              doc.offsetHeight, body.offsetHeight,
+              doc.clientHeight
+            );
+            return Math.max(0, height - window.innerHeight);
+          }
+
+          function clearInlineRevealStyles(btn) {
+            if (!btn) return;
+            btn.style.opacity = '';
+            btn.style.visibility = '';
+            btn.style.pointerEvents = '';
+            btn.style.transition = '';
+          }
+
+          function setRevealed(btn, show) {
+            if (!btn) return;
+            // Class + CSS transition handle fade in/out (no instant inline opacity).
+            clearInlineRevealStyles(btn);
+            btn.classList.toggle(REVEAL_CLASS, !!show);
+            btn.classList.remove('visible'); // legacy class — ignore
+            btn.setAttribute('aria-hidden', show ? 'false' : 'true');
+            btn.tabIndex = show ? 0 : -1;
+          }
+
+          function showBothAlways() {
+            document.documentElement.classList.add('arrows-always');
+            [btnTop, btnDown].forEach(function(btn) {
+              if (!btn) return;
+              btn.classList.add(REVEAL_CLASS);
+              btn.classList.remove('visible');
+              clearInlineRevealStyles(btn); // let CSS force visibility
+              btn.setAttribute('aria-hidden', 'false');
+              btn.tabIndex = 0;
+            });
+          }
+
+          function hideAll() {
+            if (prefersAlwaysVisible()) return;
+            if (keepVisible) return;
+            setRevealed(btnTop, false);
+            setRevealed(btnDown, false);
+          }
+
+          function revealFromY(clientY) {
+            if (prefersAlwaysVisible()) return;
+            if (typeof clientY !== 'number' || Number.isNaN(clientY)) return;
+            const h = window.innerHeight || document.documentElement.clientHeight || 0;
+            const nearTop = clientY <= HOVER_BAND;
+            const nearBottom = clientY >= h - HOVER_BAND;
+
+            // Top of viewport → ▼. Bottom of viewport → ▲. Any page scroll position.
+            if (nearTop || nearBottom) {
+              if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+              setRevealed(btnDown, nearTop);
+              setRevealed(btnTop, nearBottom);
+            } else if (!keepVisible) {
+              if (hideTimer) clearTimeout(hideTimer);
+              hideTimer = setTimeout(hideAll, 70);
+            }
+          }
+
+          function applyMode() {
+            if (prefersAlwaysVisible()) {
+              if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+              keepVisible = false;
+              showBothAlways();
+              return;
+            }
+            document.documentElement.classList.remove('arrows-always');
+            keepVisible = false;
+            hideAll();
+          }
+
+          window.addEventListener('pointermove', function(e) {
+            revealFromY(e.clientY);
+          }, { passive: true });
+
+          window.addEventListener('mousemove', function(e) {
+            revealFromY(e.clientY);
+          }, { passive: true });
+
+          window.addEventListener('touchstart', function(e) {
+            if (prefersAlwaysVisible()) return;
+            const t = e.touches && e.touches[0];
+            if (!t) return;
+            revealFromY(t.clientY);
+          }, { passive: true });
+
+          [btnTop, btnDown].forEach(function(btn) {
+            if (!btn) return;
+            btn.addEventListener('pointerenter', function() {
+              if (prefersAlwaysVisible()) return;
+              keepVisible = true;
+              if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+              setRevealed(btn, true);
+            });
+            btn.addEventListener('pointerleave', function() {
+              if (prefersAlwaysVisible()) return;
+              keepVisible = false;
+              hideTimer = setTimeout(hideAll, 70);
+            });
+          });
+
+          if (btnTop) {
+            btnTop.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              const acervo = document.getElementById('acervo');
+              if (acervo && typeof acervo.scrollIntoView === 'function') {
+                acervo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } else {
+                window.location.hash = 'acervo';
+              }
+            });
+          }
+          if (btnDown) {
+            btnDown.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              window.scrollTo({ top: maxScrollY(), behavior: 'smooth' });
+            });
+          }
+
+          applyMode();
+          try {
+            const mq = window.matchMedia('(hover: none), (pointer: coarse), (max-width: 768px)');
+            const onChange = function() { applyMode(); };
+            if (mq.addEventListener) mq.addEventListener('change', onChange);
+            else if (mq.addListener) mq.addListener(onChange);
+          } catch (_) {}
         });
     </script>
     
@@ -6361,7 +6739,7 @@ function openVideo(videoId, isProtected) {
     <div id="addMemoryFloating" class="add-memory-floating">
         <span>+</span>
     </div>
-    <button id="scrollTopBtn" class="scroll-top-fixed" title="Voltar ao Início" aria-label="Voltar ao Início"><span class="arrow-icon">▲</span></button>
+    <button id="scrollTopBtn" class="scroll-top-fixed" title="Voltar ao Acervo" aria-label="Voltar ao Acervo" aria-hidden="true" tabindex="-1"><span class="arrow-icon">▲</span></button>
     
     <!-- Botão Sair do Console -->
     <div id="exitConsoleBtn" class="exit-console-btn">
@@ -6913,7 +7291,7 @@ function openVideo(videoId, isProtected) {
                 form.author.value = author;
                 form.year.value = year;
                 form.type.value = type;
-                form.description.value = description;
+                if (form.sinopse) form.sinopse.value = description;
                 form.link.value = link;
                 // try to keep cloud id when present
                 const cloudId = cardEl.getAttribute('data-cloud-id') || '';
@@ -6925,18 +7303,20 @@ function openVideo(videoId, isProtected) {
             async saveEditedMemory() {
                 const form = document.getElementById('addMemoryForm');
                 const formData = new FormData(form);
+                const sinopseText = String(formData.get('sinopse') || formData.get('description') || '').trim();
                 const updated = {
                     title: formData.get('title'),
                     author: formData.get('author'),
                     year: formData.get('year'),
                     type: formData.get('type'),
-                    description: formData.get('description'),
+                    description: sinopseText,
+                    sinopse: sinopseText,
                     link: formData.get('link') || '#'
                 };
                 const id = form.dataset.editingId || '';
                 const code = parseInt(form.dataset.editingCode || '0', 10) || 0;
-                if (!updated.title || !updated.author || !updated.year || !updated.type) {
-                    this.showNotification('❌ Preencha todos os campos obrigatórios!', 'error');
+                if (!updated.title || !updated.author || !updated.year || !updated.type || !sinopseText) {
+                    this.showNotification('❌ Preencha todos os campos obrigatórios (incluindo a sinopse)!', 'error');
                     return;
                 }
                 // Update in DOM
@@ -6983,21 +7363,23 @@ function openVideo(videoId, isProtected) {
             async saveNewMemory() {
                 const form = document.getElementById('addMemoryForm');
                 const formData = new FormData(form);
+                const sinopseText = String(formData.get('sinopse') || formData.get('description') || '').trim();
                 
                 const newMemory = {
                     title: formData.get('title'),
                     author: formData.get('author'),
                     year: formData.get('year'),
                     type: formData.get('type'),
-                    description: formData.get('description'),
+                    description: sinopseText,
+                    sinopse: sinopseText,
                     link: formData.get('link') || '#',
                     code: undefined,
                     timestamp: new Date().toISOString()
                 };
                 
                 // Validação básica
-                if (!newMemory.title || !newMemory.author || !newMemory.year || !newMemory.type) {
-                    this.showNotification('❌ Por favor, preencha todos os campos obrigatórios!', 'error');
+                if (!newMemory.title || !newMemory.author || !newMemory.year || !newMemory.type || !sinopseText) {
+                    this.showNotification('❌ Por favor, preencha todos os campos obrigatórios (incluindo a sinopse)!', 'error');
                     return;
                 }
                 // URL validation if provided
@@ -7101,11 +7483,12 @@ function openVideo(videoId, isProtected) {
                         <h3>${c.titulo ?? c.title ?? ''}</h3>
                         <div class="document-author">${c.autor ?? c.author ?? ''}</div>
                         <div class="document-year">${c.ano ?? c.year ?? ''}</div>
-                        <p>${c.descricao ?? c.description ?? ''}</p>
+                        <p>${c.sinopse ?? c.descricao ?? c.description ?? ''}</p>
                         <div class="document-footer">
                             <span class="document-type">${type}</span>
                             <a href="${c.url ?? c.link ?? '#'}" class="read-button" target="_blank">${this.getButtonText(type)}</a>
-                        </div>`;
+                        </div>
+                    `;
                     // floating oval edit button in top-right
                     const fab = document.createElement('button');
                     fab.className = 'edit-card-btn';
@@ -7227,7 +7610,7 @@ function openVideo(videoId, isProtected) {
                     <h3>${memory.title}</h3>
                     <div class="document-author">${memory.author}</div>
                     <div class="document-year">${memory.year}</div>
-                    <p>${memory.description}</p>
+                    <p>${memory.sinopse || memory.description || ''}</p>
                     <div class="document-footer">
                         <span class="document-type">${normalizedType}</span>
                         <a href="${memory.link}" class="read-button" target="_blank">
@@ -7770,25 +8153,27 @@ function openVideo(videoId, isProtected) {
         window.editSystem = editSystem;
 
         // Console helper: persist a new memory (saves to Firebase if available, else localStorage), then updates UI
-        window.addMemory = async function({ title, author, year, type, description, link }) {
+        window.addMemory = async function({ title, author, year, type, description, sinopse, link }) {
             try {
                 if (window.waitForFirebaseAuth && typeof window.waitForFirebaseAuth.then === 'function') {
                     await window.waitForFirebaseAuth;
                 }
             } catch (e) { /* ignore and proceed with best-effort */ }
+            const sinopseText = String(sinopse || description || '').trim();
             const memory = {
                 title: title || '',
                 author: author || '',
                 year: year || '',
                 type: type || '',
-                description: description || '',
+                description: sinopseText,
+                sinopse: sinopseText,
                 link: link || '#',
                 code: undefined,
                 timestamp: new Date().toISOString()
             };
             // Basic validation similar to UI form
-            if (!memory.title || !memory.author || !memory.year || !memory.type) {
-                editSystem.showNotification('❌ Campos obrigatórios ausentes (título, autor, ano, tipo).', 'error');
+            if (!memory.title || !memory.author || !memory.year || !memory.type || !sinopseText) {
+                editSystem.showNotification('❌ Campos obrigatórios ausentes (título, autor, ano, tipo, sinopse).', 'error');
                 return null;
             }
             if (memory.link && memory.link.trim() && !/^https?:\/\//i.test(memory.link.trim())) {
@@ -8259,11 +8644,11 @@ function openVideo(videoId, isProtected) {
 
         .add-memory-floating { bottom: 24px !important; right: 24px !important; }
         .exit-console-btn    { top: 16px !important;    left: 16px !important;  }
-        .scroll-top-fixed    { bottom: 24px !important; left: 24px !important;  }
+        .scroll-top-fixed    { bottom: 10px !important; left: 24px !important;  }
 
-        /* Evita efeitos que "prendam" fixed a contêiner com transform/filtro */
-        .edit-mode, .authenticated, html, body {
-          transform: none !important;
+        /* Keep edit-mode filters from trapping fixed UI; do not set transform on html/body */
+        body.edit-mode,
+        body.authenticated {
           filter: none !important;
         }
 
@@ -8273,43 +8658,51 @@ function openVideo(videoId, isProtected) {
           z-index: 900000 !important;
         }
 
-        /* Scroll buttons */
+        /* Scroll buttons — viewport-fixed (not document-fixed) */
         .scroll-top-fixed {
-          position: fixed;
+          position: fixed !important;
+          top: auto !important;
+          bottom: 10px !important;
+          left: 24px !important;
+          right: auto !important;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 51px; height: 51px; /* +15% from 44px */
+          width: 51px; height: 51px;
           background: var(--header-bg);
           color: var(--primary-color);
           border-radius: 50%;
           border: 1px solid rgba(0,0,0,0.15);
           box-shadow: 0 6px 18px rgba(0,0,0,0.25);
           font-weight: 900;
-          font-size: 34px; /* slightly larger triangle */
+          font-size: 34px;
           cursor: pointer;
           z-index: 1000001;
+          -webkit-tap-highlight-color: transparent;
         }
         .scroll-top-fixed:hover {
-          transform: translateY(-2px);
+          translate: 0 -2px;
         }
 
-        /* Fixed down arrow placed under the header, top-right */
+        /* Fixed down arrow — high on the viewport, top-right */
         .nav-down-arrow {
-          position: fixed;
-          top: 88px; /* lowered slightly */
-          right: 16px;
-          width: 55px; height: 55px; /* +15% from 48px */
+          position: fixed !important;
+          top: 12px !important;
+          right: 16px !important;
+          bottom: auto !important;
+          left: auto !important;
+          width: 55px; height: 55px;
           display: inline-flex; align-items:center; justify-content:center;
           background: var(--header-bg);
           color: var(--primary-color);
           border-radius: 50%;
           border: 1px solid rgba(0,0,0,0.15);
           box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-          font-size: 34px; /* slightly larger triangle */
+          font-size: 34px;
           font-weight: 900;
           cursor: pointer;
           z-index: 1000001;
+          -webkit-tap-highlight-color: transparent;
         }
 
         /* Wider triangle glyphs inside the buttons */
@@ -8317,20 +8710,45 @@ function openVideo(videoId, isProtected) {
         .nav-down-arrow .arrow-icon {
           display: inline-block;
           transform: scaleX(1.15);
-        }
-        .nav-down-arrow:hover { transform: translateY(-1px); }
-
-        /* Hidden by default; revealed on hover bands via JS */
-        .scroll-top-fixed,
-        .nav-down-arrow {
-          opacity: 0;
           pointer-events: none;
-          transition: opacity 150ms ease;
         }
-        .scroll-top-fixed.visible,
-        .nav-down-arrow.visible {
+        .nav-down-arrow:hover { translate: 0 -1px; }
+
+        /* Desktop: hidden by default; fast fade in/out on .arrow-revealed. */
+        #scrollTopBtn,
+        #nav-down-arrow {
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+          transition:
+            opacity 0.14s ease,
+            visibility 0s linear 0.14s;
+        }
+        #scrollTopBtn.arrow-revealed,
+        #nav-down-arrow.arrow-revealed {
           opacity: 1;
+          visibility: visible;
           pointer-events: auto;
+          transition:
+            opacity 0.12s ease,
+            visibility 0s linear 0s;
+        }
+        /* Touch / no-hover / coarse pointer / narrow viewports: always show both arrows. */
+        @media (hover: none), (pointer: coarse), (max-width: 768px) {
+          #scrollTopBtn,
+          #nav-down-arrow {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            transition: none !important;
+          }
+        }
+        html.arrows-always #scrollTopBtn,
+        html.arrows-always #nav-down-arrow {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto !important;
+          transition: none !important;
         }
     </style>
 
@@ -8372,8 +8790,13 @@ function openVideo(videoId, isProtected) {
                         <option value="Mídia">Mídia</option>
                         <option value="Vídeo">Vídeo</option>
                         <option value="Antologia">Antologia</option>
-                    <label for="description">Descrição <span class="required">*</span></label>
-                    <textarea id="description" name="description" required placeholder="Descreva brevemente a obra, sua importância ou contexto histórico..."></textarea>
+                        <option value="Pessoas&Famílias">Pessoas&Famílias</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="sinopse">Sinopse <span class="required">*</span></label>
+                    <textarea id="sinopse" name="sinopse" required rows="5" placeholder="Escreva a sinopse da obra — o texto que aparece no Acervo (vista Grade)..."></textarea>
                 </div>
                 
                 <div class="form-group">
@@ -8487,11 +8910,13 @@ function openVideo(videoId, isProtected) {
 
       // Exposed helper functions for EditSystem -> Firebase
       window.firebaseSaveMemory = async (memory) => {
+        const sinopse = memory.sinopse || memory.description || '';
         await addDoc(collection(db, "conteudos"), {
           titulo: memory.title,
           ano: Number(memory.year),
           autor: memory.author,
-          descricao: memory.description,
+          descricao: sinopse,
+          sinopse: sinopse,
           tipo: memory.type,
           url: memory.link,
           codigo: Number(memory.code),
@@ -8503,6 +8928,7 @@ function openVideo(videoId, isProtected) {
       window.firebaseUpdateByCode = async (code, fields) => {
         const snap = await getDocs(collection(db, "conteudos"));
         const updates = [];
+        const sinopse = fields.sinopse || fields.description || '';
         snap.forEach((docSnap) => {
           const d = docSnap.data();
           if (Number(d.codigo) === Number(code)) {
@@ -8510,7 +8936,8 @@ function openVideo(videoId, isProtected) {
               titulo: fields.title,
               ano: Number(fields.year),
               autor: fields.author,
-              descricao: fields.description,
+              descricao: sinopse,
+              sinopse: sinopse,
               tipo: fields.type,
               url: fields.link,
               updatedAt: serverTimestamp()
@@ -8526,12 +8953,14 @@ function openVideo(videoId, isProtected) {
         const snap = await getDocs(collection(db, "conteudos"));
         snap.forEach((docSnap) => {
           const d = docSnap.data();
+          const sinopse = d.sinopse || d.descricao || '';
           list.push({
             id: docSnap.id,
             title: d.titulo,
             year: d.ano,
             author: d.autor,
-            description: d.descricao,
+            description: sinopse,
+            sinopse: sinopse,
             type: d.tipo,
             link: d.url,
             code: d.codigo || 0,
@@ -8557,11 +8986,13 @@ function openVideo(videoId, isProtected) {
       // Update arbitrary fields on a conteudos doc by id
       window.firebaseUpdateFieldsById = async (id, fields) => {
         const ref = doc(db, "conteudos", id);
+        const sinopse = fields.sinopse || fields.description || '';
         await updateDoc(ref, { 
           titulo: fields.title,
           ano: Number(fields.year),
           autor: fields.author,
-          descricao: fields.description,
+          descricao: sinopse,
+          sinopse: sinopse,
           tipo: fields.type,
           url: fields.link,
           updatedAt: serverTimestamp()
@@ -9332,276 +9763,6 @@ function openVideo(videoId, isProtected) {
     
     <script>
     (function(){
-        const CONFETTI_KEY = 'rdc_confetti_100_obras';
-        const getThemeColors = () => {
-            const styles = getComputedStyle(document.documentElement);
-            const pick = (v) => styles.getPropertyValue(v).trim();
-            return [
-                pick('--header-bg'),
-                pick('--secondary-color'),
-                pick('--gold-color'),
-                pick('--primary-color')
-            ].filter(Boolean);
-        };
-
-        function createConfetti(colors) {
-            const container = document.createElement('div');
-            container.className = 'confetti-container';
-            document.body.appendChild(container);
-
-            const pieces = 90;
-            for (let i = 0; i < pieces; i++) {
-                const piece = document.createElement('span');
-                piece.className = 'confetti-piece';
-                const size = 6 + Math.random() * 6;
-                const left = Math.random() * 100;
-                const drift = (Math.random() * 120 - 60).toFixed(0);
-                const duration = (2.8 + Math.random() * 1.8).toFixed(2);
-                const delay = (Math.random() * 0.6).toFixed(2);
-                piece.style.width = `${size}px`;
-                piece.style.height = `${size + 4}px`;
-                piece.style.left = `${left}vw`;
-                piece.style.setProperty('--drift', `${drift}px`);
-                piece.style.animationDuration = `${duration}s`;
-                piece.style.animationDelay = `${delay}s`;
-                piece.style.backgroundColor = colors[i % colors.length] || '#d4b45f';
-                piece.style.transform = `rotate(${Math.random() * 360}deg)`;
-                piece.addEventListener('animationend', () => {
-                    piece.remove();
-                    if (!container.hasChildNodes()) {
-                        container.remove();
-                    }
-                }, { once: true });
-                container.appendChild(piece);
-            }
-        }
-
-        function launchFireworks(colors) {
-            const canvas = document.createElement('canvas');
-            canvas.className = 'fireworks-canvas';
-            document.body.appendChild(canvas);
-
-            const ctx = canvas.getContext('2d');
-            if (!ctx) {
-                canvas.remove();
-                return;
-            }
-
-            const dpr = Math.min(window.devicePixelRatio || 1, 2);
-            const particles = [];
-            let rafId = 0;
-            let finishedScheduling = false;
-
-            const resize = () => {
-                const width = window.innerWidth;
-                const height = window.innerHeight;
-                canvas.width = Math.floor(width * dpr);
-                canvas.height = Math.floor(height * dpr);
-                canvas.style.width = `${width}px`;
-                canvas.style.height = `${height}px`;
-                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            };
-
-            const rand = (min, max) => min + Math.random() * (max - min);
-
-            function burst(x, y, count, speedMin, speedMax) {
-                for (let i = 0; i < count; i++) {
-                    const angle = (Math.PI * 2 * i) / count + rand(-0.08, 0.08);
-                    const speed = rand(speedMin, speedMax);
-                    particles.push({
-                        kind: 'burst',
-                        x,
-                        y,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        size: rand(1.8, 3.8),
-                        color: colors[i % colors.length] || '#d4b45f',
-                        life: 0,
-                        maxLife: rand(42, 72),
-                        gravity: rand(0.028, 0.045)
-                    });
-                }
-            }
-
-            function getTextPoints(text) {
-                const offscreen = document.createElement('canvas');
-                offscreen.width = 900;
-                offscreen.height = 260;
-                const offCtx = offscreen.getContext('2d');
-                if (!offCtx) return [];
-
-                offCtx.clearRect(0, 0, offscreen.width, offscreen.height);
-                offCtx.fillStyle = '#fff';
-                offCtx.textAlign = 'center';
-                offCtx.textBaseline = 'middle';
-                offCtx.font = "bold 210px 'Playfair Display', serif";
-                offCtx.fillText(text, offscreen.width / 2, offscreen.height / 2 + 10);
-
-                const data = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
-                const points = [];
-                const sample = 5;
-                const scale = Math.min(window.innerWidth / offscreen.width, 0.82);
-                const offsetX = window.innerWidth / 2 - (offscreen.width * scale) / 2;
-                const offsetY = window.innerHeight * 0.18;
-
-                for (let y = 0; y < offscreen.height; y += sample) {
-                    for (let x = 0; x < offscreen.width; x += sample) {
-                        const alpha = data[(y * offscreen.width + x) * 4 + 3];
-                        if (alpha > 90) {
-                            points.push({
-                                x: offsetX + x * scale,
-                                y: offsetY + y * scale
-                            });
-                        }
-                    }
-                }
-
-                return points;
-            }
-
-            function textBurst(text) {
-                const originX = window.innerWidth / 2;
-                const originY = window.innerHeight * 0.28;
-                burst(originX, originY, 55, 2.2, 5.2);
-
-                getTextPoints(text).forEach((point, index) => {
-                    particles.push({
-                        kind: 'text',
-                        x: originX,
-                        y: originY,
-                        vx: rand(-5.5, 5.5),
-                        vy: rand(-6.5, 2.5),
-                        tx: point.x,
-                        ty: point.y,
-                        size: rand(1.2, 2.6),
-                        color: colors[index % colors.length] || '#d4b45f',
-                        life: 0,
-                        maxLife: rand(115, 145)
-                    });
-                });
-            }
-
-            function updateParticle(p) {
-                p.life += 1;
-
-                if (p.kind === 'text') {
-                    const progress = p.life / p.maxLife;
-                    if (progress < 0.26) {
-                        p.x += p.vx;
-                        p.y += p.vy;
-                        p.vy += 0.045;
-                        p.vx *= 0.985;
-                    } else {
-                        p.x += (p.tx - p.x) * 0.1;
-                        p.y += (p.ty - p.y) * 0.1;
-                    }
-
-                    if (progress > 0.82) {
-                        p.size *= 0.992;
-                    }
-
-                    p.alpha = progress < 0.2 ? 1 : Math.max(0, 1 - Math.max(0, progress - 0.7) / 0.3);
-                } else {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vy += p.gravity;
-                    p.vx *= 0.988;
-                    p.alpha = Math.max(0, 1 - p.life / p.maxLife);
-                }
-
-                return p.life < p.maxLife && p.alpha > 0.02;
-            }
-
-            function drawParticle(p) {
-                ctx.save();
-                ctx.globalAlpha = p.alpha;
-                ctx.fillStyle = p.color;
-                ctx.shadowBlur = p.kind === 'text' ? 10 : 14;
-                ctx.shadowColor = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
-
-            function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    const p = particles[i];
-                    if (!updateParticle(p)) {
-                        particles.splice(i, 1);
-                        continue;
-                    }
-                    drawParticle(p);
-                }
-
-                if (!finishedScheduling || particles.length) {
-                    rafId = requestAnimationFrame(animate);
-                } else {
-                    cleanup();
-                }
-            }
-
-            function cleanup() {
-                cancelAnimationFrame(rafId);
-                window.removeEventListener('resize', resize);
-                canvas.remove();
-            }
-
-            resize();
-            window.addEventListener('resize', resize);
-
-            setTimeout(() => burst(window.innerWidth * 0.2, window.innerHeight * 0.32, 42, 2.2, 4.8), 150);
-            setTimeout(() => burst(window.innerWidth * 0.76, window.innerHeight * 0.24, 48, 2.4, 5.0), 650);
-            setTimeout(() => burst(window.innerWidth * 0.34, window.innerHeight * 0.18, 44, 2.0, 4.6), 1150);
-            setTimeout(() => textBurst('3000'), 1650);
-            setTimeout(() => burst(window.innerWidth * 0.82, window.innerHeight * 0.36, 40, 2.0, 4.4), 2500);
-            setTimeout(() => { finishedScheduling = true; }, 3200);
-
-            animate();
-        }
-
-        function launchCelebrationOnce() {
-            if (localStorage.getItem(CONFETTI_KEY)) return false;
-            const target = document.querySelector('#obras-stat .stat-number');
-            if (!target) return false;
-            const text = (target.textContent || target.innerText || '').trim();
-            const obrasCount = parseInt(text.replace(/[^\d]/g, ''), 10);
-            if (!Number.isFinite(obrasCount) || obrasCount < 100) return false;
-
-            localStorage.setItem(CONFETTI_KEY, '1');
-            const colors = getThemeColors();
-            createConfetti(colors);
-            launchFireworks(colors);
-            return true;
-        }
-
-        function watchFor100Plus() {
-            const target = document.querySelector('#obras-stat .stat-number');
-            if (!target) return;
-            if (launchCelebrationOnce()) return;
-            const obs = new MutationObserver(() => {
-                if (launchCelebrationOnce()) obs.disconnect();
-            });
-            obs.observe(target, { childList: true, characterData: true, subtree: true });
-        }
-
-        // Reset confetti flag to ensure it shows on this page load
-        localStorage.removeItem(CONFETTI_KEY);
-        
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                // Small delay to ensure DOM is fully painted
-                requestAnimationFrame(() => setTimeout(watchFor100Plus, 300));
-            }, { once: true });
-        } else {
-            requestAnimationFrame(() => setTimeout(watchFor100Plus, 300));
-        }
-    })();
-    </script>
-
-    <script>
-    (function(){
         const CACHE_KEY = 'rdc_visits_last';
         const SELECTOR = '#visits-stat .stat-number';
         const nf = (function(){ try { return new Intl.NumberFormat('pt-BR'); } catch(_) { return null; } })();
@@ -9831,6 +9992,185 @@ function openVideo(videoId, isProtected) {
         // Update with Firebase items when they load (non-blocking)
         rebuildTimeline(true).catch(() => {}); // Silently fail if Firebase not available
       });
+    })();
+
+    // Bigger timeline: drag-to-scroll + large year scrubber (touch-friendly)
+    (function setupTimelineScrubber() {
+      function init() {
+        const section = document.getElementById('timeline');
+        const scroller = document.querySelector('#timeline .horizontal-timeline') || document.querySelector('.horizontal-timeline');
+        const scrubberWrap = document.getElementById('timeline-scrubber');
+        const scrubber = document.getElementById('timeline-scrubber-input');
+        const yearLabel = document.getElementById('timeline-scrubber-year');
+        if (!scroller || !scrubber || !scrubberWrap) return;
+
+        // Scrubber must sit OUTSIDE the overflow scroller. Broken nested HTML
+        // (e.g. a missing </div> in a card) can pull it inside so it scrolls away.
+        if (scroller.contains(scrubberWrap)) {
+          if (section && scroller.parentElement === section) {
+            scroller.after(scrubberWrap);
+          } else {
+            scroller.parentElement?.insertBefore(scrubberWrap, scroller.nextSibling);
+          }
+        }
+
+        // Kill inherited smooth scrolling that fights programmatic scrollLeft.
+        scroller.style.scrollBehavior = 'auto';
+
+        let isPointerDown = false;
+        let startX = 0;
+        let startScrollLeft = 0;
+        let moved = false;
+        let isScrubbing = false;
+        let syncingFromScroll = false;
+        let syncRaf = 0;
+        const RANGE_MAX = 1000;
+
+        function maxScrollLeft() {
+          return Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+        }
+
+        function yearFromItem(item) {
+          const raw = item?.dataset?.year || item?.querySelector('.timeline-year-horizontal')?.textContent?.trim() || '';
+          const m = String(raw).match(/\d{4}/);
+          return m ? m[0] : '';
+        }
+
+        function updateYearLabel() {
+          if (!yearLabel) return;
+          const items = scroller.querySelectorAll('.timeline-item-horizontal');
+          if (!items.length) return;
+          const scRect = scroller.getBoundingClientRect();
+          const viewCenter = scRect.left + scRect.width / 2;
+          let best = items[0];
+          let bestDist = Infinity;
+          for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const r = item.getBoundingClientRect();
+            const mid = r.left + r.width / 2;
+            const dist = Math.abs(mid - viewCenter);
+            if (dist < bestDist) {
+              bestDist = dist;
+              best = item;
+            }
+          }
+          const year = yearFromItem(best);
+          if (year) yearLabel.textContent = year;
+        }
+
+        function updateScrubberFromScroll() {
+          if (isScrubbing) {
+            updateYearLabel();
+            return;
+          }
+          const maxScroll = maxScrollLeft();
+          syncingFromScroll = true;
+          if (scrubber.max !== String(RANGE_MAX)) scrubber.max = String(RANGE_MAX);
+          if (maxScroll <= 0) {
+            scrubber.value = '0';
+            scrubber.disabled = true;
+          } else {
+            scrubber.disabled = false;
+            const next = String(Math.round((scroller.scrollLeft / maxScroll) * RANGE_MAX));
+            if (scrubber.value !== next) scrubber.value = next;
+          }
+          syncingFromScroll = false;
+          updateYearLabel();
+        }
+
+        function scheduleSyncFromScroll() {
+          if (syncRaf) return;
+          syncRaf = requestAnimationFrame(() => {
+            syncRaf = 0;
+            updateScrubberFromScroll();
+          });
+        }
+
+        function scrollFromScrubber() {
+          if (syncingFromScroll) return;
+          const maxScroll = maxScrollLeft();
+          if (maxScroll <= 0) return;
+          const max = Number(scrubber.max);
+          const denom = Number.isFinite(max) && max > 0 ? max : RANGE_MAX;
+          const value = Number(scrubber.value);
+          if (!Number.isFinite(value)) return;
+          const ratio = Math.min(1, Math.max(0, value / denom));
+          // Direct assignment. Do NOT write scrubber.value from scroll while dragging.
+          scroller.scrollLeft = ratio * maxScroll;
+          updateYearLabel();
+        }
+
+        function endScrubbing() {
+          if (!isScrubbing) return;
+          isScrubbing = false;
+          updateScrubberFromScroll();
+        }
+
+        scrubber.addEventListener('pointerdown', () => { isScrubbing = true; });
+        scrubber.addEventListener('pointerup', endScrubbing);
+        scrubber.addEventListener('pointercancel', endScrubbing);
+        scrubber.addEventListener('mousedown', () => { isScrubbing = true; });
+        window.addEventListener('mouseup', endScrubbing);
+        scrubber.addEventListener('touchstart', () => { isScrubbing = true; }, { passive: true });
+        scrubber.addEventListener('touchend', endScrubbing, { passive: true });
+        scrubber.addEventListener('blur', endScrubbing);
+
+        scroller.addEventListener('pointerdown', (e) => {
+          if (e.target.closest('a, button, input, select, textarea, .timeline-scrubber')) return;
+          isPointerDown = true;
+          moved = false;
+          startX = e.clientX;
+          startScrollLeft = scroller.scrollLeft;
+          scroller.classList.add('is-dragging');
+          try { scroller.setPointerCapture(e.pointerId); } catch (_) {}
+        });
+
+        scroller.addEventListener('pointermove', (e) => {
+          if (!isPointerDown) return;
+          const dx = e.clientX - startX;
+          if (Math.abs(dx) > 4) moved = true;
+          scroller.scrollLeft = startScrollLeft - dx;
+        });
+
+        function endDrag(e) {
+          if (!isPointerDown) return;
+          isPointerDown = false;
+          scroller.classList.remove('is-dragging');
+          try { scroller.releasePointerCapture(e.pointerId); } catch (_) {}
+        }
+
+        scroller.addEventListener('pointerup', endDrag);
+        scroller.addEventListener('pointercancel', endDrag);
+        scroller.addEventListener('click', (e) => {
+          if (moved && e.target.closest('a')) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }, true);
+
+        scroller.addEventListener('scroll', scheduleSyncFromScroll, { passive: true });
+        scrubber.addEventListener('input', scrollFromScrubber);
+        scrubber.addEventListener('change', scrollFromScrubber);
+
+        const refresh = () => scheduleSyncFromScroll();
+        window.addEventListener('resize', refresh);
+        const track = scroller.querySelector('.timeline-track');
+        if (track && typeof MutationObserver !== 'undefined') {
+          let moTimer = 0;
+          new MutationObserver(() => {
+            clearTimeout(moTimer);
+            moTimer = setTimeout(refresh, 50);
+          }).observe(track, { childList: true });
+        }
+        refresh();
+        setTimeout(refresh, 400);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
     })();
     </script>
   </body>
