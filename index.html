@@ -2281,6 +2281,39 @@
         }
         .aviso-acervo .aviso-google button {
             margin-top: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            width: 100%;
+            max-width: 22rem;
+            padding: 0.55rem 1.05rem;
+            background: #fffaf2;
+            color: #3c4043;
+            border: 1px solid rgba(60, 64, 67, 0.35);
+            box-shadow: 0 1px 0 rgba(42, 24, 23, 0.06);
+        }
+        .aviso-acervo .aviso-google button:hover {
+            filter: none;
+            background: #fff;
+            border-color: rgba(60, 64, 67, 0.55);
+        }
+        .aviso-acervo .aviso-google-mark {
+            display: inline-flex;
+            width: 1.35rem;
+            height: 1.35rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 2px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0;
+            color: #fff;
+            background: conic-gradient(from 45deg, #4285f4 0 90deg, #34a853 90deg 180deg, #fbbc05 180deg 270deg, #ea4335 270deg 360deg);
+        }
+        .aviso-acervo .aviso-google-label {
+            font-weight: 600;
         }
         .entradas-console {
             display: none;
@@ -4898,7 +4931,10 @@ video-synopsis {
             <p class="aviso-status" id="avisoStatus" role="status"></p>
             <div class="aviso-google" id="avisoGoogle">
                 <p>Ou peça ao Google para o reconhecer — se confirmar a conta, a casa passa a escrever-lhe.</p>
-                <button type="button" id="avisoGoogleBtn">Continuar com o Google</button>
+                <button type="button" id="avisoGoogleBtn" aria-label="Continuar com o Google">
+                    <span class="aviso-google-mark" aria-hidden="true">G</span>
+                    <span class="aviso-google-label">Continuar com o Google</span>
+                </button>
                 <p class="aviso-status" id="googleEntradaStatus" role="status"></p>
             </div>
         </div>
@@ -9316,7 +9352,7 @@ function openVideo(videoId, isProtected) {
     <script type="module">
       // ===== Import Firebase SDKs =====
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-      import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithCredential, linkWithCredential } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+      import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithCredential, linkWithCredential } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
       import { getFirestore, collection, addDoc, getDocs, serverTimestamp, doc, getDoc, setDoc, onSnapshot, updateDoc, deleteDoc, increment, query, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
     
       // ===== Configuração do Firebase =====
@@ -9357,8 +9393,11 @@ function openVideo(videoId, isProtected) {
       window.ensureFirebaseAuth().catch(() => { /* logged above */ });
 
       const HOUSE_EMAIL = "reinaldoduarte080@gmail.com";
-      /* Firebase Console → Authentication → Sign-in method → Google → Web client ID */
-      const GOOGLE_WEB_CLIENT_ID = "";
+      /* Web client ID from Firebase Google sign-in (mark-2-111f9).
+         Authorized domain rdcguardandomomentos.com.br must also be listed in
+         Firebase Authentication → Settings → Authorized domains (and Google Cloud
+         OAuth client authorized JavaScript origins). */
+      const GOOGLE_WEB_CLIENT_ID = "893231291360-lbfl04hjki76grtjv9eqml8ave7i6lqn.apps.googleusercontent.com";
       const googleProvider = new GoogleAuthProvider();
       googleProvider.addScope("email");
       googleProvider.addScope("profile");
@@ -9424,10 +9463,50 @@ function openVideo(videoId, isProtected) {
         return user;
       }
 
+      function googleWebClientIdPronto() {
+        const clientId = String(GOOGLE_WEB_CLIENT_ID || "").trim();
+        return clientId.indexOf("apps.googleusercontent.com") >= 0 ? clientId : "";
+      }
+
+      function jaEntrouComGoogle(user) {
+        if (!user || user.isAnonymous || !user.email) return false;
+        return (user.providerData || []).some((p) => p && p.providerId === "google.com");
+      }
+
+      function mensagemErroGoogle(err) {
+        const code = err && err.code;
+        if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+          return "Cancelou o Google — pode usar o formulário acima, se preferir.";
+        }
+        if (code === "auth/popup-blocked") {
+          return "O browser bloqueou a janela do Google. Permita pop-ups neste site e tente de novo.";
+        }
+        if (code === "auth/operation-not-allowed") {
+          return "O Google ainda não está ligado nesta casa. Use o formulário com o seu correio.";
+        }
+        if (code === "auth/unauthorized-domain") {
+          return "Este sítio ainda não está autorizado no Google. Use o formulário com o seu correio.";
+        }
+        return "Não foi possível entrar com o Google agora. Use o formulário com o seu correio.";
+      }
+
       async function entrarComGoogle() {
-        const cred = await signInWithPopup(_auth, googleProvider);
-        await aposGoogleConfirmado(cred.user);
-        return cred.user;
+        const current = _auth.currentUser;
+        if (jaEntrouComGoogle(current)) {
+          await aposGoogleConfirmado(current);
+          return current;
+        }
+        try {
+          const cred = await signInWithPopup(_auth, googleProvider);
+          await aposGoogleConfirmado(cred.user);
+          return cred.user;
+        } catch (err) {
+          if (err && err.code === "auth/popup-blocked") {
+            await signInWithRedirect(_auth, googleProvider);
+            return null;
+          }
+          throw err;
+        }
       }
 
       async function entrarComGoogleIdToken(idToken) {
@@ -9451,9 +9530,9 @@ function openVideo(videoId, isProtected) {
       }
 
       function startGoogleOneTap() {
-        const clientId = String(GOOGLE_WEB_CLIENT_ID || "").trim();
-        if (!clientId || clientId.indexOf("apps.googleusercontent.com") < 0) return;
-        if (_auth.currentUser && !_auth.currentUser.isAnonymous) return;
+        const clientId = googleWebClientIdPronto();
+        if (!clientId) return;
+        if (jaEntrouComGoogle(_auth.currentUser)) return;
         function promptWhenReady() {
           if (!window.google || !window.google.accounts || !window.google.accounts.id) {
             window.setTimeout(promptWhenReady, 250);
@@ -9478,34 +9557,51 @@ function openVideo(videoId, isProtected) {
         promptWhenReady();
       }
 
+      async function concluirRedirectGoogle() {
+        try {
+          const cred = await getRedirectResult(_auth);
+          if (cred && cred.user) await aposGoogleConfirmado(cred.user);
+        } catch (err) {
+          const status = document.getElementById("googleEntradaStatus");
+          if (status) status.textContent = mensagemErroGoogle(err);
+        }
+      }
+
       function bindGoogleEntrada() {
         const btn = document.getElementById("avisoGoogleBtn");
         const status = document.getElementById("googleEntradaStatus");
+        const label = btn && (btn.querySelector(".aviso-google-label") || btn);
+        const idleLabel = "Continuar com o Google";
+        concluirRedirectGoogle();
         if (btn) {
           btn.addEventListener("click", async () => {
             if (status) status.textContent = "A abrir o Google…";
             btn.disabled = true;
+            btn.setAttribute("aria-busy", "true");
+            if (label) label.textContent = "A abrir o Google…";
             try {
-              await entrarComGoogle();
+              const user = await entrarComGoogle();
+              if (!user) {
+                if (status) status.textContent = "A redirecionar para o Google…";
+                return;
+              }
               if (status && !status.textContent) {
                 status.textContent = "A casa reconheceu-lhe. Escrevemos a cada peça nova e, de quinze em quinze dias, um recado do acervo.";
               }
             } catch (err) {
-              const code = err && err.code;
-              if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
-                if (status) status.textContent = "Cancelou o Google — pode usar o formulário acima, se preferir.";
-              } else {
-                console.warn("Google aviso:", err);
-                if (status) {
-                  status.textContent = "Não foi possível entrar com o Google agora. Use o formulário com o seu correio.";
-                }
+              console.warn("Google aviso:", err);
+              if (status) status.textContent = mensagemErroGoogle(err);
+              if (googleWebClientIdPronto() && err && err.code !== "auth/popup-closed-by-user" && err.code !== "auth/cancelled-popup-request") {
+                startGoogleOneTap();
               }
             } finally {
               btn.disabled = false;
+              btn.removeAttribute("aria-busy");
+              if (label) label.textContent = idleLabel;
             }
           });
         }
-        /* Optional One Tap prompt only if Web Client ID is configured in this file */
+        /* One Tap only after a real Web Client ID is pasted above */
         startGoogleOneTap();
       }
       if (document.readyState === "loading") {
