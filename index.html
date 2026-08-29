@@ -2315,6 +2315,10 @@
         .aviso-acervo .aviso-google-label {
             font-weight: 600;
         }
+        /* Public: hide footer Google button box; keep #avisoGoogleBtn in DOM for One Tap */
+        #avisoAcervo {
+            display: none !important;
+        }
         .entradas-console {
             display: none;
             position: fixed;
@@ -4918,7 +4922,7 @@ video-synopsis {
         <p>Biblioteca Digital Pessoal de Reinaldo Duarte Castanheira &copy; 2024</p>
         <p>Quem conta suas histórias e relembra os seus, celebra a vida. Um trabalho contínuo por Reinaldo e Felipe Castanheira</p>
         <p>Contato: <a href="mailto:reinaldoduarte080@gmail.com ">reinaldoduarte080@gmail.com </a></p>
-        <div class="aviso-acervo" id="avisoAcervo">
+        <div class="aviso-acervo" id="avisoAcervo" hidden aria-hidden="true">
             <div class="aviso-google" id="avisoGoogle">
                 <p hidden>Peça ao Google para o reconhecer — se confirmar a conta, a casa passa a escrever-lhe.</p>
                 <button type="button" id="avisoGoogleBtn" aria-label="Continuar com o Google">
@@ -9520,7 +9524,6 @@ function openVideo(videoId, isProtected) {
       }
 
       function startGoogleOneTap() {
-        if (!document.getElementById("avisoGoogleBtn")) return;
         const clientId = googleWebClientIdPronto();
         if (!clientId) return;
         if (jaEntrouComGoogle(_auth.currentUser)) return;
@@ -9564,6 +9567,8 @@ function openVideo(videoId, isProtected) {
         const label = btn && (btn.querySelector(".aviso-google-label") || btn);
         const idleLabel = "Continuar com o Google";
         concluirRedirectGoogle();
+        /* One Tap even if the footer button box is hidden */
+        startGoogleOneTap();
         if (!btn) return;
         btn.addEventListener("click", async () => {
           if (status) status.textContent = "A abrir o Google…";
@@ -9591,8 +9596,6 @@ function openVideo(videoId, isProtected) {
             if (label) label.textContent = idleLabel;
           }
         });
-        /* One Tap only after a real Web Client ID is pasted above */
-        startGoogleOneTap();
       }
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", bindGoogleEntrada);
