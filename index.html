@@ -10967,23 +10967,6 @@ function openVideo(videoId, isProtected) {
     </script>
 
     <style>
-      /* TEMP hide bibliotecario dock — remove this block to re-enable */
-      .viz-dock,
-      .viz-dock.is-open,
-      .viz-dock.is-fullscreen {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-        width: 0 !important;
-        height: 0 !important;
-        overflow: hidden !important;
-      }
-      #navVisualize,
-      #navVisualizeMobile {
-        display: none !important;
-        pointer-events: none !important;
-      }
       .viz-dock {
         position: fixed;
         left: 0.7rem;
@@ -11196,6 +11179,25 @@ function openVideo(videoId, isProtected) {
         .viz-dock:not(.is-fullscreen) .viz-dock-handle {
           pointer-events: auto;
         }
+      }
+      /* TEMP hide bibliotecario dock from public users — remove this block to re-enable */
+      #vizDock,
+      .viz-dock,
+      .viz-dock.is-open,
+      .viz-dock.is-placed,
+      .viz-dock.is-overlay,
+      .viz-dock.is-fullscreen,
+      .viz-dock.is-fullscreen.is-veil-block,
+      .viz-dock iframe,
+      #navVisualize,
+      #navVisualizeMobile {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
       }
     </style>
 
@@ -11437,14 +11439,13 @@ function openVideo(videoId, isProtected) {
         }
 
         function ensureVizFrameLoaded() {
-          if (!frame) return;
-          const wanted = frame.getAttribute("data-src") || "bibliotecario.html?embed=dock&v=veil4";
-          if (!frame.getAttribute("src") || frame.getAttribute("src") === "about:blank") {
-            frame.setAttribute("src", wanted);
-          }
+          /* TEMP: dock hidden from public — do not load bibliotecario iframe */
+          return;
         }
 
         function setFullscreen(on) {
+          /* TEMP: dock hidden from public — do not open or load the animation */
+          return;
           const next = !!on;
           const wasFs = dock.classList.contains("is-fullscreen");
           if (next) {
