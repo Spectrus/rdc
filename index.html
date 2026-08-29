@@ -3,8 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      /* Mobile must open on the hero. #acervo in the URL, scroll restoration, and
+         late focus (search field / dock iframe) all send Safari/Chrome straight to
+         the Acervo. Strip the fragment before that node is parsed, then hold the
+         viewport at the top until the reader actually scrolls or taps an arrow. */
+      (function () {
+        function isMobileLibrary() {
+          try {
+            return window.matchMedia(
+              '(hover: none), (pointer: coarse), (max-width: 768px)'
+            ).matches;
+          } catch (_) {
+            return false;
+          }
+        }
+        if (!isMobileLibrary()) return;
+
+        try {
+          if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        } catch (_) {}
+
+        var hash = String(location.hash || '');
+        if (/^#acervo\b/i.test(hash)) {
+          try {
+            history.replaceState(null, '', location.pathname + location.search);
+          } catch (_) {}
+        }
+
+        var userTookOver = false;
+        var pinUntil = Date.now() + 2800;
+
+        function jumpTop() {
+          var html = document.documentElement;
+          var prev = html.style.scrollBehavior;
+          html.style.scrollBehavior = 'auto';
+          try {
+            window.scrollTo(0, 0);
+          } catch (_) {}
+          html.scrollTop = 0;
+          if (document.body) document.body.scrollTop = 0;
+          html.style.scrollBehavior = prev;
+        }
+
+        function pinIfNeeded() {
+          if (userTookOver) return;
+          if (Date.now() > pinUntil) return;
+          var y = window.scrollY || htmlScrollTop();
+          if (y > 4) jumpTop();
+        }
+
+        function htmlScrollTop() {
+          return (document.documentElement && document.documentElement.scrollTop) ||
+            (document.body && document.body.scrollTop) || 0;
+        }
+
+        function releasePin() {
+          userTookOver = true;
+        }
+
+        function jumpTopIfPinned() {
+          if (!userTookOver) jumpTop();
+        }
+
+        jumpTop();
+        document.addEventListener('DOMContentLoaded', jumpTopIfPinned);
+        window.addEventListener('load', jumpTopIfPinned);
+        window.addEventListener('pageshow', function (ev) {
+          if (ev && ev.persisted) return;
+          jumpTopIfPinned();
+        });
+        window.addEventListener('scroll', pinIfNeeded, { passive: true });
+        window.addEventListener('pointerdown', releasePin, { passive: true, capture: true });
+        window.addEventListener('touchmove', releasePin, { passive: true, capture: true });
+        window.addEventListener('wheel', releasePin, { passive: true, capture: true });
+      })();
+    </script>
     <title>Biblioteca Digital Reinaldo Duarte Castanheira</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     
     <style>
@@ -359,7 +436,15 @@
             position: relative;
             overflow: hidden;
             perspective: 1500px;
-            transition: height 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition:
+                max-width 0.22s ease,
+                height 0.25s ease,
+                min-height 0.25s ease,
+                border-width 0.22s ease,
+                border-radius 0.22s ease,
+                margin 0.22s ease,
+                padding 0.22s ease,
+                box-shadow 0.25s ease;
             box-sizing: border-box;
         }
         
@@ -369,7 +454,15 @@
             box-shadow: 0 32px 64px rgba(0, 0, 0, 0.2);
             min-height: 500px;
             aspect-ratio: 16/9;
-            transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition:
+                max-width 0.28s ease,
+                height 0.28s ease,
+                min-height 0.28s ease,
+                border-width 0.22s ease,
+                border-radius 0.22s ease,
+                margin 0.22s ease,
+                padding 0.22s ease,
+                box-shadow 0.28s ease;
             overflow: hidden;
         }
         
@@ -1128,6 +1221,24 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
+
+        /* Bibliotecário voice/typed match: spotlight the real catalog container */
+        .document-card.acervo-voice-hit {
+            outline: 3px solid var(--gold-color);
+            box-shadow: 0 0 0 4px rgba(212, 180, 95, 0.35), 0 14px 32px rgba(74, 44, 42, 0.22);
+            z-index: 3;
+            animation: acervoVoicePulse 1.1s ease-in-out 2;
+        }
+        /* Listagem rows: keep compact flex layout (no bounce that fights absolute code/year) */
+        #acervo.view-list .document-card.acervo-voice-hit {
+            animation: none;
+            transform: none;
+            background: #fffdf8;
+        }
+        @keyframes acervoVoicePulse {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
         
         @keyframes fadeIn {
             from {
@@ -1202,6 +1313,11 @@
         .read-button:hover {
             background-color: var(--primary-color);
             color: var(--gold-color);
+        }
+
+        .read-button.is-unavailable {
+            opacity: 0.78;
+            cursor: pointer;
         }
         
         .timeline-section {
@@ -2084,6 +2200,142 @@
         .footer a:hover {
             text-decoration: underline;
         }
+
+        .aviso-acervo {
+            max-width: 32rem;
+            margin: 1.75rem auto 0;
+            padding: 1.35rem 1.4rem 1.45rem;
+            text-align: left;
+            background: rgba(255, 250, 242, 0.1);
+            border: 1px solid rgba(212, 180, 95, 0.45);
+            border-radius: 4px;
+        }
+        .aviso-acervo h3 {
+            font-family: "Playfair Display", Georgia, serif;
+            font-size: 1.28rem;
+            font-weight: 600;
+            color: var(--gold-color);
+            margin: 0 0 0.4rem;
+            letter-spacing: 0.02em;
+        }
+        .aviso-acervo .aviso-lead {
+            font-style: italic;
+            opacity: 0.92;
+            margin-bottom: 1rem;
+            font-size: 1.02rem;
+        }
+        .aviso-acervo label {
+            display: block;
+            font-size: 0.92rem;
+            margin: 0.55rem 0 0.28rem;
+            color: rgba(255, 250, 242, 0.88);
+        }
+        .aviso-acervo input {
+            width: 100%;
+            padding: 0.5rem 0.65rem;
+            border: 1px solid rgba(212, 180, 95, 0.55);
+            border-radius: 3px;
+            background: #fffaf2;
+            color: #4a2c2a;
+            font-family: "EB Garamond", Georgia, serif;
+            font-size: 1.05rem;
+        }
+        .aviso-acervo input:focus {
+            outline: none;
+            border-color: var(--gold-color);
+            box-shadow: 0 0 0 2px rgba(212, 180, 95, 0.28);
+        }
+        .aviso-acervo button {
+            margin-top: 1rem;
+            font-family: "EB Garamond", Georgia, serif;
+            font-size: 1.05rem;
+            letter-spacing: 0.03em;
+            padding: 0.45rem 1.1rem;
+            border: 1px solid var(--gold-color);
+            background: var(--gold-color);
+            color: #4a2c2a;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .aviso-acervo button:hover {
+            filter: brightness(1.05);
+        }
+        .aviso-acervo button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+        .aviso-status {
+            min-height: 1.3em;
+            margin: 0.7rem 0 0;
+            font-size: 0.98rem;
+        }
+        .aviso-acervo .aviso-google {
+            margin-top: 1.15rem;
+            padding-top: 0.95rem;
+            border-top: 1px solid rgba(212, 180, 95, 0.28);
+        }
+        .aviso-acervo .aviso-google p {
+            margin-bottom: 0.65rem;
+            font-size: 0.98rem;
+            opacity: 0.92;
+        }
+        .aviso-acervo .aviso-google button {
+            margin-top: 0;
+        }
+        .entradas-console {
+            display: none;
+            position: fixed;
+            right: 1rem;
+            bottom: 5.2rem;
+            width: min(22rem, calc(100vw - 1.5rem));
+            max-height: min(52vh, 28rem);
+            overflow: auto;
+            z-index: 1000035;
+            background: #fffaf2;
+            color: #4a2c2a;
+            border: 1px solid rgba(212, 180, 95, 0.7);
+            border-radius: 4px;
+            box-shadow: 0 8px 28px rgba(42, 24, 23, 0.22);
+            padding: 0.9rem 1rem 1rem;
+            font-family: "EB Garamond", Georgia, serif;
+        }
+        body.edit-mode .entradas-console {
+            display: block;
+        }
+        .entradas-console h3 {
+            font-family: "Playfair Display", Georgia, serif;
+            font-size: 1.05rem;
+            margin: 0 0 0.35rem;
+            color: #4a2c2a;
+        }
+        .entradas-console p {
+            font-size: 0.92rem;
+            margin: 0 0 0.55rem;
+        }
+        .entradas-console ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .entradas-console li {
+            border-top: 1px solid rgba(74, 44, 42, 0.12);
+            padding: 0.4rem 0;
+            font-size: 0.92rem;
+        }
+        .entradas-console li strong {
+            display: block;
+            word-break: break-all;
+        }
+        .entradas-console button {
+            font-family: inherit;
+            font-size: 0.95rem;
+            padding: 0.35rem 0.8rem;
+            border: 1px solid #d4b45f;
+            background: #d4b45f;
+            color: #4a2c2a;
+            cursor: pointer;
+            border-radius: 3px;
+        }
         
         @media (max-width: 768px) {
             .nav-bar {
@@ -2407,6 +2659,8 @@ video-synopsis {
         <a href="#intro">Início</a>
         <a href="#timeline">Linha do Tempo</a>
         <a href="#acervo">Acervo</a>
+        <a href="bibliotecario.html">Bibliotecário</a>
+        <a href="#" id="navVisualize" title="Visualização em ecrã inteiro">Visualizar</a>
     </div>
     
     <!-- Hamburger Menu for Mobile -->
@@ -2421,6 +2675,8 @@ video-synopsis {
         <a href="#intro">Início</a>
         <a href="#timeline">Linha do Tempo</a>
         <a href="#acervo">Acervo</a>
+        <a href="bibliotecario.html">Bibliotecário</a>
+        <a href="#" id="navVisualizeMobile">Visualizar</a>
     </div>
     <!-- Fixed down arrow near header top-right -->
     <button id="nav-down-arrow" class="nav-down-arrow" title="Ir para o fim" aria-hidden="true" tabindex="-1"><span class="arrow-icon">▼</span></button>
@@ -2445,7 +2701,7 @@ video-synopsis {
                 <div class="stat-badge" id="stat-badge">
                     <div class="stat-content" id="stat-container">
                         <div class="stat-item active" id="obras-stat">
-                            <div class="stat-number">110+</div>
+                            <div class="stat-number">120+</div>
                             <div class="stat-label">Obras</div>
                         </div>
                         <div class="stat-item" id="visits-stat">
@@ -2778,7 +3034,15 @@ video-synopsis {
                     max-width: 100%; /* Use full container width */
                     border: 8px solid var(--gold-color);
                     border-radius: 12px;
-                    transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Smoother responsive transitions */
+                    transition:
+                        max-width 0.22s ease,
+                        height 0.25s ease,
+                        min-height 0.25s ease,
+                        border-width 0.22s ease,
+                        border-radius 0.22s ease,
+                        margin 0.22s ease,
+                        padding 0.22s ease,
+                        box-shadow 0.25s ease;
                 }
                 
                 .historical-photo.expanded {
@@ -2787,12 +3051,20 @@ video-synopsis {
                     border-radius: 12px;
                     min-height: 400px;
                     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Enhanced shadow for prominence */
-                    transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Smoother responsive transitions */
+                    transition:
+                        max-width 0.28s ease,
+                        height 0.28s ease,
+                        min-height 0.28s ease,
+                        border-width 0.22s ease,
+                        border-radius 0.22s ease,
+                        margin 0.22s ease,
+                        padding 0.22s ease,
+                        box-shadow 0.28s ease;
                 }
                 
                 .curator-video-content {
                     border-radius: 12px;
-                    transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Smoother responsive transitions */
+                    transition: border-radius 0.22s ease, box-shadow 0.25s ease;
                 }
                 
                 .curator-video-header {
@@ -3380,6 +3652,17 @@ video-synopsis {
                             <a href="https://www.youtube.com/watch?v=WmiPzL3zfB4" class="timeline-button-horizontal">Ver vídeo</a>
                         </div>
                     </div>
+
+                    <!-- 1985 - Ser Mineiro / Dia dos Mineiros -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 1.45s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">1985</div>
+                            <div class="timeline-text-horizontal">Ser Mineiro</div>
+                            <div class="timeline-author-horizontal">José Batista Queiroz</div>
+                            <div class="timeline-tag-horizontal">Conto</div>
+                            <a href="https://docs.google.com/document/d/1oHL3vdaJrFRpUhvpgclWjtHKlflN3TA1baal_-BIfSg/edit?usp=sharing" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler obra</a>
+                        </div>
+                    </div>
                     
                     <!-- 1986 - Imagens de nossa casa e de Lafaiete -->
                     <div class="timeline-item-horizontal" style="animation-delay: 1.5s;">
@@ -3721,7 +4004,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Francisco Iribaren</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Conto</div>
-                            <a href="https://drive.google.com/file/d/1zAIiDe4F5st8O_5G5DKNGoSzW0k5C2r7/view?usp=sharing" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="https://drive.google.com/file/d/1nQZ-b6bnlsSecaI-OLb3S4XOtENIWH0r/view?usp=sharing" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler obra</a>
                         </div>
                     </div>
                     
@@ -3845,6 +4128,28 @@ video-synopsis {
                             <a href="https://www.youtube.com/watch?v=2YJyskkDJLc" class="timeline-button-horizontal">Ver vídeo</a>
                         </div>
                     </div>
+
+                    <!-- 2020 - Galos de Briga – recordações -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 5.62s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2020</div>
+                            <div class="timeline-text-horizontal">Galos de Briga</div>
+                            <div class="timeline-author-horizontal">Beatriz Marques Castanheira</div>
+                            <div class="timeline-tag-horizontal">Conto</div>
+                            <a href="https://drive.google.com/file/d/1MRkTEXCj6sKRCtYvMkmG4tXBq83fQf5K/view?usp=sharing" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler obra</a>
+                        </div>
+                    </div>
+
+                    <!-- 2020 - Galo de Briga – versão já OK -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 5.64s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2020</div>
+                            <div class="timeline-text-horizontal">Galo de Briga – versão já OK</div>
+                            <div class="timeline-author-horizontal">Beatriz Marques Castanheira</div>
+                            <div class="timeline-tag-horizontal">Conto</div>
+                            <a href="https://drive.google.com/file/d/1MvVnk8HCNt88x1JbnDvW2wt9O7jHKC3D/view?usp=sharing" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler obra</a>
+                        </div>
+                    </div>
                     
                     <!-- 2021 - O Segredo da Vida -->
                     <div class="timeline-item-horizontal" style="animation-delay: 5.7s;">
@@ -3930,7 +4235,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Uma mulher de fibra chamada Regina Coeli</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Pessoas&Famílias</div>
-                            <a href="https://drive.google.com/file/d/1veDIpHQ02Xcd3hghPmGhaF2BUcv3DZqs/view" class="timeline-button-horizontal" target="_blank">Ler obra</a>
+                            <a href="https://drive.google.com/file/d/1ArN1CrV1o7mN11uFyozWOsQYy3voNSTd/view?usp=sharing" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler obra</a>
                         </div>
                     </div>
                     
@@ -3968,6 +4273,17 @@ video-synopsis {
                             <a href="Homenagem ao meu Pai.docx.pdf" class="timeline-button-horizontal" target="_blank">Ler obra</a>
                         </div>
                     </div>
+
+                    <!-- 2024 - Deus me livre não ser mineira -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 6.45s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2024</div>
+                            <div class="timeline-text-horizontal">Deus me livre não ser mineira</div>
+                            <div class="timeline-author-horizontal">Fernanda Grey</div>
+                            <div class="timeline-tag-horizontal">Conto</div>
+                            <a href="https://docs.google.com/document/d/1-_LQXryDZXZQT_1Wr6W8D3uYdYHrkJWrK9-Rj0AhOBE/edit?usp=sharing" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler obra</a>
+                        </div>
+                    </div>
                     
                     <!-- 2025 - Primeira rodovia pavimentada do Brasil -->
                     <div class="timeline-item-horizontal" style="animation-delay: 6.5s;">
@@ -3977,6 +4293,17 @@ video-synopsis {
                             <div class="timeline-author-horizontal">Fabio Lucas Carvalho</div>
                             <div class="timeline-tag-horizontal">Documento</div>
                             <a href="https://docs.google.com/document/d/1k3WIBGl-WN5BJSHP8FQ0f41d8DcyPaygiLLIhMnsDao/edit?usp=sharing" class="timeline-button-horizontal">Ler obra</a>
+                        </div>
+                    </div>
+
+                    <!-- 2025 - Envelhecer -->
+                    <div class="timeline-item-horizontal" style="animation-delay: 6.55s;">
+                        <div class="timeline-content-horizontal">
+                            <div class="timeline-year-horizontal">2025</div>
+                            <div class="timeline-text-horizontal">Envelhecer</div>
+                            <div class="timeline-author-horizontal">Internet</div>
+                            <div class="timeline-tag-horizontal">Conto</div>
+                            <a href="https://drive.google.com/file/d/18huyj9auPSt1L06BiLPuPeVLMBpWims4/view?usp=sharing" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ver obra</a>
                         </div>
                     </div>
 
@@ -4096,7 +4423,7 @@ video-synopsis {
                     <p>Um presente que Deus me deu. Uma história real, que vivi, e que me permitiu ajudar um "cidadão de rua", a reconquistar sua cidadania espanhola e ter um final de vida com dignidade.</p>
                     <div class="document-footer">
                         <span class="document-type">Pessoas&Famílias</span>
-                        <a href=" https://drive.google.com/file/d/1nQZ-b6bnlsSecaI-OLb3S4XOtENIWH0r/view?usp=sharing" class="read-button" target="_blank">Ler</a>
+                        <a href="https://drive.google.com/file/d/1nQZ-b6bnlsSecaI-OLb3S4XOtENIWH0r/view?usp=sharing" class="read-button" target="_blank" rel="noopener noreferrer">Ler</a>
                     </div>
                 </div>
                 
@@ -4110,7 +4437,7 @@ video-synopsis {
                     <p>Divertida crônica que a autora destaca com bom humor e descreve, de forma carinhosa, as características dos mineiros</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="#" class="read-button" target="_blank">Ler</a>
+                        <a href="https://docs.google.com/document/d/1-_LQXryDZXZQT_1Wr6W8D3uYdYHrkJWrK9-Rj0AhOBE/edit?usp=sharing" class="read-button" target="_blank" rel="noopener noreferrer">Ler</a>
                     </div>
                 </div>
                 
@@ -4122,7 +4449,7 @@ video-synopsis {
                     <p>O Poema que diz do mineiro: da simplicidade e pureza, humildade e modéstia, coragem e bravura, fidalguia e elegância. Foi publicado originalmente por José Batista Queiroz. É publicado posteriormente como de autoria de Carlos Drummond de Andrade e também por Fernando Sabino.</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="#" class="read-button" target="_blank">Ler</a>
+                        <a href="https://docs.google.com/document/d/1oHL3vdaJrFRpUhvpgclWjtHKlflN3TA1baal_-BIfSg/edit?usp=sharing" class="read-button" target="_blank" rel="noopener noreferrer">Ler</a>
                     </div>
                 </div>
                 
@@ -4134,7 +4461,7 @@ video-synopsis {
                     <p>Um vídeo abordando mensagens do tema envelhecer. Vale a pena assistir</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="#" class="read-button" target="_blank">Ler</a>
+                        <a href="https://drive.google.com/file/d/18huyj9auPSt1L06BiLPuPeVLMBpWims4/view?usp=sharing" class="read-button" target="_blank" rel="noopener noreferrer">Ver</a>
                     </div>
                 </div>
                 
@@ -4158,7 +4485,19 @@ video-synopsis {
                     <p>Um divertido conto, envolvendo galos de briga contado com bom humor pela Beatriz. Vale a pena a leitura.</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="#" class="read-button" target="_blank">Ler</a>
+                        <a href="https://drive.google.com/file/d/1MRkTEXCj6sKRCtYvMkmG4tXBq83fQf5K/view?usp=sharing" class="read-button" target="_blank" rel="noopener noreferrer">Ler</a>
+                    </div>
+                </div>
+
+                <div class="document-card" style="animation-delay: 1s;">
+                    <div class="document-code">370</div>
+                    <h3>Galo de Briga – versão já OK</h3>
+                    <div class="document-author">Beatriz Marques Castanheira</div>
+                    <div class="document-year">2020</div>
+                    <p>Versão revisada do conto dos galos de briga.</p>
+                    <div class="document-footer">
+                        <span class="document-type">Conto</span>
+                        <a href="https://drive.google.com/file/d/1MvVnk8HCNt88x1JbnDvW2wt9O7jHKC3D/view?usp=sharing" class="read-button" target="_blank" rel="noopener noreferrer">Ler</a>
                     </div>
                 </div>
             </div>
@@ -4180,14 +4519,15 @@ video-synopsis {
                 <button class="filter-button" data-filter="livro">Livros</button>
                 <button class="filter-button" data-filter="conto">Pessoas&Famílias</button>
                 <button class="filter-button" data-filter="poema">Contos&Poesia</button>
+                <button class="filter-button" data-filter="crônica">Crônica</button>
                 <button class="filter-button" data-filter="documento">Documentos</button>
                 <button class="filter-button" data-filter="mídia">Mídia</button>
             </div>
 
             <div class="view-mode-container" id="view-mode-container">
                 <span class="view-mode-label">Ver por:</span>
-                <button type="button" class="view-mode-button active" data-view="sinopses" title="Vista em grade com sinopses">Grade</button>
                 <button type="button" class="view-mode-button" data-view="lista" title="Listagem compacta">Listagem</button>
+                <button type="button" class="view-mode-button active" data-view="sinopses" title="Vista em grade com sinopses">Grade</button>
             </div>
             <button type="button" class="list-back-button" id="list-back-button">← Voltar à lista</button>
             
@@ -4545,6 +4885,22 @@ video-synopsis {
         <p>Biblioteca Digital Pessoal de Reinaldo Duarte Castanheira &copy; 2024</p>
         <p>Quem conta suas histórias e relembra os seus, celebra a vida. Um trabalho contínuo por Reinaldo e Felipe Castanheira</p>
         <p>Contato: <a href="mailto:reinaldoduarte080@gmail.com ">reinaldoduarte080@gmail.com </a></p>
+        <div class="aviso-acervo" id="avisoAcervo">
+            <h3>Avisos do acervo</h3>
+            <p class="aviso-lead">Quando uma nova peça entrar na biblioteca, escrevemos-lhe — e de quinze em quinze dias, um recado do acervo.</p>
+            <form id="avisoForm" novalidate>
+                <label for="avisoNome">Como te chamamos?</label>
+                <input id="avisoNome" name="comoChamar" type="text" maxlength="80" autocomplete="nickname" placeholder="ex.: Felipe, Dona Magdalena…" required>
+                <label for="avisoEmail">O seu correio</label>
+                <input id="avisoEmail" name="email" type="email" maxlength="120" autocomplete="email" placeholder="nome@exemplo.com" required>
+                <button type="submit" id="avisoBtn">Quero receber</button>
+            </form>
+            <p class="aviso-status" id="avisoStatus" role="status"></p>
+            <div class="aviso-google" id="avisoGoogle">
+                <p>Se o Google lhe reconhecer nesta visita (e você confirmar), a casa passa a escrever-lhe a cada peça nova e, de quinze em quinze dias, um breve recado do acervo.</p>
+                <p class="aviso-status" id="googleEntradaStatus" role="status"></p>
+            </div>
+        </div>
     </footer>
     <!-- Password protection removed -->
    
@@ -5165,6 +5521,9 @@ document.addEventListener('DOMContentLoaded', function() {
               return (t === 'poema' || t === 'poesia' || t === 'conto') && 
                      t !== 'pessoas&famílias' && t !== 'pessoas&familias';
             }
+            if (filter === 'crônica' || filter === 'cronica') {
+              return t === 'crônica' || t === 'cronica';
+            }
             if (filter === 'documento') return t === 'documento';
             if (filter === 'mídia') return (
               t === 'mídia' || t === 'midia' || t === 'vídeo' || t === 'video' || t === 'áudio' || t === 'audio'
@@ -5259,6 +5618,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
           }
 
+          /* Used by Bibliotecário show-item to force Listagem without inventing a second view path */
+          window.setAcervoViewMode = setViewMode;
+          window.clearAcervoListDetail = clearListDetail;
+
           viewModeButtons.forEach(button => {
             button.addEventListener('click', function(e) {
               e.preventDefault();
@@ -5275,8 +5638,54 @@ document.addEventListener('DOMContentLoaded', function() {
             });
           }
 
+          function isEmptyCatalogHref(href) {
+            const h = String(href || '').trim();
+            return !h || h === '#' || /^javascript:/i.test(h);
+          }
+
+          function announceUnavailableWork(card) {
+            const title = (card && card.querySelector('h3') && card.querySelector('h3').textContent.trim()) || 'Esta obra';
+            const code = (card && card.querySelector('.document-code') && card.querySelector('.document-code').textContent.trim()) || '';
+            const blob = ((card && card.textContent) || '').toLowerCase();
+            const kind = /v[ií]deo/.test(blob) ? 'vídeo' : 'arquivo';
+            const codeBit = code ? ' (n' + code + ')' : '';
+            const msg = 'O ' + kind + ' «' + title + '»' + codeBit +
+              ' está no catálogo, mas ainda não tem um arquivo ou URL para abrir.';
+            let toast = document.getElementById('acervo-missing-toast');
+            if (!toast) {
+              toast = document.createElement('div');
+              toast.id = 'acervo-missing-toast';
+              toast.setAttribute('role', 'status');
+              toast.style.cssText = 'position:fixed;top:1.2rem;left:50%;transform:translateX(-50%);z-index:1000020;max-width:min(92vw,28rem);padding:0.85rem 1.1rem;background:#4a2c2a;color:#d4b45f;border:1px solid #d4b45f;font-family:EB Garamond,Georgia,serif;font-size:1.05rem;line-height:1.4;box-shadow:0 8px 24px rgba(0,0,0,0.28);';
+              document.body.appendChild(toast);
+            }
+            toast.textContent = msg;
+            toast.hidden = false;
+            clearTimeout(toast._hideTimer);
+            toast._hideTimer = setTimeout(function () { toast.hidden = true; }, 4200);
+          }
+
           document.addEventListener('click', function(e) {
-            if (currentViewMode !== 'lista' || !acervoSection) return;
+            const emptyBtn = e.target.closest('a.read-button');
+            if (emptyBtn && isEmptyCatalogHref(emptyBtn.getAttribute('href'))) {
+              e.preventDefault();
+              announceUnavailableWork(emptyBtn.closest('.document-card'));
+              return;
+            }
+
+            if (currentViewMode !== 'lista' || !acervoSection) {
+              if (currentViewMode !== 'lista') {
+                const gradeCard = e.target.closest('.document-card');
+                if (gradeCard && !e.target.closest('a, button, input, select, textarea')) {
+                  const action = gradeCard.querySelector('a.read-button') || gradeCard.querySelector('.video-thumbnail a');
+                  if (action && isEmptyCatalogHref(action.getAttribute('href'))) {
+                    e.preventDefault();
+                    announceUnavailableWork(gradeCard);
+                  }
+                }
+              }
+              return;
+            }
             if (acervoSection.classList.contains('list-detail-open')) return;
             const card = e.target.closest('#acervo .document-card');
             if (!card || card.style.display === 'none') return;
@@ -5412,6 +5821,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Adicionar rolagem suave para todos os links de navegação
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                if (anchor.classList.contains('read-button')) return;
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();
                     
@@ -5761,7 +6171,7 @@ function openVideo(videoId, isProtected) {
               if (acervo && typeof acervo.scrollIntoView === 'function') {
                 acervo.scrollIntoView({ behavior: 'smooth', block: 'start' });
               } else {
-                window.location.hash = 'acervo';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
               }
             });
           }
@@ -6737,7 +7147,13 @@ function openVideo(videoId, isProtected) {
         </div>
     </div>
     
-    <!-- Botão Flutuante + -->
+    <div id="entradasConsole" class="entradas-console">
+        <h3>Quem entrou</h3>
+        <p id="entradasConsoleStatus">Só visível à conta da casa.</p>
+        <button type="button" id="btnEntradasGoogle">Entrar como a casa</button>
+        <ul id="entradasConsoleList"></ul>
+        <p><a href="entradas.html" style="color:#4a2c2a;">Abrir lista completa</a></p>
+    </div>
     <div id="addMemoryFloating" class="add-memory-floating">
         <span>+</span>
     </div>
@@ -6817,6 +7233,9 @@ function openVideo(videoId, isProtected) {
                     document.body.classList.add('authenticated');
                     this.enableEditMode();
                     this.showSuccessMessage();
+                    if (typeof window.firebaseAbrirListaEntradas === "function") {
+                        window.firebaseAbrirListaEntradas();
+                    }
                 } else {
                     errorDiv.textContent = '❌ Senha incorreta. Tente novamente.';
                     errorDiv.style.display = 'block';
@@ -7267,13 +7686,18 @@ function openVideo(videoId, isProtected) {
 
             // Route save: create vs update
             async onSaveMemoryClicked() {
-                const form = document.getElementById('addMemoryForm');
-                const editingId = form?.dataset?.editingId || '';
-                const editingCode = form?.dataset?.editingCode || '';
-                if (editingId || editingCode) {
-                    await this.saveEditedMemory();
-                } else {
-                    await this.saveNewMemory();
+                try {
+                    const form = document.getElementById('addMemoryForm');
+                    const editingId = form?.dataset?.editingId || '';
+                    const editingCode = form?.dataset?.editingCode || '';
+                    if (editingId || editingCode) {
+                        await this.saveEditedMemory();
+                    } else {
+                        await this.saveNewMemory();
+                    }
+                } catch (e) {
+                    console.error('[conteudos] erro ao guardar:', e);
+                    this.showNotification('❌ ' + this.firebaseErrorText(e), 'error');
                 }
             }
 
@@ -7313,7 +7737,7 @@ function openVideo(videoId, isProtected) {
                     type: formData.get('type'),
                     description: sinopseText,
                     sinopse: sinopseText,
-                    link: formData.get('link') || '#'
+                    link: String(formData.get('link') || '').trim()
                 };
                 const id = form.dataset.editingId || '';
                 const code = parseInt(form.dataset.editingCode || '0', 10) || 0;
@@ -7343,22 +7767,38 @@ function openVideo(videoId, isProtected) {
                     });
                     localStorage.setItem('userMemories', JSON.stringify(saved));
                 } catch {}
-                // Update in Firebase: by id when present; otherwise try to locate by codigo
+                let cloudOk = false;
                 try {
-                    if (window.waitForFirebaseAuth && typeof window.waitForFirebaseAuth.then === 'function') {
+                    if (typeof window.ensureFirebaseAuth === 'function') {
+                        await window.ensureFirebaseAuth();
+                    } else if (window.waitForFirebaseAuth && typeof window.waitForFirebaseAuth.then === 'function') {
                         await window.waitForFirebaseAuth;
                     }
                     if (id && window.firebaseUpdateFieldsById) {
                         await window.firebaseUpdateFieldsById(id, updated);
+                        cloudOk = true;
                     } else if (code && typeof window.firebaseUpdateByCode === 'function') {
-                        await window.firebaseUpdateByCode(code, updated);
+                        const n = await window.firebaseUpdateByCode(code, updated);
+                        if (n > 0) {
+                            cloudOk = true;
+                        } else if (typeof window.firebaseSaveMemory === 'function') {
+                            await window.firebaseSaveMemory({ ...updated, code });
+                            cloudOk = true;
+                        }
                     } else if (code && typeof window.firebaseSaveMemory === 'function') {
-                        // Fallback: create new if not found; include code to keep continuity
                         await window.firebaseSaveMemory({ ...updated, code });
+                        cloudOk = true;
                     }
-                } catch (e) { console.warn('Falha ao atualizar no Firebase:', e); }
+                } catch (e) {
+                    console.error('[conteudos] Falha ao atualizar no Firebase:', e);
+                    this._lastCloudError = this.firebaseErrorText(e);
+                }
                 this.hideAddMemoryModal();
-                this.showNotification('✏️ Memória atualizada!', 'success');
+                if (cloudOk) {
+                    this.showNotification('✏️ Memória atualizada no Firebase.', 'success');
+                } else {
+                    this.showNotification('❌ Não foi possível atualizar no Firebase: ' + (this._lastCloudError || 'erro desconhecido'), 'error');
+                }
                 delete form.dataset.editingId; delete form.dataset.editingCode;
             }
             
@@ -7374,7 +7814,7 @@ function openVideo(videoId, isProtected) {
                     type: formData.get('type'),
                     description: sinopseText,
                     sinopse: sinopseText,
-                    link: formData.get('link') || '#',
+                    link: String(formData.get('link') || '').trim(),
                     code: undefined,
                     timestamp: new Date().toISOString()
                 };
@@ -7385,8 +7825,9 @@ function openVideo(videoId, isProtected) {
                     return;
                 }
                 // URL validation if provided
-                if (newMemory.link && newMemory.link.trim() && !/^https?:\/\//i.test(newMemory.link.trim())) {
-                    this.showNotification('❌ URL inválida. Use http(s)://', 'error');
+                if (newMemory.link === '#') newMemory.link = '';
+                if (newMemory.link && /^javascript:/i.test(newMemory.link)) {
+                    this.showNotification('❌ URL inválida.', 'error');
                     return;
                 }
                 // Código opcional informado pelo usuário
@@ -7404,42 +7845,35 @@ function openVideo(videoId, isProtected) {
                     newMemory.code = desiredCode;
                 }
                 
-                // Aguarda autenticação/SDK para tentar salvar na nuvem
-                try {
-                    if (window.waitForFirebaseAuth && typeof window.waitForFirebaseAuth.then === 'function') {
-                        await window.waitForFirebaseAuth;
-                    }
-                } catch (_) { /* continue */ }
-                
                 // Se o usuário não informou código, gerar automaticamente (nuvem -> local)
                 if (!Number.isInteger(newMemory.code)) {
                     try {
                         if (typeof window.firebaseNextCode === 'function') {
                             newMemory.code = await window.firebaseNextCode();
                         }
-                    } catch (e) { /* fallback abaixo */ }
+                    } catch (e) {
+                        console.warn('[conteudos] código automático na nuvem falhou, a usar código local:', e);
+                    }
                     if (!Number.isInteger(newMemory.code)) {
                         newMemory.code = this.generateNextCode();
                     }
                 }
 
-                // Sempre manter um backup local; tentar também salvar na nuvem
-                    this.saveMemoryToStorage(newMemory);
+                this.saveMemoryToStorage(newMemory);
                 const savedInCloud = await this.saveMemoryToCloud(newMemory);
-                
-                // Se salvou na nuvem, aguardamos o snapshot atualizar a UI.
+
                 if (!savedInCloud) {
-                    // Adicionar à página
                     this.addMemoryToPage(newMemory);
-                    // Adicionar à Linha do Tempo
                     this.addMemoryToTimeline(newMemory);
                 }
-                
-                // Fechar modal
+
                 this.hideAddMemoryModal();
-                
-                // Mostrar sucesso
-                this.showNotification('✅ Nova memória adicionada com sucesso!', 'success');
+
+                if (savedInCloud) {
+                    this.showNotification('✅ Guardado no Firebase (coleção conteudos).', 'success');
+                } else {
+                    this.showNotification('❌ Não foi possível guardar no Firebase: ' + (this._lastCloudError || 'erro desconhecido') + ' Ficou só neste browser.', 'error');
+                }
 
                 // Reaplicar o filtro ativo (se houver) para garantir consistência de visibilidade
                 this.reapplyActiveFilterIfAny();
@@ -7447,16 +7881,50 @@ function openVideo(videoId, isProtected) {
                 this.reapplyActiveSortIfAny();
             }
 
-            async saveMemoryToCloud(memory) {
-                try {
-                    if (typeof window.firebaseSaveMemory === 'function') {
-                        await window.firebaseSaveMemory(memory);
-                        return true;
-                    }
-                } catch (e) {
-                    console.warn('Falha ao salvar no Firebase:', e);
+            firebaseErrorText(err) {
+                if (!err) return 'erro desconhecido';
+                const code = err.code ? String(err.code) : '';
+                const msg = err.message ? String(err.message) : String(err);
+                if (code === 'permission-denied' || /permission/i.test(msg)) {
+                    return 'sem permissão (permission-denied). Confirme que há sessão Firebase e que as regras de conteudos permitem create.';
                 }
-                return false;
+                return (code ? code + ' — ' : '') + msg;
+            }
+
+            async waitForFirebaseHelper(name, ms = 8000) {
+                const start = Date.now();
+                while (typeof window[name] !== 'function') {
+                    if (Date.now() - start > ms) return false;
+                    await new Promise((resolve) => setTimeout(resolve, 120));
+                }
+                return true;
+            }
+
+            async saveMemoryToCloud(memory) {
+                this._lastCloudError = '';
+                try {
+                    if (typeof window.ensureFirebaseAuth === 'function') {
+                        await window.ensureFirebaseAuth();
+                    } else if (window.waitForFirebaseAuth && typeof window.waitForFirebaseAuth.then === 'function') {
+                        await Promise.race([
+                            window.waitForFirebaseAuth,
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('Auth Firebase demorou demais.')), 10000))
+                        ]);
+                    }
+                    const ready = await this.waitForFirebaseHelper('firebaseSaveMemory');
+                    if (!ready) {
+                        this._lastCloudError = 'o módulo Firebase não carregou (firebaseSaveMemory).';
+                        console.error('[conteudos]', this._lastCloudError);
+                        return false;
+                    }
+                    const id = await window.firebaseSaveMemory(memory);
+                    if (id) memory.cloudId = id;
+                    return true;
+                } catch (e) {
+                    this._lastCloudError = this.firebaseErrorText(e);
+                    console.error('[conteudos] Falha ao salvar no Firebase:', e);
+                    return false;
+                }
             }
 
             // Renderiza snapshot completo da nuvem: remove antigos e recria
@@ -7518,6 +7986,7 @@ function openVideo(videoId, isProtected) {
                 if (t === 'poesia' || t === 'poema') return 'Poema';
                 if (t === 'livro') return 'Livro';
                 if (t === 'conto') return 'Conto';
+                if (t === 'crônica' || t === 'cronica') return 'Crônica';
                 if (t === 'documento') return 'Documento';
                 if (t === 'mídia' || t === 'midia' || t === 'vídeo' || t === 'video' || t === 'áudio' || t === 'audio') return 'Mídia';
                 return type; // mantém valor original para categorias não mapeadas
@@ -7636,6 +8105,7 @@ function openVideo(videoId, isProtected) {
                     'Livro': 'Ler',
                     'Conto': 'Ler',
                     'Poema': 'Ler',
+                    'Crônica': 'Ler',
                     'Documento': 'Ver',
                     'Mídia': 'Ver',
                     'Vídeo': 'Ver',
@@ -7650,6 +8120,7 @@ function openVideo(videoId, isProtected) {
                     'Livro': 'Ler obra',
                     'Conto': 'Ler obra',
                     'Poema': 'Ler obra',
+                    'Crônica': 'Ler obra',
                     'Documento': 'Ver obra',
                     'Mídia': 'Ver obra',
                     'Vídeo': 'Ver vídeo',
@@ -8169,7 +8640,7 @@ function openVideo(videoId, isProtected) {
                 type: type || '',
                 description: sinopseText,
                 sinopse: sinopseText,
-                link: link || '#',
+                link: (link && link !== '#') ? String(link).trim() : '',
                 code: undefined,
                 timestamp: new Date().toISOString()
             };
@@ -8178,8 +8649,8 @@ function openVideo(videoId, isProtected) {
                 editSystem.showNotification('❌ Campos obrigatórios ausentes (título, autor, ano, tipo, sinopse).', 'error');
                 return null;
             }
-            if (memory.link && memory.link.trim() && !/^https?:\/\//i.test(memory.link.trim())) {
-                editSystem.showNotification('❌ URL inválida. Use http(s)://', 'error');
+            if (memory.link && /^javascript:/i.test(memory.link)) {
+                editSystem.showNotification('❌ URL inválida.', 'error');
                 return null;
             }
             try {
@@ -8191,10 +8662,13 @@ function openVideo(videoId, isProtected) {
                 memory.code = editSystem.generateNextCode();
             }
             const savedInCloud = await editSystem.saveMemoryToCloud(memory);
-            if (!savedInCloud) {
+            if (savedInCloud) {
+                editSystem.showNotification('✅ Guardado no Firebase (coleção conteudos).', 'success');
+            } else {
                 editSystem.saveMemoryToStorage(memory);
                 editSystem.addMemoryToPage(memory);
                 editSystem.addMemoryToTimeline(memory);
+                editSystem.showNotification('❌ Não foi possível guardar no Firebase: ' + (editSystem._lastCloudError || 'erro desconhecido'), 'error');
             }
             editSystem.reapplyActiveFilterIfAny?.();
             editSystem.reapplyActiveSortIfAny?.();
@@ -8788,6 +9262,7 @@ function openVideo(videoId, isProtected) {
                         <option value="Livro">Livro</option>
                         <option value="Conto">Conto</option>
                         <option value="Poema">Poema</option>
+                        <option value="Crônica">Crônica</option>
                         <option value="Documento">Documento</option>
                         <option value="Mídia">Mídia</option>
                         <option value="Vídeo">Vídeo</option>
@@ -8840,7 +9315,7 @@ function openVideo(videoId, isProtected) {
     <script type="module">
       // ===== Import Firebase SDKs =====
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-      import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+      import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithCredential, linkWithCredential } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
       import { getFirestore, collection, addDoc, getDocs, serverTimestamp, doc, getDoc, setDoc, onSnapshot, updateDoc, deleteDoc, increment, query, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
     
       // ===== Configuração do Firebase =====
@@ -8853,18 +9328,229 @@ function openVideo(videoId, isProtected) {
         appId: "1:893231291360:web:bbe242a0acb635c7e2a985",
         measurementId: "G-FQYBS18ZX0"
       };
-    
-      // ===== Inicializa o Firebase =====
+
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
-      // Expose a promise to await auth readiness for console operations
       const _auth = getAuth(app);
       window.waitForFirebaseAuth = new Promise((resolve) => {
         const unsub = onAuthStateChanged(_auth, (user) => {
           if (user) { unsub(); resolve(true); }
         });
       });
-    
+
+      // Sign in as soon as the module loads — do not wait until the bottom of this file.
+      // Writes to `conteudos` require request.auth (see firestore.rules).
+      let _authInFlight = null;
+      window.ensureFirebaseAuth = async function ensureFirebaseAuth() {
+        if (_auth.currentUser) return _auth.currentUser;
+        if (_authInFlight) return _authInFlight;
+        _authInFlight = signInAnonymously(_auth)
+          .then((cred) => cred.user)
+          .catch((err) => {
+            console.error("[conteudos] autenticação anónima falhou; a gravação no Firebase vai ser recusada.", err);
+            throw err;
+          })
+          .finally(() => { _authInFlight = null; });
+        return _authInFlight;
+      };
+      window.ensureFirebaseAuth().catch(() => { /* logged above */ });
+
+      const HOUSE_EMAIL = "reinaldoduarte080@gmail.com";
+      /* Firebase Console → Authentication → Sign-in method → Google → Web client ID */
+      const GOOGLE_WEB_CLIENT_ID = "";
+      const googleProvider = new GoogleAuthProvider();
+      googleProvider.addScope("email");
+      googleProvider.addScope("profile");
+      googleProvider.setCustomParameters({ prompt: "select_account" });
+
+      function isHouseUser(user) {
+        return !!(user && user.email && String(user.email).trim().toLowerCase() === HOUSE_EMAIL);
+      }
+
+      async function registrarEntrada(user) {
+        if (!user || user.isAnonymous || !user.email) return;
+        const email = String(user.email).trim().toLowerCase();
+        const ref = doc(db, "entradas", user.uid);
+        const sessKey = "rdc_entrada_sessao";
+        let snap;
+        try {
+          snap = await getDoc(ref);
+        } catch (err) {
+          snap = null;
+        }
+        const sameSess = sessionStorage.getItem(sessKey) === user.uid;
+        if (snap && snap.exists()) {
+          const patch = { lastSeen: serverTimestamp() };
+          if (!sameSess) patch.visitas = increment(1);
+          await updateDoc(ref, patch);
+        } else {
+          await setDoc(ref, {
+            email,
+            nome: user.displayName || "",
+            uid: user.uid,
+            firstSeen: serverTimestamp(),
+            lastSeen: serverTimestamp(),
+            visitas: 1
+          });
+        }
+        sessionStorage.setItem(sessKey, user.uid);
+      }
+
+      async function inscreverAvisoGoogle(user) {
+        const mail = String(user && user.email || "").trim().toLowerCase();
+        if (!mail) return;
+        const nome = String(user.displayName || "").trim().split(/\s+/)[0] || "amigo da casa";
+        const id = mail.replace(/\//g, "");
+        await setDoc(doc(db, "avisos", id), {
+          comoChamar: nome,
+          email: mail,
+          ativo: true,
+          origem: "google",
+          novaPeca: true,
+          quinzenal: true,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+
+      async function aposGoogleConfirmado(user) {
+        if (!user || user.isAnonymous || !user.email) return user;
+        await registrarEntrada(user);
+        try { await inscreverAvisoGoogle(user); } catch (err) { console.warn("Aviso Google:", err); }
+        const status = document.getElementById("googleEntradaStatus");
+        if (status) {
+          status.textContent = "A casa reconheceu-lhe. Escrevemos a cada peça nova e, de quinze em quinze dias, um recado do acervo.";
+        }
+        return user;
+      }
+
+      async function entrarComGoogle() {
+        const cred = await signInWithPopup(_auth, googleProvider);
+        await aposGoogleConfirmado(cred.user);
+        return cred.user;
+      }
+
+      async function entrarComGoogleIdToken(idToken) {
+        const credential = GoogleAuthProvider.credential(idToken);
+        const current = _auth.currentUser;
+        if (current && current.isAnonymous) {
+          try {
+            const cred = await linkWithCredential(current, credential);
+            await aposGoogleConfirmado(cred.user);
+            return cred.user;
+          } catch (err) {
+            const code = err && err.code;
+            if (code !== "auth/credential-already-in-use" && code !== "auth/email-already-in-use" && code !== "auth/provider-already-linked") {
+              throw err;
+            }
+          }
+        }
+        const cred = await signInWithCredential(_auth, credential);
+        await aposGoogleConfirmado(cred.user);
+        return cred.user;
+      }
+
+      function startGoogleOneTap() {
+        const clientId = String(GOOGLE_WEB_CLIENT_ID || "").trim();
+        if (!clientId || clientId.indexOf("apps.googleusercontent.com") < 0) return;
+        if (_auth.currentUser && !_auth.currentUser.isAnonymous) return;
+        function promptWhenReady() {
+          if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+            window.setTimeout(promptWhenReady, 250);
+            return;
+          }
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            auto_select: false,
+            cancel_on_tap_outside: true,
+            use_fedcm_for_prompt: true,
+            callback: async (response) => {
+              if (!response || !response.credential) return;
+              try {
+                await entrarComGoogleIdToken(response.credential);
+              } catch (err) {
+                console.warn("One Tap:", err);
+              }
+            }
+          });
+          window.google.accounts.id.prompt();
+        }
+        promptWhenReady();
+      }
+
+      function bindGoogleEntrada() {
+        startGoogleOneTap();
+      }
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bindGoogleEntrada);
+      } else {
+        bindGoogleEntrada();
+      }
+
+      function renderEntradasList(docs, listEl) {
+        if (!listEl) return;
+        listEl.innerHTML = "";
+        docs.forEach((row) => {
+          const li = document.createElement("li");
+          const when = row.lastSeen && row.lastSeen.toDate ? row.lastSeen.toDate() : null;
+          const first = row.firstSeen && row.firstSeen.toDate ? row.firstSeen.toDate() : null;
+          const fmt = (d) => d ? d.toLocaleString("pt-BR") : "—";
+          li.innerHTML = "<strong></strong><span></span>";
+          li.querySelector("strong").textContent = row.email || "sem correio";
+          li.querySelector("span").textContent =
+            (row.nome ? row.nome + " · " : "") +
+            (row.visitas || 1) + " visita(s) · última " + fmt(when) +
+            (first ? " · primeira " + fmt(first) : "");
+          listEl.appendChild(li);
+        });
+      }
+
+      window.firebaseAbrirListaEntradas = async function () {
+        const box = document.getElementById("entradasConsole");
+        const status = document.getElementById("entradasConsoleStatus");
+        const list = document.getElementById("entradasConsoleList");
+        const btn = document.getElementById("btnEntradasGoogle");
+        if (!box) return;
+        const load = async (user) => {
+          if (!isHouseUser(user)) {
+            if (status) status.textContent = "Entre com reinaldoduarte080@gmail.com para ver a lista.";
+            if (btn) btn.hidden = false;
+            if (list) list.innerHTML = "";
+            return;
+          }
+          if (btn) btn.hidden = true;
+          if (status) status.textContent = "A carregar…";
+          try {
+            const q = query(collection(db, "entradas"), orderBy("lastSeen", "desc"));
+            const snap = await getDocs(q);
+            const rows = [];
+            snap.forEach((ds) => rows.push(ds.data()));
+            if (status) {
+              status.textContent = rows.length
+                ? rows.length + (rows.length === 1 ? " visita reconhecida." : " visitas reconhecidas.")
+                : "Ainda ninguém entrou com Google.";
+            }
+            renderEntradasList(rows, list);
+          } catch (err) {
+            if (status) status.textContent = "A lista só abre com a conta da casa.";
+          }
+        };
+        if (btn && !btn.dataset.bound) {
+          btn.dataset.bound = "1";
+          btn.addEventListener("click", async () => {
+            btn.disabled = true;
+            try {
+              const user = await entrarComGoogle();
+              await load(user);
+            } catch (err) {
+              if (status) status.textContent = "Não foi possível entrar como a casa.";
+            } finally {
+              btn.disabled = false;
+            }
+          });
+        }
+        await load(_auth.currentUser);
+      };
+
       // ===== Função: Carregar todos os conteúdos =====
       async function carregarConteudos() {
         const lista = document.getElementById("conteudos-lista");
@@ -8888,22 +9574,47 @@ function openVideo(videoId, isProtected) {
         });
       }
     
+      function finiteNumber(value) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : null;
+      }
+
+      function payloadConteudo(memory) {
+        const sinopse = String(memory.sinopse || memory.description || memory.descricao || "").trim();
+        const urlRaw = String(memory.link || memory.url || "").trim();
+        const url = (urlRaw && urlRaw !== "#") ? urlRaw : "";
+        const ano = finiteNumber(memory.year ?? memory.ano);
+        const codigo = finiteNumber(memory.code ?? memory.codigo);
+        const data = {
+          titulo: String(memory.title || memory.titulo || "").trim(),
+          autor: String(memory.author || memory.autor || "").trim(),
+          tipo: String(memory.type || memory.tipo || "").trim(),
+          descricao: sinopse,
+          sinopse: sinopse,
+          url,
+          avisarLista: memory.avisarLista !== false,
+          createdAt: serverTimestamp()
+        };
+        if (ano !== null) data.ano = ano;
+        if (codigo !== null && codigo > 0) data.codigo = codigo;
+        return data;
+      }
+
       // ===== Função: Adicionar novo conteúdo =====
       async function adicionarConteudo(titulo, ano, autor, descricao, tipo, url) {
         try {
-          await addDoc(collection(db, "conteudos"), {
-            titulo,
-            ano: Number(ano),
-            autor,
-            descricao,
-            tipo,
-            url,
-            createdAt: serverTimestamp()
+          await window.firebaseSaveMemory({
+            title: titulo,
+            year: ano,
+            author: autor,
+            description: descricao,
+            type: tipo,
+            link: url
           });
-          console.log("✅ Documento adicionado com sucesso!");
-          carregarConteudos(); // recarrega lista
+          carregarConteudos();
         } catch (e) {
-          console.error("❌ Erro ao adicionar documento: ", e);
+          console.error("[conteudos] Erro ao adicionar documento:", e);
+          throw e;
         }
       }
 
@@ -8912,38 +9623,45 @@ function openVideo(videoId, isProtected) {
 
       // Exposed helper functions for EditSystem -> Firebase
       window.firebaseSaveMemory = async (memory) => {
-        const sinopse = memory.sinopse || memory.description || '';
-        await addDoc(collection(db, "conteudos"), {
-          titulo: memory.title,
-          ano: Number(memory.year),
-          autor: memory.author,
-          descricao: sinopse,
-          sinopse: sinopse,
-          tipo: memory.type,
-          url: memory.link,
-          codigo: Number(memory.code),
-          createdAt: serverTimestamp()
-        });
+        await window.ensureFirebaseAuth();
+        if (!_auth.currentUser) {
+          throw new Error("Sem sessão Firebase. Não é possível gravar em conteudos.");
+        }
+        const data = payloadConteudo(memory);
+        if (!data.titulo) {
+          throw new Error("Título em falta — o documento não foi gravado.");
+        }
+        try {
+          const ref = await addDoc(collection(db, "conteudos"), data);
+          console.log("[conteudos] documento criado:", ref.id, data.titulo);
+          return ref.id;
+        } catch (e) {
+          console.error("[conteudos] falha ao gravar em conteudos:", e && e.code, e && e.message, e);
+          throw e;
+        }
       };
 
       // Update arbitrary fields by codigo when id is unknown
       window.firebaseUpdateByCode = async (code, fields) => {
+        await window.ensureFirebaseAuth();
         const snap = await getDocs(collection(db, "conteudos"));
         const updates = [];
         const sinopse = fields.sinopse || fields.description || '';
+        const ano = Number(fields.year);
         snap.forEach((docSnap) => {
           const d = docSnap.data();
           if (Number(d.codigo) === Number(code)) {
-            updates.push(updateDoc(docSnap.ref, {
+            const patch = {
               titulo: fields.title,
-              ano: Number(fields.year),
               autor: fields.author,
               descricao: sinopse,
               sinopse: sinopse,
               tipo: fields.type,
-              url: fields.link,
+              url: fields.link || "",
               updatedAt: serverTimestamp()
-            }));
+            };
+            if (Number.isFinite(ano)) patch.ano = ano;
+            updates.push(updateDoc(docSnap.ref, patch));
           }
         });
         await Promise.all(updates);
@@ -8987,18 +9705,21 @@ function openVideo(videoId, isProtected) {
 
       // Update arbitrary fields on a conteudos doc by id
       window.firebaseUpdateFieldsById = async (id, fields) => {
+        await window.ensureFirebaseAuth();
         const ref = doc(db, "conteudos", id);
         const sinopse = fields.sinopse || fields.description || '';
-        await updateDoc(ref, { 
+        const ano = Number(fields.year);
+        const patch = {
           titulo: fields.title,
-          ano: Number(fields.year),
           autor: fields.author,
           descricao: sinopse,
           sinopse: sinopse,
           tipo: fields.type,
-          url: fields.link,
+          url: fields.link || "",
           updatedAt: serverTimestamp()
-        });
+        };
+        if (Number.isFinite(ano)) patch.ano = ano;
+        await updateDoc(ref, patch);
       };
 
       // Delete by document id or by matching codigo
@@ -9022,6 +9743,55 @@ function openVideo(videoId, isProtected) {
         return 0;
       };
 
+      window.firebaseInscreverAviso = async (comoChamar, email) => {
+        const nome = String(comoChamar || "").trim().slice(0, 80);
+        const mail = String(email || "").trim().toLowerCase();
+        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail);
+        if (nome.length < 2) throw new Error("Diga-nos como lhe chamamos.");
+        if (!ok) throw new Error("Esse correio não parece válido.");
+        const id = mail.replace(/\//g, "");
+        await setDoc(doc(db, "avisos", id), {
+          comoChamar: nome,
+          email: mail,
+          ativo: true,
+          origem: "formulario",
+          novaPeca: true,
+          quinzenal: true,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+        return true;
+      };
+
+      function bindAvisoForm() {
+        const form = document.getElementById("avisoForm");
+        const status = document.getElementById("avisoStatus");
+        const btn = document.getElementById("avisoBtn");
+        if (!form) return;
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const nome = form.comoChamar.value;
+          const email = form.email.value;
+          if (status) status.textContent = "A guardar o seu lugar na lista…";
+          if (btn) btn.disabled = true;
+          try {
+            if (window.waitForFirebaseAuth) await window.waitForFirebaseAuth;
+            await window.firebaseInscreverAviso(nome, email);
+            if (status) status.textContent = "Está na lista. Escrevemos a cada peça nova e, de quinze em quinze dias, um recado do acervo.";
+            form.reset();
+          } catch (err) {
+            if (status) status.textContent = err && err.message ? err.message : "Não foi possível inscrever agora.";
+          } finally {
+            if (btn) btn.disabled = false;
+          }
+        });
+      }
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bindAvisoForm);
+      } else {
+        bindAvisoForm();
+      }
+
       // Live feed: renders cards in real-time
       function startCardsFeed() {
         const q = query(collection(db, "conteudos"), orderBy("createdAt", "desc"));
@@ -9031,14 +9801,15 @@ function openVideo(videoId, isProtected) {
           if (window.editSystem && typeof window.editSystem.renderCloudCards === 'function') {
             window.editSystem.renderCloudCards(cards);
           }
+        }, (err) => {
+          console.error("[conteudos] listener do acervo falhou:", err && err.code, err && err.message, err);
         });
       }
       // Atomic (best-effort) numeric code allocator using a counters doc
       window.firebaseNextCode = async () => {
+        await window.ensureFirebaseAuth();
         const ref = doc(db, 'counters', 'codes');
-        // Initialize if missing
         await setDoc(ref, { last: 330, updatedAt: serverTimestamp() }, { merge: true });
-        // We do a read then +1 write; for true atomicity, use a transaction; keeping simple here
         const snap = await getDoc(ref);
         const last = (snap.exists() && typeof snap.data().last === 'number') ? snap.data().last : 330;
         const next = last + 1;
@@ -9120,13 +9891,17 @@ function openVideo(videoId, isProtected) {
       }
 
       // autentica e conta visita
-      const auth = getAuth(app);
+      const auth = _auth;
       onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          try { await bumpCountersOnce(); } catch (e) { console.error("Falha ao atualizar contadores:", e); }
+        if (!user) {
+          signInAnonymously(auth).catch(console.error);
+          return;
+        }
+        try { await bumpCountersOnce(); } catch (e) { console.error("Falha ao atualizar contadores:", e); }
+        if (!user.isAnonymous && user.email) {
+          try { await aposGoogleConfirmado(user); } catch (e) { console.warn("Entrada não registada:", e); }
         }
       });
-      signInAnonymously(auth).catch(console.error);
 
       // ===== Basket badge (avoid guest/localStorage flicker) =====
       // If the page has basket counters, keep them hidden until auth resolves,
@@ -9914,7 +10689,7 @@ function openVideo(videoId, isProtected) {
             title:  card.querySelector('h3')?.textContent?.trim(),
             author: card.querySelector('.document-author')?.textContent?.trim(),
             type:   card.querySelector('.document-type')?.textContent?.trim(),
-            link:   card.querySelector('.read-button')?.getAttribute('href') || '#'
+            link:   (card.querySelector('.read-button')?.getAttribute('href') || '#').trim()
           });
         });
         return list;
@@ -9955,16 +10730,31 @@ function openVideo(videoId, isProtected) {
           firebaseItems = await pullFromFirebase();
         }
 
-        // 2) Merge + de-duplicate by title+year
+        // 2) Merge + de-duplicate by title+year.
+        // Static HTML used to win even when Acervo had the correct URL (Iribaren,
+        // Regina Coeli). Prefer Acervo links; Firebase only fills empty ones.
         const pool = new Map();
-        const add = (r) => {
+        const isUsableLink = (link) => {
+          const h = String(link || '').trim();
+          return !!(h && h !== '#' && h !== '#acervo' && !/^javascript:/i.test(h));
+        };
+        const add = (r, { overwriteLink = false, fillEmptyOnly = false } = {}) => {
           const y = parseYear(r.year);
           const t = normalize(r.title);
           if (!t || !y) return;
           const key = `${t}|${y}`;
-          if (!pool.has(key)) pool.set(key, { ...r, year: y });
+          const nextLink = String(r.link || '').trim();
+          if (!pool.has(key)) {
+            pool.set(key, { ...r, year: y, link: nextLink });
+            return;
+          }
+          const cur = pool.get(key);
+          if (overwriteLink && isUsableLink(nextLink)) cur.link = nextLink;
+          else if (fillEmptyOnly && !isUsableLink(cur.link) && isUsableLink(nextLink)) cur.link = nextLink;
         };
-        [...staticItems, ...acervoItems, ...firebaseItems].forEach(add);
+        staticItems.forEach((r) => add(r));
+        acervoItems.forEach((r) => add(r, { overwriteLink: true }));
+        firebaseItems.forEach((r) => add(r, { fillEmptyOnly: true }));
 
         // 3) Sort by year (ascending), but force "Cine Regina" as last item.
         const items = [...pool.values()].sort((a, b) => {
@@ -10174,6 +10964,958 @@ function openVideo(videoId, isProtected) {
         init();
       }
     })();
+    </script>
+
+    <style>
+      /* TEMP hide bibliotecario dock — remove this block to re-enable */
+      .viz-dock,
+      .viz-dock.is-open,
+      .viz-dock.is-fullscreen {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+      }
+      #navVisualize,
+      #navVisualizeMobile {
+        display: none !important;
+        pointer-events: none !important;
+      }
+      .viz-dock {
+        position: fixed;
+        left: 0.7rem;
+        top: 5.4rem;
+        right: auto;
+        bottom: auto;
+        width: min(280px, 88vw);
+        height: min(190px, 34vh);
+        z-index: 1000006;
+        display: flex;
+        flex-direction: column;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        overflow: visible;
+        border-radius: 8px;
+        pointer-events: none;
+        transition: width 0.28s ease, height 0.28s ease, left 0.28s ease, top 0.28s ease, border-radius 0.28s ease, background 0.22s ease, box-shadow 0.22s ease;
+      }
+      .viz-dock.is-placed {
+        right: auto;
+        bottom: auto;
+      }
+      .viz-dock.is-dragging,
+      .viz-dock.is-scaling {
+        transition: none;
+        user-select: none;
+      }
+      /* Drag bar removed — drag the animation itself */
+      .viz-dock-chrome,
+      .viz-dock-grip,
+      .viz-dock:hover .viz-dock-chrome,
+      .viz-dock.is-dragging .viz-dock-chrome,
+      .viz-dock.is-scaling .viz-dock-chrome,
+      .viz-dock.is-chrome-open .viz-dock-chrome,
+      .viz-dock.is-overlay .viz-dock-chrome,
+      .viz-dock.is-overlay.is-chrome-open .viz-dock-chrome,
+      .viz-dock.is-overlay:hover .viz-dock-chrome,
+      .viz-dock.is-overlay.is-dragging .viz-dock-chrome,
+      .viz-dock.is-overlay.is-scaling .viz-dock-chrome {
+        display: none !important;
+        pointer-events: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        width: 0 !important;
+        overflow: hidden !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      /* Word-style picture resize handles on the dock box */
+      .viz-dock-handles {
+        position: absolute;
+        inset: 0;
+        z-index: 11;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.18s ease, visibility 0.18s ease;
+      }
+      .viz-dock:hover .viz-dock-handles,
+      .viz-dock.is-dragging .viz-dock-handles,
+      .viz-dock.is-scaling .viz-dock-handles,
+      .viz-dock.is-chrome-open .viz-dock-handles {
+        opacity: 1;
+        visibility: visible;
+      }
+      .viz-dock-handle {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        background: #fffaf2;
+        border: 1.5px solid #4a2c2a;
+        border-radius: 2px;
+        box-shadow: 0 1px 3px rgba(74, 44, 42, 0.28);
+        pointer-events: none;
+        z-index: 12;
+        touch-action: none;
+      }
+      .viz-dock:hover .viz-dock-handle,
+      .viz-dock.is-dragging .viz-dock-handle,
+      .viz-dock.is-scaling .viz-dock-handle,
+      .viz-dock.is-chrome-open .viz-dock-handle {
+        pointer-events: auto;
+      }
+      .viz-dock-handle[data-dir="nw"] { top: -5px; left: -5px; cursor: nwse-resize; }
+      .viz-dock-handle[data-dir="n"]  { top: -5px; left: 50%; margin-left: -5px; cursor: ns-resize; }
+      .viz-dock-handle[data-dir="ne"] { top: -5px; right: -5px; cursor: nesw-resize; }
+      .viz-dock-handle[data-dir="e"]  { top: 50%; right: -5px; margin-top: -5px; cursor: ew-resize; }
+      .viz-dock-handle[data-dir="se"] { bottom: -5px; right: -5px; cursor: nwse-resize; }
+      .viz-dock-handle[data-dir="s"]  { bottom: -5px; left: 50%; margin-left: -5px; cursor: ns-resize; }
+      .viz-dock-handle[data-dir="sw"] { bottom: -5px; left: -5px; cursor: nesw-resize; }
+      .viz-dock-handle[data-dir="w"]  { top: 50%; left: -5px; margin-top: -5px; cursor: ew-resize; }
+      .viz-dock-grip {
+        flex: 1 1 auto;
+        height: calc(100% - 0.2rem);
+        margin: 0.1rem 0;
+        border: 1px solid rgba(74, 44, 42, 0.28);
+        border-radius: 5px;
+        background: rgba(74, 44, 42, 0.08);
+        color: #4a2c2a;
+        cursor: grab;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.28rem;
+        padding: 0 0.35rem;
+        font-size: 0.62rem;
+        letter-spacing: 0.04em;
+        line-height: 1;
+        font-family: Georgia, "Times New Roman", serif;
+        min-width: 4.2rem;
+        text-transform: lowercase;
+      }
+      .viz-dock-grip:hover {
+        background: rgba(74, 44, 42, 0.14);
+      }
+      .viz-dock.is-dragging .viz-dock-grip {
+        cursor: grabbing;
+        background: rgba(74, 44, 42, 0.18);
+      }
+      .viz-dock-grip-icon {
+        transform: rotate(90deg);
+        display: block;
+        pointer-events: none;
+        font-size: 0.78rem;
+        letter-spacing: 0.02em;
+        line-height: 1;
+        opacity: 0.85;
+      }
+      .viz-dock-grip-label {
+        pointer-events: none;
+        font-size: 0.62rem;
+        opacity: 0.92;
+      }
+      .viz-dock iframe {
+        flex: 1 1 auto;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: transparent;
+        pointer-events: auto;
+        border-radius: 8px;
+      }
+      .viz-dock.is-overlay {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+      }
+      .viz-dock.is-overlay iframe {
+        background: transparent;
+      }
+      /* Full-screen viz — cream page veil; synced with iframe */
+      .viz-dock.is-fullscreen {
+        inset: 0;
+        left: 0 !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+        z-index: 1000010;
+        background: transparent !important;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .viz-dock.is-fullscreen iframe {
+        pointer-events: auto;
+        background: transparent !important;
+        border-radius: 0;
+      }
+      .viz-dock.is-fullscreen.is-veil-block {
+        pointer-events: auto;
+        background: var(--viz-fs-bg, rgba(247, 240, 228, 1)) !important;
+      }
+      .viz-dock.is-fullscreen .viz-dock-chrome,
+      .viz-dock.is-fullscreen .viz-dock-handles {
+        display: none !important;
+      }
+      body.viz-fs-open {
+        overflow: hidden;
+      }
+      @media (max-width: 520px) {
+        .viz-dock:not(.is-fullscreen):not(.is-placed) {
+          left: 0.35rem;
+          top: 4.6rem;
+          right: auto;
+          bottom: auto;
+          width: min(250px, calc(100vw - 0.7rem));
+          height: min(170px, 30vh);
+        }
+      }
+      @media (hover: none) {
+        .viz-dock:not(.is-fullscreen) .viz-dock-chrome {
+          opacity: 1;
+          visibility: visible;
+          pointer-events: auto;
+        }
+        .viz-dock:not(.is-fullscreen) .viz-dock-handles {
+          opacity: 1;
+          visibility: visible;
+        }
+        .viz-dock:not(.is-fullscreen) .viz-dock-handle {
+          pointer-events: auto;
+        }
+      }
+    </style>
+
+    <div class="viz-dock is-open" id="vizDock" hidden aria-hidden="true" role="complementary" aria-label="Animações do Bibliotecário">
+      <div class="viz-dock-chrome" id="vizDockChrome" hidden aria-hidden="true"></div>
+      <div class="viz-dock-handles" id="vizDockHandles" aria-hidden="true">
+        <span class="viz-dock-handle" data-dir="nw" title="Redimensionar"></span>
+        <span class="viz-dock-handle" data-dir="n" title="Redimensionar"></span>
+        <span class="viz-dock-handle" data-dir="ne" title="Redimensionar"></span>
+        <span class="viz-dock-handle" data-dir="e" title="Redimensionar"></span>
+        <span class="viz-dock-handle" data-dir="se" title="Redimensionar"></span>
+        <span class="viz-dock-handle" data-dir="s" title="Redimensionar"></span>
+        <span class="viz-dock-handle" data-dir="sw" title="Redimensionar"></span>
+        <span class="viz-dock-handle" data-dir="w" title="Redimensionar"></span>
+      </div>
+      <iframe id="vizDockFrame" title="Animações do Bibliotecário" src="about:blank" data-src="bibliotecario.html?embed=dock&v=veil4" allow="autoplay *" allowtransparency="true" tabindex="-1"></iframe>
+    </div>
+    <script>
+      (function () {
+        const dock = document.getElementById("vizDock");
+        const frame = document.getElementById("vizDockFrame");
+        const chrome = document.getElementById("vizDockChrome");
+        const grip = null;
+        const handlesRoot = document.getElementById("vizDockHandles");
+        const navViz = document.getElementById("navVisualize");
+        const navVizMobile = document.getElementById("navVisualizeMobile");
+        if (!dock || !frame) return;
+
+        const POS_KEY = "vizDockPosTL";
+        const OVERLAY_KEY = "vizDockOverlay";
+        const SCALE_KEY = "vizDockScale";
+        const BASE_W = 280;
+        const BASE_H = 190;
+        const SCALE_MIN = 0.5;
+        const SCALE_MAX = 2;
+        /* Keep at least this much of the dock reachable when dragged off-screen */
+        const GRAB_STRIP = 40;
+
+        let currentScale = 1;
+
+        function postToFrame(action, extra) {
+          try {
+            const win = frame.contentWindow;
+            if (!win) return;
+            win.postMessage(Object.assign({ type: "viz-dock", action: action }, extra || {}), "*");
+          } catch (err) { /* ignore */ }
+        }
+
+        function syncFsToFrame() {
+          postToFrame("set-fs", { fs: dock.classList.contains("is-fullscreen") });
+        }
+
+        function syncOverlayToFrame() {
+          postToFrame("set-overlay", { overlay: dock.classList.contains("is-overlay") });
+        }
+
+        function requestFrameResize() {
+          postToFrame("resize");
+          window.setTimeout(function () { postToFrame("resize"); }, 80);
+          window.setTimeout(function () { postToFrame("resize"); }, 320);
+        }
+
+        function syncAllToFrame() {
+          syncFsToFrame();
+          syncOverlayToFrame();
+          requestFrameResize();
+        }
+
+        function clampScale(s) {
+          const n = Number(s);
+          if (!isFinite(n)) return 1;
+          return Math.min(SCALE_MAX, Math.max(SCALE_MIN, Math.round(n * 100) / 100));
+        }
+
+        function baseSize() {
+          const narrow = window.innerWidth <= 520;
+          const bw = narrow ? 250 : BASE_W;
+          const bh = narrow ? 170 : BASE_H;
+          const maxW = narrow ? Math.max(120, window.innerWidth - 0.7 * 16) : window.innerWidth * 0.88;
+          const maxH = narrow ? window.innerHeight * 0.3 : window.innerHeight * 0.34;
+          return {
+            w: Math.min(bw, maxW),
+            h: Math.min(bh, maxH)
+          };
+        }
+
+        function applyScale(scale, persist, opts) {
+          const s = clampScale(scale);
+          currentScale = s;
+          dock.dataset.scale = String(s);
+          if (!dock.classList.contains("is-fullscreen")) {
+            const base = baseSize();
+            dock.style.width = (base.w * s) + "px";
+            dock.style.height = (base.h * s) + "px";
+          }
+          if (persist) {
+            try {
+              localStorage.setItem(SCALE_KEY, String(s));
+            } catch (err) { /* ignore */ }
+          }
+          if ((!opts || opts.skipPos !== true) &&
+              dock.classList.contains("is-placed") &&
+              !dock.classList.contains("is-fullscreen")) {
+            const left = parseFloat(dock.style.left);
+            const top = parseFloat(dock.style.top);
+            if (isFinite(left) && isFinite(top)) {
+              applyPos(left, top, !!persist);
+            }
+          }
+          if (!opts || opts.resize !== false) requestFrameResize();
+          return s;
+        }
+
+        function restoreScale() {
+          let s = 1;
+          try {
+            const raw = localStorage.getItem(SCALE_KEY);
+            if (raw != null && raw !== "") s = clampScale(parseFloat(raw));
+          } catch (err) { /* ignore */ }
+          applyScale(s, false);
+        }
+
+        function clearInlineSize() {
+          dock.style.width = "";
+          dock.style.height = "";
+        }
+
+        /* Soft clamp: allow most of the dock off-screen; keep a grab strip reachable */
+        function clampPos(x, y) {
+          const w = dock.offsetWidth || BASE_W;
+          const h = dock.offsetHeight || BASE_H;
+          const minX = GRAB_STRIP - w;
+          const minY = GRAB_STRIP - h;
+          const maxX = window.innerWidth - GRAB_STRIP;
+          const maxY = window.innerHeight - GRAB_STRIP;
+          return {
+            x: Math.min(maxX, Math.max(minX, x)),
+            y: Math.min(maxY, Math.max(minY, y))
+          };
+        }
+
+        function applyPos(x, y, persist) {
+          const p = clampPos(x, y);
+          dock.style.left = p.x + "px";
+          dock.style.top = p.y + "px";
+          dock.style.right = "auto";
+          dock.style.bottom = "auto";
+          dock.classList.add("is-placed");
+          if (persist) {
+            try {
+              localStorage.setItem(POS_KEY, JSON.stringify({ x: p.x, y: p.y }));
+            } catch (err) { /* ignore */ }
+          }
+          return p;
+        }
+
+        function clearInlinePos() {
+          dock.style.left = "";
+          dock.style.top = "";
+          dock.style.right = "";
+          dock.style.bottom = "";
+        }
+
+        function restorePos() {
+          try {
+            const raw = localStorage.getItem(POS_KEY);
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            if (!data || !isFinite(data.x) || !isFinite(data.y)) return;
+            applyPos(data.x, data.y, false);
+          } catch (err) { /* ignore */ }
+        }
+
+        function setOverlay(on, persist) {
+          const next = !!on;
+          dock.classList.toggle("is-overlay", next);
+          if (persist !== false) {
+            try {
+              localStorage.setItem(OVERLAY_KEY, next ? "1" : "0");
+            } catch (err) { /* ignore */ }
+          }
+          syncOverlayToFrame();
+        }
+
+        function restoreOverlay() {
+          /* No UI toggle anymore: default transparent overlay ON when unset. */
+          try {
+            const v = localStorage.getItem(OVERLAY_KEY);
+            if (v === null) {
+              setOverlay(true, true);
+              return;
+            }
+            if (v === "1") dock.classList.add("is-overlay");
+          } catch (err) {
+            dock.classList.add("is-overlay");
+          }
+        }
+
+        function applyParentFsBg(key, color, opts) {
+          opts = opts || {};
+          const PAGE = "#f7f0e4";
+          const bg = "page";
+          const hex = PAGE;
+          const veilLevels = [4];
+          let veil = parseInt(opts.veil, 10);
+          if (veilLevels.indexOf(veil) < 0) {
+            veil = veilLevels[0];
+            let bestD = Infinity;
+            for (let i = 0; i < veilLevels.length; i++) {
+              const d = Math.abs((parseInt(opts.veil, 10) || veilLevels[0]) - veilLevels[i]);
+              if (d < bestD) {
+                bestD = d;
+                veil = veilLevels[i];
+              }
+            }
+          }
+          const paint = String(opts.rgba || color || "").toLowerCase();
+          const isBrown = /74\s*,\s*44\s*,\s*42|#4a2c2a|brown/.test(paint);
+          let rgba = opts.rgba;
+          if (!rgba || isBrown) {
+            const a = opts.alpha != null ? Number(opts.alpha) : Math.round((1.1 - veil * 0.1) * 100) / 100;
+            rgba = "rgba(247, 240, 228, " + (isFinite(a) ? a : 0.8) + ")";
+          }
+          const pass = opts.passThrough != null ? !!opts.passThrough : veil >= 2;
+          dock.setAttribute("data-viz-bg", bg);
+          dock.setAttribute("data-viz-veil", String(veil));
+          dock.style.setProperty("--viz-fs-bg", rgba);
+          dock.classList.toggle("is-veil-block", !pass);
+          /* Veil paint lives in the iframe; parent stays clear so clicks can pass. */
+          dock.style.background = "";
+        }
+
+        function clearParentFsBg() {
+          dock.removeAttribute("data-viz-bg");
+          dock.removeAttribute("data-viz-veil");
+          dock.style.removeProperty("--viz-fs-bg");
+          dock.classList.remove("is-veil-block");
+          dock.style.background = "";
+        }
+
+        function ensureVizFrameLoaded() {
+          if (!frame) return;
+          const wanted = frame.getAttribute("data-src") || "bibliotecario.html?embed=dock&v=veil4";
+          if (!frame.getAttribute("src") || frame.getAttribute("src") === "about:blank") {
+            frame.setAttribute("src", wanted);
+          }
+        }
+
+        function setFullscreen(on) {
+          const next = !!on;
+          const wasFs = dock.classList.contains("is-fullscreen");
+          if (next) {
+            ensureVizFrameLoaded();
+            dock.hidden = false;
+            dock.removeAttribute("aria-hidden");
+            dock.classList.add("is-open");
+          }
+          dock.classList.toggle("is-fullscreen", next);
+          document.body.classList.toggle("viz-fs-open", next);
+          dock.setAttribute("aria-label", next
+            ? "Visualização em ecrã inteiro"
+            : "Animações do Bibliotecário");
+          if (next) {
+            if (dock.classList.contains("is-overlay")) {
+              setOverlay(false, false);
+              dock.dataset.restoreOverlay = "1";
+            }
+            clearInlinePos();
+            clearInlineSize();
+            applyParentFsBg("page", null, { veil: 4, passThrough: true });
+            try { frame.focus(); } catch (err) { /* ignore */ }
+          } else if (wasFs) {
+            clearParentFsBg();
+            applyScale(currentScale, false, { resize: false });
+            if (dock.classList.contains("is-placed")) {
+              restorePos();
+            } else {
+              clearInlinePos();
+              dock.classList.remove("is-placed");
+            }
+            if (dock.dataset.restoreOverlay === "1") {
+              delete dock.dataset.restoreOverlay;
+              setOverlay(true, false);
+            }
+            requestFrameResize();
+          }
+          syncFsToFrame();
+          if (!next) syncOverlayToFrame();
+        }
+
+        function enterFullscreen(e) {
+          if (e) e.preventDefault();
+          const mobile = document.getElementById("mobile-nav");
+          if (mobile) mobile.classList.remove("active");
+          const hamburger = document.getElementById("hamburger-menu");
+          if (hamburger) hamburger.classList.remove("active");
+          setFullscreen(true);
+        }
+
+        function exitFullscreen() {
+          setFullscreen(false);
+        }
+
+        /* Parent drag chrome: open from iframe hover (postMessage) or bar hover.
+           Leave delay avoids flicker when moving from iframe up onto the grip. */
+        let chromeLeaveTimer = null;
+        let chromePointerInside = false;
+        const CHROME_LEAVE_MS = 200;
+
+        function setChromeOpen(open) {
+          if (open) {
+            if (chromeLeaveTimer) {
+              window.clearTimeout(chromeLeaveTimer);
+              chromeLeaveTimer = null;
+            }
+            dock.classList.add("is-chrome-open");
+            return;
+          }
+          /* Ignore delayed iframe leave while pointer is on the parent bar */
+          if (chromePointerInside) return;
+          if (dock.classList.contains("is-dragging") || dock.classList.contains("is-scaling")) return;
+          if (chromeLeaveTimer) window.clearTimeout(chromeLeaveTimer);
+          chromeLeaveTimer = window.setTimeout(function () {
+            chromeLeaveTimer = null;
+            if (chromePointerInside) return;
+            if (dock.classList.contains("is-dragging") || dock.classList.contains("is-scaling")) return;
+            dock.classList.remove("is-chrome-open");
+          }, CHROME_LEAVE_MS);
+        }
+
+        function bindChromeHover(el) {
+          if (!el) return;
+          el.addEventListener("mouseenter", function () {
+            chromePointerInside = true;
+            setChromeOpen(true);
+          });
+          el.addEventListener("mouseleave", function () {
+            chromePointerInside = false;
+            setChromeOpen(false);
+          });
+        }
+        bindChromeHover(chrome);
+        bindChromeHover(handlesRoot);
+
+        /* Word-style corner/edge resize handles (aspect locked via vizDockScale). */
+        (function setupResizeHandles() {
+          if (!handlesRoot) return;
+          const handleEls = handlesRoot.querySelectorAll(".viz-dock-handle");
+          if (!handleEls.length) return;
+
+          const resizeState = {
+            active: false,
+            dir: "",
+            pointerId: null,
+            startScale: 1,
+            startW: 0,
+            startH: 0,
+            startX: 0,
+            startY: 0,
+            anchorLeft: 0,
+            anchorTop: 0,
+            anchorRight: 0,
+            anchorBottom: 0
+          };
+
+          function beginResize(dir, clientX, clientY, pointerId) {
+            if (dock.classList.contains("is-fullscreen")) return false;
+            if (!dir || !isFinite(clientX) || !isFinite(clientY)) return false;
+            const rect = dock.getBoundingClientRect();
+            resizeState.active = true;
+            resizeState.dir = dir;
+            resizeState.pointerId = pointerId != null ? pointerId : null;
+            resizeState.startScale = currentScale;
+            resizeState.startW = rect.width;
+            resizeState.startH = rect.height;
+            resizeState.startX = clientX;
+            resizeState.startY = clientY;
+            resizeState.anchorLeft = rect.left;
+            resizeState.anchorTop = rect.top;
+            resizeState.anchorRight = rect.right;
+            resizeState.anchorBottom = rect.bottom;
+            dock.classList.add("is-scaling");
+            setChromeOpen(true);
+            applyPos(rect.left, rect.top, false);
+            return true;
+          }
+
+          function moveResize(clientX, clientY) {
+            if (!resizeState.active) return;
+            if (!isFinite(clientX) || !isFinite(clientY)) return;
+            const dir = resizeState.dir;
+            const dx = clientX - resizeState.startX;
+            const dy = clientY - resizeState.startY;
+            let scaleFactor = 1;
+
+            if (dir === "e" || dir === "w") {
+              const signed = dir === "e" ? dx : -dx;
+              scaleFactor = (resizeState.startW + signed) / resizeState.startW;
+            } else if (dir === "n" || dir === "s") {
+              const signed = dir === "s" ? dy : -dy;
+              scaleFactor = (resizeState.startH + signed) / resizeState.startH;
+            } else {
+              /* Corners: lock aspect; pick the dominant axis like Word picture resize */
+              let factorW = 1;
+              let factorH = 1;
+              if (dir.indexOf("e") !== -1) factorW = (resizeState.startW + dx) / resizeState.startW;
+              if (dir.indexOf("w") !== -1) factorW = (resizeState.startW - dx) / resizeState.startW;
+              if (dir.indexOf("s") !== -1) factorH = (resizeState.startH + dy) / resizeState.startH;
+              if (dir.indexOf("n") !== -1) factorH = (resizeState.startH - dy) / resizeState.startH;
+              scaleFactor = Math.abs(factorW - 1) >= Math.abs(factorH - 1) ? factorW : factorH;
+            }
+
+            if (!isFinite(scaleFactor) || scaleFactor <= 0) return;
+            const next = clampScale(resizeState.startScale * scaleFactor);
+            applyScale(next, false, { resize: false, skipPos: true });
+
+            const base = baseSize();
+            const w = base.w * currentScale;
+            const h = base.h * currentScale;
+            let left = resizeState.anchorLeft;
+            let top = resizeState.anchorTop;
+            if (dir.indexOf("w") !== -1) left = resizeState.anchorRight - w;
+            if (dir.indexOf("n") !== -1) top = resizeState.anchorBottom - h;
+            applyPos(left, top, false);
+          }
+
+          function endResize() {
+            if (!resizeState.active) return;
+            resizeState.active = false;
+            resizeState.pointerId = null;
+            dock.classList.remove("is-scaling");
+            applyScale(currentScale, true);
+            const rect = dock.getBoundingClientRect();
+            applyPos(rect.left, rect.top, true);
+            if (chromePointerInside) setChromeOpen(true);
+            else setChromeOpen(false);
+          }
+
+          handleEls.forEach(function (handle) {
+            handle.addEventListener("pointerdown", function (e) {
+              if (e.button != null && e.button !== 0) return;
+              const dir = handle.getAttribute("data-dir") || "";
+              e.preventDefault();
+              e.stopPropagation();
+              if (!beginResize(dir, e.clientX, e.clientY, e.pointerId)) return;
+              try { handle.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+            });
+            handle.addEventListener("pointermove", function (e) {
+              if (!resizeState.active) return;
+              if (resizeState.pointerId != null && e.pointerId !== resizeState.pointerId) return;
+              e.preventDefault();
+              moveResize(e.clientX, e.clientY);
+            });
+            handle.addEventListener("pointerup", function (e) {
+              if (!resizeState.active) return;
+              if (resizeState.pointerId != null && e.pointerId !== resizeState.pointerId) return;
+              try { handle.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+              endResize();
+            });
+            handle.addEventListener("pointercancel", function (e) {
+              if (!resizeState.active) return;
+              if (resizeState.pointerId != null && e.pointerId !== resizeState.pointerId) return;
+              endResize();
+            });
+          });
+        })();
+
+        /* Drag via top chrome / grip (parent) + iframe postMessage fallback (screen coords). */
+        const dragState = {
+          dragging: false,
+          startX: 0,
+          startY: 0,
+          origX: 0,
+          origY: 0,
+          pointerId: null,
+          fromIframe: false
+        };
+
+        function beginDockDrag(screenX, screenY, opts) {
+          if (dock.classList.contains("is-fullscreen")) return false;
+          if (!isFinite(screenX) || !isFinite(screenY)) return false;
+          const rect = dock.getBoundingClientRect();
+          dragState.dragging = true;
+          dragState.fromIframe = !!(opts && opts.fromIframe);
+          dragState.pointerId = opts && opts.pointerId != null ? opts.pointerId : null;
+          dragState.startX = screenX;
+          dragState.startY = screenY;
+          dragState.origX = rect.left;
+          dragState.origY = rect.top;
+          dock.classList.add("is-dragging");
+          setChromeOpen(true);
+          applyPos(dragState.origX, dragState.origY, false);
+          return true;
+        }
+
+        function moveDockDrag(screenX, screenY) {
+          if (!dragState.dragging) return;
+          if (!isFinite(screenX) || !isFinite(screenY)) return;
+          applyPos(
+            dragState.origX + (screenX - dragState.startX),
+            dragState.origY + (screenY - dragState.startY),
+            false
+          );
+        }
+
+        function endDockDrag() {
+          if (!dragState.dragging) return;
+          dragState.dragging = false;
+          dragState.pointerId = null;
+          dragState.fromIframe = false;
+          dock.classList.remove("is-dragging");
+          const rect = dock.getBoundingClientRect();
+          applyPos(rect.left, rect.top, true);
+          if (chromePointerInside) setChromeOpen(true);
+          else setChromeOpen(false);
+        }
+
+        (function setupDrag() {
+          /* Drag is driven from the iframe animation area (no Arrastar grip). */
+        })();
+
+        window.addEventListener("resize", function () {
+          if (dock.classList.contains("is-fullscreen")) return;
+          applyScale(currentScale, false);
+          if (!dock.classList.contains("is-placed")) return;
+          const left = parseFloat(dock.style.left);
+          const top = parseFloat(dock.style.top);
+          if (!isFinite(left) || !isFinite(top)) return;
+          applyPos(left, top, true);
+        });
+
+        if (navViz) navViz.addEventListener("click", enterFullscreen);
+        if (navVizMobile) navVizMobile.addEventListener("click", enterFullscreen);
+
+        restoreScale();
+        restorePos();
+        restoreOverlay();
+
+        frame.addEventListener("load", syncAllToFrame);
+
+        let voiceHitTimer = null;
+
+        function normalizeAcervoText(s) {
+          return String(s || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^\w\s]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+        }
+
+        function findAcervoCard(data) {
+          const code = String((data && data.code) || "").trim();
+          const titleN = normalizeAcervoText(data && data.title);
+          const cards = Array.from(document.querySelectorAll("#acervo .document-card, .document-card"));
+          if (code) {
+            const codeNum = String(parseInt(code, 10));
+            for (let i = 0; i < cards.length; i++) {
+              const c = (cards[i].querySelector(".document-code")?.textContent || "").trim();
+              if (c === code || c === codeNum || String(parseInt(c, 10)) === codeNum) {
+                return cards[i];
+              }
+            }
+          }
+          if (titleN) {
+            for (let i = 0; i < cards.length; i++) {
+              const t = normalizeAcervoText(cards[i].querySelector("h3")?.textContent);
+              if (t && (t === titleN || t.indexOf(titleN) !== -1 || titleN.indexOf(t) !== -1)) {
+                return cards[i];
+              }
+            }
+          }
+          return null;
+        }
+
+        function clearAcervoVoiceHit() {
+          document.querySelectorAll(".document-card.acervo-voice-hit").forEach(function (el) {
+            el.classList.remove("acervo-voice-hit");
+          });
+          if (voiceHitTimer) {
+            clearTimeout(voiceHitTimer);
+            voiceHitTimer = null;
+          }
+        }
+
+        function revealAcervoItem(data) {
+          if (!data || (!data.code && !data.title)) return;
+          const card = findAcervoCard(data);
+          if (!card) return;
+
+          const stayFs = !!data.stayFs;
+          if (!stayFs && dock.classList.contains("is-fullscreen")) exitFullscreen();
+
+          const todosBtn = document.querySelector('.filter-button[data-filter="todos"]');
+          if (todosBtn && !todosBtn.classList.contains("active")) {
+            try { todosBtn.click(); } catch (err) { /* ignore */ }
+          }
+
+          const wantGrade = data.view === "grade" || data.view === "sinopses";
+          const viewMode = wantGrade ? "sinopses" : "lista";
+          if (typeof window.setAcervoViewMode === "function") {
+            window.setAcervoViewMode(viewMode);
+          } else {
+            const modeBtn = document.querySelector(
+              '.view-mode-button[data-view="' + (wantGrade ? "sinopses" : "lista") + '"]'
+            );
+            const acervoSectionFallback = document.getElementById("acervo");
+            if (modeBtn) {
+              try { modeBtn.click(); } catch (err) { /* ignore */ }
+            } else if (acervoSectionFallback) {
+              acervoSectionFallback.classList.toggle("view-list", !wantGrade);
+            }
+            if (typeof window.clearAcervoListDetail === "function") {
+              window.clearAcervoListDetail();
+            } else if (acervoSectionFallback) {
+              acervoSectionFallback.classList.remove("list-detail-open");
+              document.querySelectorAll(".document-card.list-detail-active").forEach(function (el) {
+                el.classList.remove("list-detail-active");
+              });
+            }
+          }
+
+          const visible = document.getElementById("visible-documents");
+          const acervoSection = document.getElementById("acervo");
+          if (visible && card.parentElement !== visible) {
+            visible.appendChild(card);
+          }
+          card.style.display = "flex";
+          card.classList.remove("list-detail-active");
+          if (acervoSection) acervoSection.classList.remove("list-detail-open");
+
+          /* Mirror listagem click: open full card detail on the page */
+          if (data.openDetail && !wantGrade && acervoSection) {
+            card.classList.add("list-detail-active");
+            acervoSection.classList.add("list-detail-open");
+          }
+
+          clearAcervoVoiceHit();
+          card.classList.add("acervo-voice-hit");
+          voiceHitTimer = setTimeout(clearAcervoVoiceHit, 5200);
+
+          if (!stayFs) {
+            try {
+              if (acervoSection) acervoSection.scrollIntoView({ behavior: "smooth", block: "start" });
+            } catch (err) { /* ignore */ }
+            window.setTimeout(function () {
+              try {
+                card.scrollIntoView({ behavior: "smooth", block: "center" });
+              } catch (err) { /* ignore */ }
+            }, 180);
+          }
+        }
+
+        window.addEventListener("message", function (ev) {
+          const data = ev && ev.data;
+          if (!data || data.type !== "viz-dock") return;
+          if (data.action === "enter-fs") setFullscreen(true);
+          else if (data.action === "exit-fs") setFullscreen(false);
+          else if (data.action === "set-fs-bg") {
+            applyParentFsBg(data.bg, data.color, {
+              rgba: data.rgba,
+              veil: data.veil,
+              alpha: data.alpha,
+              passThrough: data.passThrough
+            });
+          }
+          else if (data.action === "set-overlay") setOverlay(!!data.overlay, true);
+          else if (data.action === "toggle-overlay") {
+            setOverlay(!dock.classList.contains("is-overlay"), true);
+          } else if (data.action === "set-scale") {
+            applyScale(data.scale, true);
+          } else if (data.action === "nudge-scale") {
+            applyScale(currentScale + (Number(data.delta) || 0), true);
+          } else if (data.action === "chrome") {
+            setChromeOpen(!!data.open);
+          } else if (data.action === "drag-start") {
+            beginDockDrag(Number(data.screenX), Number(data.screenY), { fromIframe: true });
+          } else if (data.action === "drag-move") {
+            if (dragState.dragging && dragState.fromIframe) {
+              moveDockDrag(Number(data.screenX), Number(data.screenY));
+            }
+          } else if (data.action === "drag-end") {
+            if (dragState.dragging && dragState.fromIframe) {
+              if (isFinite(Number(data.screenX)) && isFinite(Number(data.screenY))) {
+                moveDockDrag(Number(data.screenX), Number(data.screenY));
+              }
+              endDockDrag();
+            }
+          } else if (data.action === "show-item") {
+            revealAcervoItem(data);
+          }
+        });
+
+        try {
+          if (typeof BroadcastChannel !== "undefined") {
+            const bc = new BroadcastChannel("biblioteca-digital-acervo");
+            bc.onmessage = function (ev) {
+              const data = ev && ev.data;
+              if (!data || data.action !== "show-item") return;
+              revealAcervoItem(data);
+            };
+          }
+        } catch (err) { /* ignore */ }
+
+        window.addEventListener("storage", function (ev) {
+          if (!ev || ev.key !== "bd-show-acervo-item" || !ev.newValue) return;
+          try {
+            const data = JSON.parse(ev.newValue);
+            if (data && (data.code || data.title)) revealAcervoItem(data);
+          } catch (err) { /* ignore */ }
+        });
+
+        window.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && dock.classList.contains("is-fullscreen")) {
+            e.preventDefault();
+            exitFullscreen();
+          }
+        });
+      })();
     </script>
   </body>
 </html>
