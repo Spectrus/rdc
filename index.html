@@ -4897,7 +4897,8 @@ video-synopsis {
             </form>
             <p class="aviso-status" id="avisoStatus" role="status"></p>
             <div class="aviso-google" id="avisoGoogle">
-                <p>Se o Google lhe reconhecer nesta visita (e você confirmar), a casa passa a escrever-lhe a cada peça nova e, de quinze em quinze dias, um breve recado do acervo.</p>
+                <p>Ou peça ao Google para o reconhecer — se confirmar a conta, a casa passa a escrever-lhe.</p>
+                <button type="button" id="avisoGoogleBtn">Continuar com o Google</button>
                 <p class="aviso-status" id="googleEntradaStatus" role="status"></p>
             </div>
         </div>
@@ -9478,6 +9479,33 @@ function openVideo(videoId, isProtected) {
       }
 
       function bindGoogleEntrada() {
+        const btn = document.getElementById("avisoGoogleBtn");
+        const status = document.getElementById("googleEntradaStatus");
+        if (btn) {
+          btn.addEventListener("click", async () => {
+            if (status) status.textContent = "A abrir o Google…";
+            btn.disabled = true;
+            try {
+              await entrarComGoogle();
+              if (status && !status.textContent) {
+                status.textContent = "A casa reconheceu-lhe. Escrevemos a cada peça nova e, de quinze em quinze dias, um recado do acervo.";
+              }
+            } catch (err) {
+              const code = err && err.code;
+              if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+                if (status) status.textContent = "Cancelou o Google — pode usar o formulário acima, se preferir.";
+              } else {
+                console.warn("Google aviso:", err);
+                if (status) {
+                  status.textContent = "Não foi possível entrar com o Google agora. Use o formulário com o seu correio.";
+                }
+              }
+            } finally {
+              btn.disabled = false;
+            }
+          });
+        }
+        /* Optional One Tap prompt only if Web Client ID is configured in this file */
         startGoogleOneTap();
       }
       if (document.readyState === "loading") {
