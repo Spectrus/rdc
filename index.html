@@ -134,12 +134,149 @@
       }
     }
 
+    // Keep cards as direct grid children so the existing filters and sorting still work.
+    function instalarSinopses(doc, win){
+      const acervo = doc.getElementById('acervo');
+      if (!acervo) return;
+      const style = doc.createElement('style');
+      style.textContent = `
+        #acervo:not(.view-list) .rdc-masonry { position:relative; }
+        #acervo:not(.view-list) .rdc-masonry > .document-card {
+          position:absolute; box-sizing:border-box; height:auto; min-height:0;
+        }
+        #acervo:not(.view-list) .rdc-synopsis {
+          flex:none; box-sizing:content-box; min-height:0; overflow:hidden;
+          transition:height 400ms cubic-bezier(.22,1,.36,1);
+        }
+        #acervo:not(.view-list) .rdc-synopsis.rdc-clamped {
+          display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3;
+        }
+        #acervo .rdc-synopsis-toggle {
+          align-self:flex-start; border:0; background:transparent;
+          color:var(--primary-color, #4a2c2a); font:inherit; font-weight:600;
+          text-decoration:underline; text-underline-offset:3px; cursor:pointer;
+          padding:4px 0; margin:0 0 1rem; border-radius:4px;
+        }
+        #acervo .rdc-synopsis-toggle:focus-visible { outline:2px solid currentColor; outline-offset:4px; }
+        #acervo .rdc-synopsis-toggle[hidden], #acervo.view-list .rdc-synopsis-toggle { display:none; }
+        #acervo.view-list .rdc-synopsis { height:auto !important; }
+        @media (prefers-reduced-motion:reduce) {
+          #acervo .rdc-synopsis { transition:none !important; }
+        }
+      `;
+      doc.head.appendChild(style);
+      const states = new Map();
+      const entries = new WeakMap();
+      let serial = 0, pending = 0;
+      const set = (el, prop, value) => { if (el.style[prop] !== value) el.style[prop] = value; };
+      const schedule = () => { if (!pending) pending = win.requestAnimationFrame(layout); };
+      const resize = new win.ResizeObserver(schedule);
+      const mutations = new win.MutationObserver(schedule);
+      const observe = () => mutations.observe(acervo, {childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:['class','style']});
+
+      function prepare(card){
+        const p = card.querySelector(':scope > p, :scope > .video-synopsis');
+        if (!p) return null;
+        let entry = entries.get(p);
+        if (entry) return entry;
+        const key = card.dataset.cloudId || (cardCode(card) + ':' + cardTitle(card));
+        const button = doc.createElement('button');
+        button.type = 'button'; button.className = 'rdc-synopsis-toggle';
+        if (!p.id) p.id = 'rdc-synopsis-' + (++serial);
+        button.setAttribute('aria-controls', p.id);
+        p.classList.add('rdc-synopsis');
+        p.after(button);
+        entry = {p, button, key, expanded:states.get(key) || false, width:0, text:null, full:0, preview:0};
+        entries.set(p, entry);
+        const settle = () => p.classList.toggle('rdc-clamped', !entry.expanded);
+        p.addEventListener('transitionend', e => { if (e.propertyName === 'height') settle(); });
+        button.addEventListener('click', e => {
+          e.stopPropagation();
+          entry.expanded = !entry.expanded;
+          states.set(key, entry.expanded);
+          p.classList.remove('rdc-clamped');
+          set(p, 'height', (entry.expanded ? entry.full : entry.preview) + 'px');
+          button.textContent = entry.expanded ? 'Ler menos' : 'Ler mais';
+          button.setAttribute('aria-expanded', String(entry.expanded));
+          if (win.matchMedia('(prefers-reduced-motion: reduce)').matches) settle();
+          schedule();
+        });
+        resize.observe(card);
+        return entry;
+      }
+
+      function layout(){
+        pending = 0;
+        mutations.disconnect();
+        const list = acervo.classList.contains('view-list');
+        acervo.querySelectorAll('.documents-grid').forEach(grid => {
+          resize.observe(grid);
+          const cards = Array.from(grid.children).filter(c => c.classList.contains('document-card'));
+          if (list) {
+            grid.classList.remove('rdc-masonry'); set(grid, 'height', '');
+            cards.forEach(card => {
+              ['width','top','left'].forEach(prop => set(card, prop, ''));
+              const p = card.querySelector('.rdc-synopsis');
+              if (p) { set(p, 'height', ''); p.classList.remove('rdc-clamped'); const entry = entries.get(p); if (entry) entry.width = 0; }
+            });
+            return;
+          }
+          if (!grid.clientWidth || win.getComputedStyle(grid).display === 'none') return;
+          const css = win.getComputedStyle(grid);
+          const columns = Math.max(1, css.gridTemplateColumns.split(' ').filter(Boolean).length);
+          const gap = parseFloat(css.columnGap) || 0;
+          const rowGap = parseFloat(css.rowGap) || gap;
+          const width = (grid.clientWidth - gap * (columns - 1)) / columns;
+          const heights = Array(columns).fill(0);
+          grid.classList.add('rdc-masonry');
+          let index = 0;
+          cards.forEach(card => {
+            if (win.getComputedStyle(card).display === 'none') return;
+            const column = index++ % columns;
+            set(card, 'width', width + 'px');
+            const entry = prepare(card);
+            if (entry) {
+              const {p, button} = entry;
+              if (entry.width !== width || entry.text !== p.textContent) {
+                entry.width = width; entry.text = p.textContent;
+                set(p, 'transition', 'none'); p.classList.remove('rdc-clamped'); set(p, 'height', 'auto');
+                const pc = win.getComputedStyle(p);
+                const line = parseFloat(pc.lineHeight) || parseFloat(pc.fontSize) * 1.2;
+                entry.full = p.getBoundingClientRect().height - (parseFloat(pc.paddingTop) || 0) - (parseFloat(pc.paddingBottom) || 0);
+                entry.preview = Math.min(entry.full, line * 3);
+                button.hidden = entry.full <= line * 3 + 1;
+                set(p, 'height', (entry.expanded ? entry.full : entry.preview) + 'px');
+                p.classList.toggle('rdc-clamped', !entry.expanded);
+                void p.offsetHeight;
+                set(p, 'transition', '');
+                button.textContent = entry.expanded ? 'Ler menos' : 'Ler mais';
+                button.setAttribute('aria-expanded', String(entry.expanded));
+              }
+            }
+            set(card, 'left', (column * (width + gap)) + 'px');
+            set(card, 'top', heights[column] + 'px');
+            heights[column] += card.offsetHeight + rowGap;
+          });
+          set(grid, 'height', Math.max(0, ...heights.map(h => h - rowGap)) + 'px');
+        });
+        observe();
+      }
+      observe();
+      win.addEventListener('resize', schedule);
+      doc.fonts.ready.then(() => {
+        acervo.querySelectorAll('.rdc-synopsis').forEach(p => { const entry = entries.get(p); if (entry) entry.width = 0; });
+        schedule();
+      });
+      schedule();
+    }
+
     frame.addEventListener('load', async function(){
       let doc, win;
       try { doc = frame.contentDocument; win = frame.contentWindow; } catch (_) { return; }
       if (!doc || !win) return;
       document.title = doc.title || document.title;
       for (let i=0; i<40 && !injetar(doc); i++) await sleep(150);
+      instalarSinopses(doc, win);
       const obs = new MutationObserver(() => deduplicar(doc));
       try { obs.observe(doc.documentElement, {childList:true, subtree:true}); } catch (_) {}
       sincronizarFirebase(win).then(() => {
