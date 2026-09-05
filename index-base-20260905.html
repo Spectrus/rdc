@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script>
+    // PDF editions of the seven Google Docs, including entries loaded from Firebase.
+    window.bibliotecaPdfUrl = function (value) {
+      const urls = {
+        "1KxWtuRCEYjzgt7S59QuqvvfpVhDjDo5xSggH0A2d51M": "/pdfs/historia-da-cachaca.pdf",
+        "1k3WIBGl-WN5BJSHP8FQ0f41d8DcyPaygiLLIhMnsDao": "/pdfs/primeira-rodovia-pavimentada.pdf",
+        "18ao4PhN-X0Lh79Rj5VqJJrNXt0C1SJsSUlyvH7O6zXo": "/pdfs/heranca-dos-castanheiras.pdf",
+        "1lI3uM-_IUujDaNPjaCX-oMHmcPYfFgdQEGrsDe-vak0": "/pdfs/pessoas-e-personalidades-ii.pdf",
+        "1-_LQXryDZXZQT_1Wr6W8D3uYdYHrkJWrK9-Rj0AhOBE": "/pdfs/deus-me-livre-nao-ser-mineira.pdf",
+        "1oHL3vdaJrFRpUhvpgclWjtHKlflN3TA1baal_-BIfSg": "/pdfs/ser-mineiro.pdf",
+        "1cdadX6OPeQYiQlHAfeM7NGLI-3gMo4Zg-v7NxQykpEk": "/pdfs/alexandre-gustave-eiffel.pdf"
+};
+      try {
+        const url = new URL(value, location.href);
+        if (url.hostname !== 'docs.google.com' && url.hostname !== 'drive.google.com') return value;
+        const match = url.pathname.match(/\/d\/([^/]+)/);
+        return match && urls[match[1]] ? urls[match[1]] : value;
+      } catch (_) { return value; }
+    };
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
@@ -3697,7 +3718,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Ser Mineiro</div>
                             <div class="timeline-author-horizontal">José Batista Queiroz</div>
                             <div class="timeline-tag-horizontal">Conto</div>
-                            <a href="https://docs.google.com/document/d/1oHL3vdaJrFRpUhvpgclWjtHKlflN3TA1baal_-BIfSg/edit?usp=sharing" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler obra</a>
+                            <a href="/pdfs/ser-mineiro.pdf" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler obra</a>
                         </div>
                     </div>
                     
@@ -4140,7 +4161,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">A história da Cachaça - Pinga e Água Ardente</div>
                             <div class="timeline-author-horizontal">Youtube</div>
                             <div class="timeline-tag-horizontal">Conto</div>
-                            <a href="https://docs.google.com/document/d/1KxWtuRCEYjzgt7S59QuqvvfpVhDjDo5xSggH0A2d51M/edit?usp=sharing" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="/pdfs/historia-da-cachaca.pdf" class="timeline-button-horizontal">Ler obra</a>
                         </div>
                     </div>
                     
@@ -4285,7 +4306,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">A Herança dos Castanheiras</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Documento</div>
-                            <a href="https://docs.google.com/document/d/18ao4PhN-X0Lh79Rj5VqJJrNXt0C1SJsSUlyvH7O6zXo/edit?usp=sharing" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="/pdfs/heranca-dos-castanheiras.pdf" class="timeline-button-horizontal">Ler obra</a>
                         </div>
                     </div>
                     
@@ -4318,7 +4339,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Deus me livre não ser mineira</div>
                             <div class="timeline-author-horizontal">Fernanda Grey</div>
                             <div class="timeline-tag-horizontal">Conto</div>
-                            <a href="https://docs.google.com/document/d/1-_LQXryDZXZQT_1Wr6W8D3uYdYHrkJWrK9-Rj0AhOBE/edit?usp=sharing" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler obra</a>
+                            <a href="/pdfs/deus-me-livre-nao-ser-mineira.pdf" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler obra</a>
                         </div>
                     </div>
                     
@@ -4329,7 +4350,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Primeira rodovia pavimentada do Brasil</div>
                             <div class="timeline-author-horizontal">Fabio Lucas Carvalho</div>
                             <div class="timeline-tag-horizontal">Documento</div>
-                            <a href="https://docs.google.com/document/d/1k3WIBGl-WN5BJSHP8FQ0f41d8DcyPaygiLLIhMnsDao/edit?usp=sharing" class="timeline-button-horizontal">Ler obra</a>
+                            <a href="/pdfs/primeira-rodovia-pavimentada.pdf" class="timeline-button-horizontal">Ler obra</a>
                         </div>
                     </div>
 
@@ -4436,7 +4457,7 @@ video-synopsis {
                     <p>Lenda da história da cachaça no Brasil, sua produção artesanal e importância cultural na sociedade brasileira.</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="https://docs.google.com/document/d/1KxWtuRCEYjzgt7S59QuqvvfpVhDjDo5xSggH0A2d51M/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
+                        <a href="/pdfs/historia-da-cachaca.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -4474,7 +4495,7 @@ video-synopsis {
                     <p>Divertida crônica que a autora destaca com bom humor e descreve, de forma carinhosa, as características dos mineiros</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="https://docs.google.com/document/d/1-_LQXryDZXZQT_1Wr6W8D3uYdYHrkJWrK9-Rj0AhOBE/edit?usp=sharing" class="read-button" target="_blank" rel="noopener noreferrer">Ler</a>
+                        <a href="/pdfs/deus-me-livre-nao-ser-mineira.pdf" class="read-button" target="_blank" rel="noopener noreferrer">Ler</a>
                     </div>
                 </div>
                 
@@ -4486,7 +4507,7 @@ video-synopsis {
                     <p>O Poema que diz do mineiro: da simplicidade e pureza, humildade e modéstia, coragem e bravura, fidalguia e elegância. Foi publicado originalmente por José Batista Queiroz. É publicado posteriormente como de autoria de Carlos Drummond de Andrade e também por Fernando Sabino.</p>
                     <div class="document-footer">
                         <span class="document-type">Conto</span>
-                        <a href="https://docs.google.com/document/d/1oHL3vdaJrFRpUhvpgclWjtHKlflN3TA1baal_-BIfSg/edit?usp=sharing" class="read-button" target="_blank" rel="noopener noreferrer">Ler</a>
+                        <a href="/pdfs/ser-mineiro.pdf" class="read-button" target="_blank" rel="noopener noreferrer">Ler</a>
                     </div>
                 </div>
                 
@@ -4748,7 +4769,7 @@ video-synopsis {
                     <p>Uma obra prestigiada pelo Imperador Dom Pedro II ligando Petrópolis a Juiz de Fora.</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="https://docs.google.com/document/d/1k3WIBGl-WN5BJSHP8FQ0f41d8DcyPaygiLLIhMnsDao/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
+                        <a href="/pdfs/primeira-rodovia-pavimentada.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 <div class="document-card" style="animation-delay: 1.9s;">
@@ -4841,7 +4862,7 @@ video-synopsis {
                     <p>Documento sobre a herança cultural e familiar dos Castanheiras, preservando a história e tradições da família.</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="https://docs.google.com/document/d/18ao4PhN-X0Lh79Rj5VqJJrNXt0C1SJsSUlyvH7O6zXo/edit?usp=sharing" class="read-button" target="_blank">Ler</a>
+                        <a href="/pdfs/heranca-dos-castanheiras.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -7987,7 +8008,7 @@ function openVideo(videoId, isProtected) {
                         <p>${c.sinopse ?? c.descricao ?? c.description ?? ''}</p>
                         <div class="document-footer">
                             <span class="document-type">${type}</span>
-                            <a href="${c.url ?? c.link ?? '#'}" class="read-button" target="_blank">${this.getButtonText(type)}</a>
+                            <a href="${window.bibliotecaPdfUrl(c.url ?? c.link ?? '#')}" class="read-button" target="_blank">${this.getButtonText(type)}</a>
                         </div>
                     `;
                     // floating oval edit button in top-right
@@ -8115,7 +8136,7 @@ function openVideo(videoId, isProtected) {
                     <p>${memory.sinopse || memory.description || ''}</p>
                     <div class="document-footer">
                         <span class="document-type">${normalizedType}</span>
-                        <a href="${memory.link}" class="read-button" target="_blank">
+                        <a href="${window.bibliotecaPdfUrl(memory.link)}" class="read-button" target="_blank">
                             ${this.getButtonText(memory.type)}
                         </a>
                         <button class="edit-card-btn" title="Editar">✏️</button>
@@ -8190,7 +8211,7 @@ function openVideo(videoId, isProtected) {
                         <div class="timeline-text-horizontal">${memory.title}</div>
                         <div class="timeline-author-horizontal">${memory.author}</div>
                         <div class="timeline-tag-horizontal">${normalizedType}</div>
-                        <a href="${memory.link}" class="timeline-button-horizontal" target="_blank">${buttonText}</a>
+                        <a href="${window.bibliotecaPdfUrl(memory.link)}" class="timeline-button-horizontal" target="_blank">${buttonText}</a>
                     </div>
                 `;
 
@@ -9685,7 +9706,7 @@ function openVideo(videoId, isProtected) {
             <p><strong>Autor:</strong> ${data.autor}</p>
             <p><strong>Descrição:</strong> ${data.descricao}</p>
             <p><strong>Tipo:</strong> ${data.tipo}</p>
-            <a href="${data.url}" target="_blank">Ver</a>
+            <a href="${window.bibliotecaPdfUrl(data.url)}" target="_blank">Ver</a>
           `;
           lista.appendChild(card);
         });
@@ -9799,7 +9820,7 @@ function openVideo(videoId, isProtected) {
             description: sinopse,
             sinopse: sinopse,
             type: d.tipo,
-            link: d.url,
+            link: window.bibliotecaPdfUrl(d.url),
             code: d.codigo || 0,
             timestamp: d.createdAt?.toDate?.()?.toISOString?.() || ''
           });
