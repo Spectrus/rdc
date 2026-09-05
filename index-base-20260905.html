@@ -2,9 +2,13 @@
 <html lang="pt-BR">
 <head>
     <script>
-    // PDF editions of the seven Google Docs, including entries loaded from Firebase.
+    // PDF editions used by static cards and entries loaded from Firebase.
     window.bibliotecaPdfUrl = function (value) {
       const urls = {
+        "1lVI5bC4QIkjwKZiVF00JSDlpLM2flZUL": "/pdfs/certidao-casamento-avos.pdf",
+        "1p7ExGzkHrSUf6ekhRYUO6yaenOIUqT2B": "/pdfs/diploma-reinaldo.pdf",
+        "1tKlkE7QiAT11pJ2hYNBM71y8XDw4su7c": "/pdfs/pessoas-e-personalidades-i.pdf",
+        "1MPyNPu-Wu3mRFmZJ_naUFQb4XMFVVLyZ6ODI9M2IX9A": "/pdfs/eduardo-biagioni-visita.pdf",
         "1KxWtuRCEYjzgt7S59QuqvvfpVhDjDo5xSggH0A2d51M": "/pdfs/historia-da-cachaca.pdf",
         "1k3WIBGl-WN5BJSHP8FQ0f41d8DcyPaygiLLIhMnsDao": "/pdfs/primeira-rodovia-pavimentada.pdf",
         "18ao4PhN-X0Lh79Rj5VqJJrNXt0C1SJsSUlyvH7O6zXo": "/pdfs/heranca-dos-castanheiras.pdf",
@@ -15,6 +19,9 @@
 };
       try {
         const url = new URL(value, location.href);
+        if (url.origin === location.origin && /\/PaieMae2\.jpeg$/i.test(url.pathname)) {
+          return "/pdfs/pasta-de-registro.pdf";
+        }
         if (url.hostname !== 'docs.google.com' && url.hostname !== 'drive.google.com') return value;
         const match = url.pathname.match(/\/d\/([^/]+)/);
         return match && urls[match[1]] ? urls[match[1]] : value;
@@ -3576,7 +3583,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Pasta de Registro</div>
                             <div class="timeline-author-horizontal">Álvaro Lobo Castanheira e Maria Duarte Castanheira</div>
                     <div class="timeline-tag-horizontal">Documento</div>
-                    <a href="PaieMae2.jpeg" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ver obra</a>
+                    <a href="/pdfs/pasta-de-registro.pdf" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ver obra</a>
                         </div>
                     </div>
                     
@@ -3598,7 +3605,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Pessoas e personalidades I</div>
                             <div class="timeline-author-horizontal">Mauro Dutra de Faria</div>
                             <div class="timeline-tag-horizontal">Mídia</div>
-                            <a href="https://drive.google.com/file/d/1tKlkE7QiAT11pJ2hYNBM71y8XDw4su7c/view?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
+                            <a href="/pdfs/pessoas-e-personalidades-i.pdf" class="timeline-button-horizontal">Ver obra</a>
                         </div>
                     </div>
                     
@@ -4152,7 +4159,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Eduardo Biagioni visita Lenita e Carmem Friche</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Documento</div>
-                            <a href="https://docs.google.com/presentation/d/1MPyNPu-Wu3mRFmZJ_naUFQb4XMFVVLyZ6ODI9M2IX9A/edit?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
+                            <a href="/pdfs/eduardo-biagioni-visita.pdf" class="timeline-button-horizontal">Ver obra</a>
                         </div>
                     </div>
                     
@@ -4251,7 +4258,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Certidão de Casamento Vovô com Vovó, em Portugal</div>
                             <div class="timeline-author-horizontal">Conservatória de Vila Nova de Gaia</div>
                             <div class="timeline-tag-horizontal">Documento</div>
-                            <a href="https://drive.google.com/file/d/1lVI5bC4QIkjwKZiVF00JSDlpLM2flZUL/view?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
+                            <a href="/pdfs/certidao-casamento-avos.pdf" class="timeline-button-horizontal">Ver obra</a>
                         </div>
                     </div>
                     
@@ -4262,7 +4269,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Diploma concedido a Reinaldo Duarte Castanheira</div>
                             <div class="timeline-author-horizontal">ACLCL</div>
                             <div class="timeline-tag-horizontal">Documento</div>
-                            <a href="https://drive.google.com/file/d/1p7ExGzkHrSUf6ekhRYUO6yaenOIUqT2B/view?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
+                            <a href="/pdfs/diploma-reinaldo.pdf" class="timeline-button-horizontal">Ver obra</a>
                         </div>
                     </div>
                     
@@ -4709,7 +4716,7 @@ video-synopsis {
                     <p>Documento expedido em 30 de novembro de 2021, para compor meu processo de cidadania portuguesa, em andamento na Conservatória de Lisboa.</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="https://drive.google.com/file/d/1lVI5bC4QIkjwKZiVF00JSDlpLM2flZUL/view?usp=sharing" class="read-button" target="_blank">Ler</a>
+                        <a href="/pdfs/certidao-casamento-avos.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 
@@ -4745,7 +4752,7 @@ video-synopsis {
                     <p>Alegre visita que Eduardo Biagioni fez às minhas primas Lenita e Carmem Friche, recordando e lembrando épocas do passado, em Lafaiete</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="https://docs.google.com/presentation/d/1MPyNPu-Wu3mRFmZJ_naUFQb4XMFVVLyZ6ODI9M2IX9A/edit?usp=sharing" class="read-button" target="_blank">Ver</a>
+                        <a href="/pdfs/eduardo-biagioni-visita.pdf" class="read-button" target="_blank">Ver</a>
                     </div>
                 </div>
                 
@@ -4815,7 +4822,7 @@ video-synopsis {
                     <p>Diploma da Ordem dos Construtores do Progresso de Conselheiro Lafaiete</p>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="https://drive.google.com/file/d/1p7ExGzkHrSUf6ekhRYUO6yaenOIUqT2B/view?usp=sharing" class="read-button" target="_blank">Ler</a>
+                        <a href="/pdfs/diploma-reinaldo.pdf" class="read-button" target="_blank">Ler</a>
                     </div>
                 </div>
                 <div class="document-card" style="animation-delay: 2.2s;">
@@ -4888,7 +4895,7 @@ video-synopsis {
                     <p>Foto de um evento no Grupo Escolar Domingos Bebiano com presenças de pessoas e personalidades de uma época.</p>
                     <div class="document-footer">
                         <span class="document-type">Mídia</span>
-                        <a href="https://drive.google.com/file/d/1tKlkE7QiAT11pJ2hYNBM71y8XDw4su7c/view?usp=sharing" class="read-button" target="_blank">Ver</a>
+                        <a href="/pdfs/pessoas-e-personalidades-i.pdf" class="read-button" target="_blank">Ver</a>
                     </div>
                 </div>
                
@@ -4902,7 +4909,7 @@ video-synopsis {
                      Esta obra é uma janela para um tempo em que os sentimentos eram muitas vezes expressos com discrição, mas permaneciam gravados na firmeza de um gesto e na proximidade entre duas pessoas. A colorização aproxima o passado dos olhos de hoje, permitindo que a beleza desse casal seja contemplada com nova sensibilidade.  É um registro de afeto, história e permanência, um momento antigo que agora respira em cores.</div>
                     <div class="document-footer">
                         <span class="document-type">Documento</span>
-                        <a href="PaieMae2.jpeg" class="read-button" target="_blank" rel="noopener noreferrer" onclick="window.open('PaieMae2.jpeg', '_blank', 'noopener,noreferrer'); return false;">Ver</a>
+                        <a href="/pdfs/pasta-de-registro.pdf" class="read-button" target="_blank" rel="noopener noreferrer">Ver</a>
                     </div>
                 </div>
                 
