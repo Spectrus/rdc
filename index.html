@@ -134,90 +134,128 @@
       }
     }
 
-    // Keep cards as direct grid children so the existing filters and sorting still work.
+    // Explicit target heights keep animation independent of resize notifications.
     function instalarSinopses(doc, win){
       const acervo = doc.getElementById('acervo');
       if (!acervo) return;
       const style = doc.createElement('style');
       style.textContent = `
-        #acervo:not(.view-list) .rdc-masonry { position:relative; }
-        #acervo:not(.view-list) .rdc-masonry > .document-card {
-          position:absolute; box-sizing:border-box; height:auto; min-height:0;
-        }
-        #acervo:not(.view-list) .rdc-synopsis {
-          flex:none; box-sizing:content-box; min-height:0; overflow:hidden;
+        #acervo:not(.view-list) .rdc-masonry {
+          position:relative; overflow-anchor:none;
           transition:height 400ms cubic-bezier(.22,1,.36,1);
         }
-        #acervo:not(.view-list) .rdc-synopsis.rdc-clamped {
-          display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3;
+        #acervo:not(.view-list) .rdc-masonry > .document-card {
+          position:absolute; box-sizing:border-box; min-height:0;
+          animation:none !important; transform:none !important;
+          transition:top 400ms cubic-bezier(.22,1,.36,1),
+            height 400ms cubic-bezier(.22,1,.36,1), box-shadow .2s ease;
+        }
+        #acervo:not(.view-list) .rdc-synopsis {
+          flex:0 0 auto; box-sizing:content-box; min-height:0; overflow:hidden;
+          transition:height 400ms cubic-bezier(.22,1,.36,1);
         }
         #acervo .rdc-synopsis-toggle {
-          align-self:flex-start; border:0; background:transparent;
+          align-self:flex-start; flex:0 0 auto; border:0; background:transparent;
           color:var(--primary-color, #4a2c2a); font:inherit; font-weight:600;
           text-decoration:underline; text-underline-offset:3px; cursor:pointer;
           padding:4px 0; margin:0 0 1rem; border-radius:4px;
         }
         #acervo .rdc-synopsis-toggle:focus-visible { outline:2px solid currentColor; outline-offset:4px; }
-        #acervo .rdc-synopsis-toggle[hidden], #acervo.view-list .rdc-synopsis-toggle { display:none; }
+        #acervo .rdc-synopsis-toggle[data-unneeded] { visibility:hidden; pointer-events:none; }
+        #acervo.view-list .rdc-synopsis-toggle { display:none; }
         #acervo.view-list .rdc-synopsis { height:auto !important; }
+        #acervo .rdc-measuring, #acervo .rdc-measuring > .document-card,
+        #acervo .rdc-measuring .rdc-synopsis { transition:none !important; }
         @media (prefers-reduced-motion:reduce) {
+          #acervo .rdc-masonry, #acervo .rdc-masonry > .document-card,
           #acervo .rdc-synopsis { transition:none !important; }
         }
       `;
       doc.head.appendChild(style);
-      const states = new Map();
+      const expanded = new Map();
       const entries = new WeakMap();
+      const grids = new Map();
       let serial = 0, pending = 0;
       const set = (el, prop, value) => { if (el.style[prop] !== value) el.style[prop] = value; };
-      const schedule = () => { if (!pending) pending = win.requestAnimationFrame(layout); };
-      const resize = new win.ResizeObserver(schedule);
-      const mutations = new win.MutationObserver(schedule);
-      const observe = () => mutations.observe(acervo, {childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:['class','style']});
-
+      const mutations = new win.MutationObserver(() => schedule());
+      const observe = () => mutations.observe(acervo, {
+        childList:true, subtree:true, characterData:true,
+        attributes:true, attributeFilter:['class','style']
+      });
+      function schedule(){
+        if (!pending) pending = win.requestAnimationFrame(rebuild);
+      }
+      // Only container WIDTH changes invalidate measurements. Animated heights do not.
+      const resize = new win.ResizeObserver(records => {
+        if (records.some(r => {
+          const state = grids.get(r.target);
+          return state && Math.abs(r.contentRect.width - state.width) > 0.5;
+        })) schedule();
+      });
+      function keyFor(card){
+        return card.dataset.cloudId || (cardCode(card) + ':' + cardTitle(card));
+      }
       function prepare(card){
         const p = card.querySelector(':scope > p, :scope > .video-synopsis');
         if (!p) return null;
         let entry = entries.get(p);
         if (entry) return entry;
-        const key = card.dataset.cloudId || (cardCode(card) + ':' + cardTitle(card));
         const button = doc.createElement('button');
         button.type = 'button'; button.className = 'rdc-synopsis-toggle';
         if (!p.id) p.id = 'rdc-synopsis-' + (++serial);
         button.setAttribute('aria-controls', p.id);
-        p.classList.add('rdc-synopsis');
-        p.after(button);
-        entry = {p, button, key, expanded:states.get(key) || false, width:0, text:null, full:0, preview:0};
+        p.classList.add('rdc-synopsis'); p.after(button);
+        entry = {p, button, key:keyFor(card), full:0, preview:0};
         entries.set(p, entry);
-        const settle = () => p.classList.toggle('rdc-clamped', !entry.expanded);
-        p.addEventListener('transitionend', e => { if (e.propertyName === 'height') settle(); });
-        button.addEventListener('click', e => {
-          e.stopPropagation();
-          entry.expanded = !entry.expanded;
-          states.set(key, entry.expanded);
-          p.classList.remove('rdc-clamped');
-          set(p, 'height', (entry.expanded ? entry.full : entry.preview) + 'px');
-          button.textContent = entry.expanded ? 'Ler menos' : 'Ler mais';
-          button.setAttribute('aria-expanded', String(entry.expanded));
-          if (win.matchMedia('(prefers-reduced-motion: reduce)').matches) settle();
-          schedule();
+        button.addEventListener('click', event => {
+          event.stopPropagation();
+          if (button.hasAttribute('data-unneeded')) return;
+          if (pending) { win.cancelAnimationFrame(pending); rebuild(); }
+          expanded.set(entry.key, !expanded.get(entry.key));
+          mutations.disconnect();
+          const state = grids.get(card.parentElement);
+          if (state) place(state);
+          observe();
         });
-        resize.observe(card);
         return entry;
       }
-
-      function layout(){
+      function place(state){
+        const heights = Array(state.columns).fill(0);
+        state.cards.forEach((card, index) => {
+          const entry = entries.get(card.querySelector('.rdc-synopsis'));
+          const open = entry && expanded.get(entry.key);
+          const extra = open ? Math.max(0, entry.full - entry.preview) : 0;
+          const height = state.baseHeight + extra;
+          const column = index % state.columns;
+          if (entry) {
+            set(entry.p, 'height', (open ? Math.max(entry.full, entry.preview) : entry.preview) + 'px');
+            const label = open ? 'Ler menos' : 'Ler mais';
+            if (entry.button.textContent !== label) entry.button.textContent = label;
+            entry.button.setAttribute('aria-expanded', String(!!open));
+          }
+          set(card, 'height', height + 'px');
+          set(card, 'left', (column * (state.cardWidth + state.gap)) + 'px');
+          set(card, 'top', heights[column] + 'px');
+          heights[column] += height + state.rowGap;
+        });
+        set(state.grid, 'height', Math.max(0, ...heights.map(h => h - state.rowGap)) + 'px');
+      }
+      function rebuild(){
         pending = 0;
         mutations.disconnect();
         const list = acervo.classList.contains('view-list');
+        for (const [grid] of grids) {
+          if (!grid.isConnected) { resize.unobserve(grid); grids.delete(grid); }
+        }
         acervo.querySelectorAll('.documents-grid').forEach(grid => {
-          resize.observe(grid);
-          const cards = Array.from(grid.children).filter(c => c.classList.contains('document-card'));
+          const all = Array.from(grid.children).filter(c => c.classList.contains('document-card'));
           if (list) {
-            grid.classList.remove('rdc-masonry'); set(grid, 'height', '');
-            cards.forEach(card => {
-              ['width','top','left'].forEach(prop => set(card, prop, ''));
+            grid.classList.remove('rdc-masonry');
+            set(grid, 'height', '');
+            all.forEach(card => {
+              ['height','width','top','left'].forEach(prop => set(card, prop, ''));
               const p = card.querySelector('.rdc-synopsis');
-              if (p) { set(p, 'height', ''); p.classList.remove('rdc-clamped'); const entry = entries.get(p); if (entry) entry.width = 0; }
+              if (p) set(p, 'height', '');
             });
             return;
           }
@@ -226,48 +264,45 @@
           const columns = Math.max(1, css.gridTemplateColumns.split(' ').filter(Boolean).length);
           const gap = parseFloat(css.columnGap) || 0;
           const rowGap = parseFloat(css.rowGap) || gap;
-          const width = (grid.clientWidth - gap * (columns - 1)) / columns;
-          const heights = Array(columns).fill(0);
-          grid.classList.add('rdc-masonry');
-          let index = 0;
+          const width = grid.clientWidth;
+          const cardWidth = (width - gap * (columns - 1)) / columns;
+          const cards = all.filter(card => win.getComputedStyle(card).display !== 'none');
+          const state = {grid, cards, width, columns, gap, rowGap, cardWidth, baseHeight:0};
+          if (!grids.has(grid)) resize.observe(grid);
+          grids.set(grid, state);
+          grid.classList.add('rdc-masonry', 'rdc-measuring');
+          // Measure collapsed content once, before painting. All cards share its maximum.
           cards.forEach(card => {
-            if (win.getComputedStyle(card).display === 'none') return;
-            const column = index++ % columns;
-            set(card, 'width', width + 'px');
+            set(card, 'width', cardWidth + 'px'); set(card, 'height', 'auto');
             const entry = prepare(card);
             if (entry) {
               const {p, button} = entry;
-              if (entry.width !== width || entry.text !== p.textContent) {
-                entry.width = width; entry.text = p.textContent;
-                set(p, 'transition', 'none'); p.classList.remove('rdc-clamped'); set(p, 'height', 'auto');
-                const pc = win.getComputedStyle(p);
-                const line = parseFloat(pc.lineHeight) || parseFloat(pc.fontSize) * 1.2;
-                entry.full = p.getBoundingClientRect().height - (parseFloat(pc.paddingTop) || 0) - (parseFloat(pc.paddingBottom) || 0);
-                entry.preview = Math.min(entry.full, line * 3);
-                button.hidden = entry.full <= line * 3 + 1;
-                set(p, 'height', (entry.expanded ? entry.full : entry.preview) + 'px');
-                p.classList.toggle('rdc-clamped', !entry.expanded);
-                void p.offsetHeight;
-                set(p, 'transition', '');
-                button.textContent = entry.expanded ? 'Ler menos' : 'Ler mais';
-                button.setAttribute('aria-expanded', String(entry.expanded));
-              }
+              set(p, 'height', 'auto');
+              const pc = win.getComputedStyle(p);
+              const fontSize = parseFloat(pc.fontSize) || 16;
+              if (pc.lineHeight === 'normal') set(p, 'lineHeight', '1.5');
+              const line = parseFloat(win.getComputedStyle(p).lineHeight) || fontSize * 1.5;
+              const padding = (parseFloat(pc.paddingTop) || 0) + (parseFloat(pc.paddingBottom) || 0);
+              const border = (parseFloat(pc.borderTopWidth) || 0) + (parseFloat(pc.borderBottomWidth) || 0);
+              entry.full = Math.ceil(p.getBoundingClientRect().height - padding - border);
+              entry.preview = line * 3;
+              button.toggleAttribute('data-unneeded', entry.full <= entry.preview + 1);
+              button.tabIndex = button.hasAttribute('data-unneeded') ? -1 : 0;
+              button.textContent = expanded.get(entry.key) ? 'Ler menos' : 'Ler mais';
+              set(p, 'height', entry.preview + 'px');
             }
-            set(card, 'left', (column * (width + gap)) + 'px');
-            set(card, 'top', heights[column] + 'px');
-            heights[column] += card.offsetHeight + rowGap;
           });
-          set(grid, 'height', Math.max(0, ...heights.map(h => h - rowGap)) + 'px');
+          cards.forEach(card => { state.baseHeight = Math.max(state.baseHeight, Math.ceil(card.getBoundingClientRect().height)); });
+          place(state);
+          void grid.offsetHeight;
+          grid.classList.remove('rdc-measuring');
         });
         observe();
       }
-      observe();
       win.addEventListener('resize', schedule);
-      doc.fonts.ready.then(() => {
-        acervo.querySelectorAll('.rdc-synopsis').forEach(p => { const entry = entries.get(p); if (entry) entry.width = 0; });
-        schedule();
-      });
-      schedule();
+      acervo.addEventListener('load', event => { if (event.target.tagName === 'IMG') schedule(); }, true);
+      doc.fonts.ready.then(schedule);
+      rebuild();
     }
 
     frame.addEventListener('load', async function(){
