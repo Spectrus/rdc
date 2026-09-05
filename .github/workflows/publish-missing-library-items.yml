@@ -1,0 +1,196 @@
+name: Publish missing Biblioteca works
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-missing-library-items.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Publish works in index and bibliotecario
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, json
+
+          INDEX = Path('index.html')
+          BIB = Path('bibliotecario.html')
+          html = INDEX.read_text(encoding='utf-8')
+          bib = BIB.read_text(encoding='utf-8')
+
+          items = [
+            {
+              'title': 'Tiro de Guerra 281 – versão final',
+              'author': 'Reinaldo Duarte Castanheira',
+              'year': '2026',
+              'code': '370',
+              'type': 'Mídia',
+              'description': 'Documentário de memória afetiva e histórica dedicado aos companheiros do Tiro de Guerra 281 – Classe 1943, que cumpriram o Serviço Militar em Conselheiro Lafaiete no ano de 1962. Preparado décadas depois, o vídeo reúne recordações de um período marcado pela convivência, pela disciplina e pelo aprendizado coletivo, prestando homenagem aos instrutores Sargento Camilo e Sargento Costa e aos jovens que compartilharam quase onze meses de formação. Mais do que recordar fardas, nomes de guerra e fotografias, a obra procura preservar valores que atravessaram aquela experiência: respeito aos mais velhos, hierarquia, cumprimento das normas, amor à Pátria, ética, moralidade e responsabilidade. Ao transformar lembranças pessoais em registro permanente, o documentário devolve voz e presença a uma geração e cria uma ponte entre os antigos integrantes, seus familiares e todos aqueles interessados na história do Tiro de Guerra em Conselheiro Lafaiete.',
+              'link': 'https://drive.google.com/file/d/1agPb_hRx7KzrVmTsMSUUJNRf1McM3h7i/view?usp=sharing',
+              'button': 'Ver'
+            },
+            {
+              'title': 'Álbum de Fotos de Nosso Casamento',
+              'author': 'Reinaldo Duarte Castanheira',
+              'year': '1967',
+              'code': '373',
+              'type': 'Mídia',
+              'description': 'Um álbum audiovisual criado para conservar, em movimento e sequência, as fotografias de um dos acontecimentos mais importantes de uma história familiar: o casamento de Bet e Reinaldo, em 1967. As imagens deixam de ser apenas retratos guardados e passam a compor uma narrativa de memória, capaz de aproximar novamente rostos, gestos, roupas, ambientes e pequenos detalhes de um dia que se tornou ponto de partida para muitas outras histórias. Ao reunir essas fotografias em vídeo, a obra transforma o álbum de família em documento afetivo, preservando não apenas a cerimônia, mas a presença daqueles que fizeram parte daquele momento. É também um convite às gerações seguintes para conhecerem suas origens e perceberem como um instante vivido há décadas continua presente quando é cuidadosamente guardado, revisto e compartilhado.',
+              'link': 'https://drive.google.com/file/d/1-2a6Q05eCexwhknAFTYFN_n2ZPBfJJJL/view?usp=sharing',
+              'button': 'Ver'
+            },
+            {
+              'title': '59 anos depois',
+              'author': 'Reinaldo Duarte Castanheira',
+              'year': '2026',
+              'code': '374',
+              'type': 'Mídia',
+              'description': 'Cinquenta e nove anos depois do casamento, esta memória audiovisual olha para o tempo não como uma distância que apaga, mas como uma trajetória que acrescenta significado às fotografias, aos encontros e às lembranças de uma vida compartilhada. O que em 1967 era começo, esperança e projeto de futuro pode ser revisto, em 2026, com a perspectiva de quem atravessou décadas de experiências, mudanças, alegrias e desafios. A obra reúne esse sentimento de continuidade: recordar o início para compreender melhor tudo o que veio depois. Mais do que celebrar uma contagem de anos, o vídeo valoriza a permanência dos vínculos, a construção cotidiana de uma família e a capacidade das imagens de devolver ao presente pessoas, lugares e emoções de outros tempos. É um registro de gratidão pela caminhada e, ao mesmo tempo, uma maneira de deixá-la guardada para quem vier depois.',
+              'link': 'https://drive.google.com/file/d/1ZSy9YtlWMPO0kYAKKjbBOP3FswYRx-tv/view?usp=sharing',
+              'button': 'Ver'
+            },
+            {
+              'title': 'Frederico no Sítio – 1º Neto',
+              'author': 'Reinaldo Duarte Castanheira',
+              'year': '2026',
+              'code': '375',
+              'type': 'Mídia',
+              'description': 'Registro familiar dedicado a Frederico, o primeiro neto, preservando em vídeo momentos ligados ao sítio e a uma fase da vida que ganha ainda mais valor com a passagem dos anos. Cenas familiares aparentemente simples têm uma força especial quando revisitadas: nelas permanecem a infância, a espontaneidade, o convívio entre gerações e o cenário onde tantas lembranças foram construídas. Ao guardar Frederico no sítio, a Biblioteca conserva mais do que uma gravação doméstica; conserva um fragmento da história da família, visto pelo olhar de quem compreendeu que os pequenos acontecimentos de hoje se transformam nas grandes recordações de amanhã. Esta memória é também uma homenagem ao lugar ocupado pelo primeiro neto na vida dos avós e ao vínculo que se forma quando uma nova geração chega, trazendo consigo novos afetos, novas histórias e a continuidade da família.',
+              'link': 'https://drive.google.com/file/d/1xQInECOAbIQx9yWMEi0i_KICdbvgqX7q/view?usp=sharing',
+              'button': 'Ver'
+            },
+            {
+              'title': 'Síntese da Felicidade',
+              'author': 'Carlos Drummond de Andrade (atribuição do arquivo)',
+              'year': '2026',
+              'code': '376',
+              'type': 'Poema',
+              'description': 'Um texto poético construído como um inventário das pequenas alegrias que dão sabor à existência. No arquivo preservado, a composição é atribuída a Carlos Drummond de Andrade e reúne imagens de uma felicidade simples, cotidiana e profundamente humana: o cheiro do jardim, o namoro no portão, o encontro com os amigos, um filme antigo, uma palavra amável, a música, o riso de criança, o canto dos pássaros, o pôr do sol na roça, a chuva no telhado, uma velha amizade e a presença de alguém querido. Em vez de procurar a felicidade em acontecimentos grandiosos, o texto a encontra na soma de instantes comuns que, quando vividos com atenção e afeto, passam a ter enorme significado. É uma leitura leve e calorosa sobre amizade, amor, memória, fé, companhia e a arte de reconhecer beleza no que muitas vezes passa despercebido.',
+              'link': 'https://drive.google.com/file/d/1OSDsmMYIrS5tYcVPWIahw5W_-qNeXJRj/view?usp=sharing',
+              'button': 'Ler'
+            },
+            {
+              'title': 'Imortalizando Memórias Centenárias de minha Vó Maria Magdalena',
+              'author': 'Maria Magdalena Lobo Castanheira / Reinaldo Duarte Castanheira',
+              'year': '2024',
+              'code': '377',
+              'type': 'Livro',
+              'description': 'Uma obra de preservação familiar e histórica dedicada a Maria Magdalena Lobo Castanheira, avó paterna de Reinaldo Duarte Castanheira. Em um caderno manuscrito com admirável cuidado, Maria Magdalena registrou dezenas de crônicas, poemas e contos produzidos desde o final dos anos 1890 até aproximadamente as décadas de 1920 e 1930. A digitalização desse conjunto permite que uma voz nascida no século XIX continue sendo lida no século XXI, conservando não apenas palavras, mas maneiras de pensar, sentir e observar uma realidade hoje distante. Os textos oferecem uma aproximação rara com a vida de uma mulher de outro tempo e ajudam a preservar a memória de uma família que se estabeleceu em Minas Gerais a partir de raízes portuguesas. Ao reunir e disponibilizar esses escritos, a obra cumpre exatamente o propósito da Biblioteca: impedir que lembranças, documentos e experiências desapareçam e permitir que novas gerações encontrem nelas suas próprias origens.',
+              'link': 'https://drive.google.com/file/d/1DujHUHIWimep6EIRjEzrc8cudFOi8niW/view?usp=sharing',
+              'button': 'Ler'
+            }
+          ]
+
+          # Free code 370 for the item for which the curator reserved it.
+          galo_pattern = r'(<div class="document-code">)370(</div>\s*<h3>Galo de Briga – versão já OK</h3>)'
+          html, changed = re.subn(galo_pattern, r'\g<1>350\g<2>', html, count=1)
+          if not changed and 'Galo de Briga – versão já OK' in html and '<div class="document-code">350</div>' not in html:
+              raise SystemExit('Could not resolve Galo de Briga code conflict')
+
+          marker = '<!-- PUBLICACOES_CHATGPT_2026_09_05 -->'
+          if marker not in html:
+              cards = [marker]
+              for i, item in enumerate(items, 1):
+                  cards.append(f'''                <div class="document-card" style="animation-delay: {0.05*i:.2f}s;">
+                    <div class="document-code">{item['code']}</div>
+                    <h3>{item['title']}</h3>
+                    <div class="document-author">{item['author']}</div>
+                    <div class="document-year">{item['year']}</div>
+                    <p>{item['description']}</p>
+                    <div class="document-footer">
+                        <span class="document-type">{item['type']}</span>
+                        <a href="{item['link']}" class="read-button" target="_blank" rel="noopener noreferrer">{item['button']}</a>
+                    </div>
+                </div>''')
+              insert = '\n'.join(cards) + '\n'
+              anchor = '            <div class="documents-grid" id="visible-documents">\n                <!-- Documentos do acervo -->\n'
+              if anchor not in html:
+                  raise SystemExit('Acervo insertion anchor not found')
+              html = html.replace(anchor, anchor + insert, 1)
+
+          # Keep Firestore `conteudos` synchronized when the curator account signs in.
+          firebase_marker = '// PUBLICACOES_CHATGPT_FIREBASE_2026_09_05'
+          if firebase_marker not in html:
+              seed = []
+              for item in items:
+                  seed.append({
+                    'codigo': item['code'], 'titulo': item['title'], 'ano': item['year'],
+                    'autor': item['author'], 'descricao': item['description'],
+                    'tipo': item['type'], 'url': item['link']
+                  })
+              seed_json = json.dumps(seed, ensure_ascii=False, indent=8)
+              firebase_code = f'''
+      {firebase_marker}
+      const publicacoesChatGPT20260905 = {seed_json};
+      async function sincronizarPublicacoesChatGPT20260905(user) {{
+        if (!isHouseUser(user)) return;
+        for (const item of publicacoesChatGPT20260905) {{
+          await setDoc(doc(db, "conteudos", "codigo-" + item.codigo), {{
+            ...item,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            origem: "catalogo-estatico-2026-09-05"
+          }}, {{ merge: true }});
+        }}
+        console.log("[conteudos] 6 publicações sincronizadas com o Firebase.");
+      }}
+      onAuthStateChanged(_auth, (user) => {{
+        if (user && isHouseUser(user)) {{
+          sincronizarPublicacoesChatGPT20260905(user).catch((err) =>
+            console.error("[conteudos] falha ao sincronizar publicações:", err)
+          );
+        }}
+      }});
+
+'''
+              anchor = '      // ===== Função: Carregar todos os conteúdos =====\n'
+              if anchor not in html:
+                  raise SystemExit('Firebase insertion anchor not found')
+              html = html.replace(anchor, firebase_code + anchor, 1)
+
+          INDEX.write_text(html, encoding='utf-8')
+
+          bib_marker = '/* PUBLICACOES_CHATGPT_2026_09_05 */'
+          if bib_marker not in bib:
+              new_objects = []
+              for item in items:
+                  obj = {
+                    'title': item['title'], 'author': item['author'], 'year': item['year'],
+                    'code': item['code'], 'type': item['type'],
+                    'description': item['description'], 'link': item['link']
+                  }
+                  new_objects.append(json.dumps(obj, ensure_ascii=False, indent=2))
+              payload = ',\n  ' + bib_marker + '\n  ' + ',\n  '.join(new_objects)
+              pattern = r'(\{\s*"title"\s*:\s*"Meu Encantamento por Paris".*?\n\s*\})'
+              match = re.search(pattern, bib, flags=re.S)
+              if not match:
+                  raise SystemExit('Bibliotecario insertion anchor not found')
+              bib = bib[:match.end()] + payload + bib[match.end():]
+              BIB.write_text(bib, encoding='utf-8')
+
+          print('Published:', ', '.join(i['code'] + ' ' + i['title'] for i in items))
+          PY
+
+      - name: Commit published catalog
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html bibliotecario.html
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit.'
+          else
+            git commit -m 'Publish six missing Biblioteca works'
+            git push origin HEAD:main
+          fi
