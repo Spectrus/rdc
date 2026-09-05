@@ -1,3 +1,4 @@
+# retrigger 2026-09-05
 name: Publish missing Biblioteca works
 
 on:
@@ -93,7 +94,6 @@ jobs:
             }
           ]
 
-          # Free code 370 for the item for which the curator reserved it.
           galo_pattern = r'(<div class="document-code">)370(</div>\s*<h3>Galo de Briga – versão já OK</h3>)'
           html, changed = re.subn(galo_pattern, r'\g<1>350\g<2>', html, count=1)
           if not changed and 'Galo de Briga – versão já OK' in html and '<div class="document-code">350</div>' not in html:
@@ -120,7 +120,6 @@ jobs:
                   raise SystemExit('Acervo insertion anchor not found')
               html = html.replace(anchor, anchor + insert, 1)
 
-          # Keep Firestore `conteudos` synchronized when the curator account signs in.
           firebase_marker = '// PUBLICACOES_CHATGPT_FIREBASE_2026_09_05'
           if firebase_marker not in html:
               seed = []
