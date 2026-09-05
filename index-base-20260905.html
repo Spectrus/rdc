@@ -2772,7 +2772,7 @@ video-synopsis {
                             <div class="stat-label">Obras</div>
                         </div>
                         <div class="stat-item" id="visits-stat">
-                            <div class="stat-number">2.847</div>
+                            <div class="stat-number" aria-live="polite" aria-busy="true">…</div>
                             <div class="stat-label">Visitas</div>
                         </div>
                     </div>
@@ -10009,67 +10009,58 @@ function openVideo(videoId, isProtected) {
       // ===== Inicializa carregamento =====
       carregarConteudos();
       
-      // ===== Visitas: círculo de estatísticas (MOSTRAR VISITAS TOTAIS DA SEMANA) =====
+      // One authoritative source for the badge: the global Firebase visit counter.
       const visitsEl = document.querySelector("#visits-stat .stat-number");
-      const setBadge = n => { if (visitsEl) visitsEl.textContent = (n || 0).toLocaleString('pt-BR'); };
       const visitsLabelEl = document.querySelector("#visits-stat .stat-label");
       if (visitsLabelEl) visitsLabelEl.textContent = "Visitas";
-
-      // realtime para o círculo: total de visitas de todos os anos
-      onSnapshot(collection(db, 'stats_weekly'), snap => {
-        let total = 0;
-        snap.forEach(ds => {
-          const d = ds.data();
-          total += (d.visits || 0);
-        });
-        setBadge(total);
-      });
-
-      // flag de visitante único por navegador
-      const IS_UNIQUE = !localStorage.getItem("rdc_unique_global");
-      if (IS_UNIQUE) localStorage.setItem("rdc_unique_global", "1");
-
-      // patch nos contadores com increment atômico
-      async function bumpCountersOnce() {
-        const ref = doc(db, "stats", "global");
-        try {
-          // Garante o doc e faz +1 em visitas
-          await setDoc(ref, { createdAt: serverTimestamp() }, { merge: true });
-          await updateDoc(ref, {
-            visits_total: increment(1),
-            updatedAt: serverTimestamp()
-          });
-        } catch (e) {
-          // Se não existir, cria com valores iniciais
-          await setDoc(ref, {
-            visits_total: 1,
-            unique_visitors: IS_UNIQUE ? 1 : 0,
-            updatedAt: serverTimestamp()
-          }, { merge: true });
-        }
-        if (IS_UNIQUE) {
-          try {
-            await updateDoc(ref, {
-              unique_visitors: increment(1),
-              updatedAt: serverTimestamp()
-            });
-          } catch (e) {
-            await setDoc(ref, {
-              unique_visitors: 1,
-              updatedAt: serverTimestamp()
-            }, { merge: true });
+      let stopVisits = null;
+      let countVisit = null;
+      function listenToVisits(){
+        if (stopVisits) stopVisits();
+        stopVisits = onSnapshot(doc(db, "stats", "global"), snapshot => {
+          const total = Number(snapshot.data()?.visits_total);
+          if (!visitsEl) return;
+          if (!snapshot.exists() || !Number.isFinite(total) || total < 0) {
+            visitsEl.textContent = "—";
+            visitsEl.title = "Contador de visitas ainda indisponível";
+          } else {
+            visitsEl.textContent = Math.trunc(total).toLocaleString("pt-BR");
+            visitsEl.removeAttribute("title");
           }
-        }
+          visitsEl.setAttribute("aria-busy", "false");
+        }, error => {
+          if (visitsEl) {
+            visitsEl.textContent = "—";
+            visitsEl.title = "Não foi possível carregar o contador de visitas";
+            visitsEl.setAttribute("aria-busy", "false");
+          }
+          console.error("Falha ao carregar contador de visitas:", error);
+        });
       }
 
-      // autentica e conta visita
+      // Atomic merge never replaces an existing total with a fallback value.
+      async function bumpCountersOnce() {
+        let unique = false;
+        try { unique = !localStorage.getItem("rdc_unique_global"); } catch (_) {}
+        const patch = { visits_total: increment(1), updatedAt: serverTimestamp() };
+        if (unique) patch.unique_visitors = increment(1);
+        await setDoc(doc(db, "stats", "global"), patch, { merge:true });
+        if (unique) { try { localStorage.setItem("rdc_unique_global", "1"); } catch (_) {} }
+      }
+
+      // Subscribe after authentication; count once per page, even if auth changes.
       const auth = _auth;
       onAuthStateChanged(auth, async (user) => {
         if (!user) {
+          if (stopVisits) { stopVisits(); stopVisits = null; }
           signInAnonymously(auth).catch(console.error);
           return;
         }
-        try { await bumpCountersOnce(); } catch (e) { console.error("Falha ao atualizar contadores:", e); }
+        listenToVisits();
+        if (!countVisit) countVisit = bumpCountersOnce().catch(error => {
+          console.error("Falha ao atualizar contadores:", error);
+        });
+        await countVisit;
         if (!user.isAnonymous && user.email) {
           try { await aposGoogleConfirmado(user); } catch (e) { console.warn("Entrada não registada:", e); }
         }
@@ -10710,99 +10701,7 @@ function openVideo(videoId, isProtected) {
       observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     </script>
     
-    <script>
-    (function(){
-        const CACHE_KEY = 'rdc_visits_last';
-        const SELECTOR = '#visits-stat .stat-number';
-        const nf = (function(){ try { return new Intl.NumberFormat('pt-BR'); } catch(_) { return null; } })();
-        const format = (n) => nf ? nf.format(Number(n)||0) : String(Number(n)||0);
-        const onlyDigits = (s) => { const m = String(s||'').match(/\d+/g); return m ? parseInt(m.join(''),10) : 0; };
-
-        function ensureRoller(el){
-            let roller = el.querySelector('.stat-roller');
-            if (roller) return roller;
-            roller = document.createElement('span');
-            roller.className = 'stat-roller';
-            const stack = document.createElement('span');
-            stack.className = 'stack';
-            const frame = document.createElement('span');
-            frame.className = 'frame';
-            frame.textContent = el.textContent.trim();
-            stack.appendChild(frame);
-            roller.appendChild(stack);
-            el.textContent = '';
-            el.appendChild(roller);
-            return roller;
-        }
-
-        function setImmediateNumber(el, value){
-            const roller = ensureRoller(el);
-            const stack = roller.querySelector('.stack');
-            stack.style.transform = 'translateY(0)';
-            stack.innerHTML = '';
-            const frame = document.createElement('span');
-            frame.className = 'frame';
-            frame.textContent = format(value);
-            stack.appendChild(frame);
-        }
-
-        function rollTo(el, newValue){
-            const roller = ensureRoller(el);
-            const stack = roller.querySelector('.stack');
-            const next = document.createElement('span');
-            next.className = 'frame';
-            next.textContent = format(newValue);
-            stack.appendChild(next);
-            // animate stack upwards to reveal new frame
-            requestAnimationFrame(()=>{ stack.style.transform = 'translateY(-100%)'; });
-            const onDone = ()=>{
-                stack.style.transition = '';
-                stack.style.transform = 'translateY(0)';
-                stack.innerHTML = '';
-                const finalFrame = document.createElement('span');
-                finalFrame.className = 'frame';
-                finalFrame.textContent = format(newValue);
-                stack.appendChild(finalFrame);
-                stack.removeEventListener('transitionend', onDone);
-                // restore transition for future rolls
-                requestAnimationFrame(()=>{ stack.style.transition = 'transform .8s cubic-bezier(0.2, 0.7, 0.2, 1)'; });
-            };
-            stack.style.transition = 'transform .8s cubic-bezier(0.2, 0.7, 0.2, 1)';
-            stack.addEventListener('transitionend', onDone);
-        }
-
-        async function fetchVisits(){
-            try {
-                if (typeof doc !== 'function' || typeof getDoc !== 'function' || typeof db === 'undefined') return null;
-                const ref = doc(db, 'stats', 'global');
-                const snap = await getDoc(ref);
-                if (!snap.exists()) return null;
-                const data = snap.data() || {};
-                const v = typeof data.visits_total === 'number' ? data.visits_total : 0;
-                return v;
-            } catch(_) { return null; }
-        }
-
-        document.addEventListener('DOMContentLoaded', async function(){
-            const el = document.querySelector(SELECTOR);
-            if (!el) return;
-            // preload from cache
-            const cached = localStorage.getItem(CACHE_KEY);
-            if (cached != null) {
-                setImmediateNumber(el, Number(cached));
-            }
-            // fetch live and animate
-            const live = await fetchVisits();
-            if (typeof live === 'number' && !Number.isNaN(live)) {
-                localStorage.setItem(CACHE_KEY, String(live));
-                const currentVal = onlyDigits(el.textContent);
-                if (currentVal !== live) {
-                    rollTo(el, live);
-                }
-            }
-        });
-    })();
-    </script>
+    <!-- The visits badge is rendered only by its authenticated Firebase listener. -->
     
     <script>
     (function () {
