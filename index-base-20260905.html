@@ -1123,7 +1123,7 @@
             white-space: nowrap;
         }
 
-        #acervo.view-list .document-code {
+        #acervo.view-list :is(.document-code, .catalog-code) {
             top: 50%;
             left: 0.55rem;
             transform: translateY(-50%);
@@ -1194,7 +1194,7 @@
             font-size: inherit;
         }
 
-        #acervo.view-list.list-detail-open .document-card.list-detail-active .document-code {
+        #acervo.view-list.list-detail-open .document-card.list-detail-active :is(.document-code, .catalog-code) {
             top: 10px;
             left: 10px;
             transform: none;
@@ -1272,7 +1272,7 @@
             }
         }
         
-        .document-code {
+        :is(.document-code, .catalog-code) {
             position: absolute;
             top: 10px;
             left: 10px;
@@ -2710,6 +2710,8 @@ video-synopsis {
   
 
     </style>
+<style>.document-code[hidden], .catalog-code[hidden] { display:none !important; }</style>
+<script src="acervo-catalogo.js" defer></script>
 </head>
 <body>
     
@@ -4591,8 +4593,8 @@ video-synopsis {
             
             <div class="sort-container">
                 <select class="sort-select">
-                    <option>Ordenar por Código</option>
-                    <option>Ordenar por Título</option>
+                    <option selected>Ordenar por Título</option>
+                    <option>Códigos Originais</option>
                     <option>Ordenar por Autor</option>
                     <option>Ordenar por Data</option>
                 </select>
@@ -5492,7 +5494,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     .trim()
                     .toLowerCase() || '';
               
-                  const matches = fields.includes(term) || code.includes(term);
+                  const shownCode = window.bibliotecaDisplayCode?.(card) || code;
+              const matches = fields.includes(term) || shownCode.includes(term);
                   card.style.display = matches ? 'flex' : 'none';
                 });
               }
@@ -5517,7 +5520,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   return a.querySelector('.document-author').textContent.localeCompare(b.querySelector('.document-author').textContent);
                 } else if (option === 'Ordenar por Data') {
                   return parseInt(b.querySelector('.document-year').textContent) - parseInt(a.querySelector('.document-year').textContent);
-                } else if (option === 'Ordenar por Código') {
+                } else if (option === 'Códigos Originais') {
                   return parseInt(a.querySelector('.document-code').textContent) - parseInt(b.querySelector('.document-code').textContent);
                 }
                 return 0;
@@ -5617,8 +5620,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (filter === 'todos') {
               const sortSelect = document.querySelector('.sort-select');
-              if (sortSelect) sortSelect.value = 'Ordenar por Código';
-              if (typeof applySort === 'function') applySort('Ordenar por Código');
+              if (sortSelect) sortSelect.value = 'Ordenar por Título';
+              if (typeof applySort === 'function') applySort('Ordenar por Título');
             }
           }
 
@@ -5644,7 +5647,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const initialFilter = activeBtn ? activeBtn.getAttribute('data-filter') : 'todos';
           applyFilter(initialFilter);
           // Apply default sort (by Código) so cards appear in numeric order on open
-          applySort('Ordenar por Código');
+          applySort('Ordenar por Título');
 
           // Two viewing options: Grade (current cards) and Listagem (title/author/code/year)
           const acervoSection = document.getElementById('acervo');
@@ -5782,7 +5785,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 .trim()
                 .toLowerCase() || '';
           
-              const matches = fields.includes(term) || code.includes(term);
+              const shownCode = window.bibliotecaDisplayCode?.(card) || code;
+              const matches = fields.includes(term) || shownCode.includes(term);
               card.style.display = matches ? 'flex' : 'none';
             });
           }
@@ -5809,7 +5813,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return a.querySelector('.document-author').textContent.localeCompare(b.querySelector('.document-author').textContent);
               } else if (option === 'Ordenar por Data') {
                 return parseInt(b.querySelector('.document-year').textContent) - parseInt(a.querySelector('.document-year').textContent);
-              } else if (option === 'Ordenar por Código') {
+              } else if (option === 'Códigos Originais') {
                 return parseInt(a.querySelector('.document-code').textContent) - parseInt(b.querySelector('.document-code').textContent);
               }
               return 0;
@@ -5849,7 +5853,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const allDocuments = document.querySelectorAll('.document-card');
                 
                 allDocuments.forEach(function(doc) {
-                    const code = doc.querySelector('.document-code').textContent;
+                    const code = window.bibliotecaDisplayCode?.(doc) || doc.querySelector('.document-code').textContent;
                     const title = doc.querySelector('h3').textContent.toLowerCase();
                     const author = doc.querySelector('.document-author') ? 
                                   doc.querySelector('.document-author').textContent.toLowerCase() : '';
@@ -9370,6 +9374,29 @@ function openVideo(videoId, isProtected) {
       import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithCredential, linkWithCredential } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
       import { getFirestore, collection, addDoc, getDocs, serverTimestamp, doc, getDoc, setDoc, onSnapshot, updateDoc, deleteDoc, increment, query, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
     
+      let catalogSyncTimer;
+      window.firebaseSyncTitleCatalog = function (items) {
+        clearTimeout(catalogSyncTimer);
+        catalogSyncTimer = setTimeout(async () => {
+          const section = document.getElementById('acervo');
+          try {
+            await window.waitForFirebaseAuth;
+            const writes = [];
+            const ref = doc(db, 'configuracoes', 'acervo');
+            const previous = await getDoc(ref);
+            const settings = { ordemPadrao: 'titulo', codigoInicial: 101, cineReginaCodigo: 100, codigosOriginaisPreservados: true, itens: items };
+            if (!previous.exists() || JSON.stringify(previous.data().itens) !== JSON.stringify(items) || previous.data().ordemPadrao !== 'titulo') {
+              writes.push(setDoc(ref, settings, { merge: true }));
+            }
+            await Promise.all(writes);
+            if (section) section.dataset.catalogSync = 'saved';
+          } catch (error) {
+            if (section) section.dataset.catalogSync = 'failed';
+            console.error('Não foi possível sincronizar a organização do Acervo:', error);
+          }
+        }, 1500);
+      };
+
       // ===== Configuração do Firebase =====
       const firebaseConfig = {
         apiKey: "AIzaSyB0Pcq3Us_uY281pRJsR2U5-04_pplrH9g",
