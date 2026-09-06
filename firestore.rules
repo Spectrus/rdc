@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    match /conteudos/{id} {
+      allow read: if true;
+      allow create, update, delete: if signedIn();
+    }
+
+    match /stats/{id} {
+      allow read, write: if signedIn();
+    }
+
+    match /stats_weekly/{id} {
+      allow read, write: if signedIn();
+    }
+
+    match /counters/{id} {
+      allow read, write: if signedIn();
+    }
+
+    match /avisos/{id} {
+      allow create, update: if signedIn()
+        && request.resource.data.comoChamar is string
+        && request.resource.data.comoChamar.size() >= 2
+        && request.resource.data.comoChamar.size() <= 80
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 120
+        && request.resource.data.email.matches('.*@.*\\..*')
+        && request.resource.data.ativo == true;
+      allow read, delete: if false;
+    }
+
+    match /mail/{id} {
+      allow read, write: if false;
+    }
+
+    function isHouse() {
+      return signedIn()
+        && request.auth.token.email is string
+        && request.auth.token.email.lower() == 'reinaldoduarte080@gmail.com';
+    }
+
+    match /entradas/{id} {
+      allow create: if signedIn()
+        && request.auth.token.email is string
+        && request.auth.uid == id
+        && request.resource.data.email is string
+        && request.resource.data.email.lower() == request.auth.token.email.lower()
+        && request.resource.data.uid == request.auth.uid;
+      allow update: if signedIn()
+        && request.auth.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.uid == resource.data.uid;
+      // get must allow "doc missing" for first visit (resource is null).
+      // Full list stays server-side via listaEntradas + second password.
+      allow get: if isHouse()
+        || (signedIn() && request.auth.uid == id);
+      allow list: if false;
+      allow delete: if isHouse();
+    }
+
+    // Rate-limit / unlock attempts for listaEntradas — Admin SDK only.
+    match /_entradas_auth_attempts/{id} {
+      allow read, write: if false;
+    }
+  }
+}
