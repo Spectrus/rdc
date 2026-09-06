@@ -2426,6 +2426,39 @@
             cursor: pointer;
             border-radius: 3px;
         }
+        .entradas-console .entradas-senha-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            align-items: center;
+            margin: 0 0 0.55rem;
+        }
+        .entradas-console .entradas-senha-form input[type="password"] {
+            flex: 1 1 8rem;
+            min-width: 0;
+            font: inherit;
+            font-size: 0.95rem;
+            padding: 0.35rem 0.55rem;
+            border: 1px solid rgba(74, 44, 42, 0.28);
+            border-radius: 3px;
+            background: #fffaf2;
+            color: #4a2c2a;
+        }
+        .entradas-console .entradas-senha-form input[type="password"]:focus {
+            outline: 2px solid #d4b45f;
+            outline-offset: 1px;
+        }
+        .visually-hidden {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
         
         @media (max-width: 768px) {
             .nav-bar {
@@ -7237,8 +7270,12 @@ function openVideo(videoId, isProtected) {
     
     <div id="entradasConsole" class="entradas-console">
         <h3>Quem entrou</h3>
-        <p id="entradasConsoleStatus">Só visível à conta da casa.</p>
-        <button type="button" id="btnEntradasGoogle">Entrar como a casa</button>
+        <p id="entradasConsoleStatus">Digite a segunda senha para ver a lista.</p>
+        <form id="entradasSenhaForm" class="entradas-senha-form" autocomplete="off">
+            <label for="entradasSenhaInput" class="visually-hidden">Segunda senha</label>
+            <input type="password" id="entradasSenhaInput" name="entradas-senha" inputmode="numeric" autocomplete="off" placeholder="Segunda senha" aria-label="Segunda senha da lista">
+            <button type="submit" id="btnEntradasSenha">Abrir lista</button>
+        </form>
         <ul id="entradasConsoleList"></ul>
         <p><button type="button" id="abrirEntradasCompleta">Abrir lista completa</button></p>
     </div>
@@ -9688,8 +9725,17 @@ function openVideo(videoId, isProtected) {
         listEl.innerHTML = "";
         docs.forEach((row) => {
           const li = document.createElement("li");
-          const when = row.lastSeen && row.lastSeen.toDate ? row.lastSeen.toDate() : null;
-          const first = row.firstSeen && row.firstSeen.toDate ? row.firstSeen.toDate() : null;
+          const toDate = (v) => {
+            if (!v) return null;
+            if (v.toDate) return v.toDate();
+            if (typeof v === "string" || typeof v === "number") {
+              const d = new Date(v);
+              return Number.isNaN(d.getTime()) ? null : d;
+            }
+            return null;
+          };
+          const when = toDate(row.lastSeen);
+          const first = toDate(row.firstSeen);
           const fmt = (d) => d ? d.toLocaleString("pt-BR") : "—";
           li.innerHTML = "<strong></strong><span></span>";
           li.querySelector("strong").textContent = row.email || "sem correio";
@@ -9701,51 +9747,183 @@ function openVideo(videoId, isProtected) {
         });
       }
 
+      const ENTRADAS_LIST_API =
+        "https://southamerica-east1-mark-2-111f9.cloudfunctions.net/listaEntradas";
+      const ENTRADAS_TOKEN_KEY = "rdc_entradas_sessao";
+      let entradasListToken = "";
+
+      function readEntradasToken() {
+        if (entradasListToken) return entradasListToken;
+        try {
+          const raw = sessionStorage.getItem(ENTRADAS_TOKEN_KEY);
+          if (!raw) return "";
+          const parsed = JSON.parse(raw);
+          if (!parsed || !parsed.token || !parsed.expiresAt) return "";
+          if (Date.now() > Number(parsed.expiresAt) - 5000) {
+            sessionStorage.removeItem(ENTRADAS_TOKEN_KEY);
+            return "";
+          }
+          entradasListToken = parsed.token;
+          return entradasListToken;
+        } catch (_err) {
+          return "";
+        }
+      }
+
+      function storeEntradasToken(token, expiresAt) {
+        entradasListToken = token || "";
+        try {
+          if (token && expiresAt) {
+            sessionStorage.setItem(
+              ENTRADAS_TOKEN_KEY,
+              JSON.stringify({ token, expiresAt: Number(expiresAt) })
+            );
+          } else {
+            sessionStorage.removeItem(ENTRADAS_TOKEN_KEY);
+          }
+        } catch (_err) { /* ignore */ }
+      }
+
+      function clearEntradasToken() {
+        entradasListToken = "";
+        try { sessionStorage.removeItem(ENTRADAS_TOKEN_KEY); } catch (_err) { /* ignore */ }
+      }
+
+      function setEntradasAuthUi(unlocked) {
+        const form = document.getElementById("entradasSenhaForm");
+        const input = document.getElementById("entradasSenhaInput");
+        if (form) form.hidden = !!unlocked;
+        if (input && unlocked) input.value = "";
+      }
+
+      async function fetchEntradasViaApi(token) {
+        const res = await fetch(ENTRADAS_LIST_API, {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + token,
+            Accept: "application/json"
+          }
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const err = new Error((data && data.error) || "nao_autorizado");
+          err.code = data && data.error;
+          err.status = res.status;
+          throw err;
+        }
+        return Array.isArray(data.entradas) ? data.entradas : [];
+      }
+
+      async function unlockEntradasComSenha(password) {
+        const res = await fetch(ENTRADAS_LIST_API, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json"
+          },
+          body: JSON.stringify({ action: "unlock", password: String(password || "") })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.token) {
+          const err = new Error((data && data.error) || "senha_incorreta");
+          err.code = data && data.error;
+          err.status = res.status;
+          err.retryAfterSec = data && data.retryAfterSec;
+          throw err;
+        }
+        storeEntradasToken(data.token, data.expiresAt);
+        return data.token;
+      }
+
       window.firebaseAbrirListaEntradas = async function () {
         const box = document.getElementById("entradasConsole");
         const status = document.getElementById("entradasConsoleStatus");
         const list = document.getElementById("entradasConsoleList");
-        const btn = document.getElementById("btnEntradasGoogle");
+        const form = document.getElementById("entradasSenhaForm");
+        const input = document.getElementById("entradasSenhaInput");
+        const btn = document.getElementById("btnEntradasSenha");
         if (!box) return;
-        const load = async (user) => {
-          if (!isHouseUser(user)) {
-            if (status) status.textContent = "Entre com reinaldoduarte080@gmail.com para ver a lista.";
-            if (btn) btn.hidden = false;
-            if (list) list.innerHTML = "";
-            return;
+
+        const showLocked = (msg) => {
+          setEntradasAuthUi(false);
+          if (status) status.textContent = msg || "Digite a segunda senha para ver a lista.";
+          if (list) list.innerHTML = "";
+        };
+
+        const loadWithToken = async (token) => {
+          if (!token) {
+            showLocked();
+            return false;
           }
-          if (btn) btn.hidden = true;
           if (status) status.textContent = "A carregar…";
           try {
-            const q = query(collection(db, "entradas"), orderBy("lastSeen", "desc"));
-            const snap = await getDocs(q);
-            const rows = [];
-            snap.forEach((ds) => rows.push(ds.data()));
+            const rows = await fetchEntradasViaApi(token);
+            setEntradasAuthUi(true);
             if (status) {
               status.textContent = rows.length
                 ? rows.length + (rows.length === 1 ? " visita reconhecida." : " visitas reconhecidas.")
                 : "Ainda ninguém entrou com Google.";
             }
             renderEntradasList(rows, list);
+            return true;
           } catch (err) {
-            if (status) status.textContent = "A lista só abre com a conta da casa.";
+            clearEntradasToken();
+            if (err && err.status === 401) {
+              showLocked("Sessão expirada. Digite a segunda senha novamente.");
+            } else {
+              showLocked("Não foi possível carregar a lista agora.");
+            }
+            return false;
           }
         };
-        if (btn && !btn.dataset.bound) {
-          btn.dataset.bound = "1";
-          btn.addEventListener("click", async () => {
-            btn.disabled = true;
+
+        if (form && !form.dataset.bound) {
+          form.dataset.bound = "1";
+          form.addEventListener("submit", async (ev) => {
+            ev.preventDefault();
+            const password = input ? String(input.value || "") : "";
+            if (!password) {
+              showLocked("Digite a segunda senha para ver a lista.");
+              if (input) input.focus();
+              return;
+            }
+            if (btn) btn.disabled = true;
+            if (status) status.textContent = "A verificar…";
             try {
-              const user = await entrarComGoogle();
-              await load(user);
+              const token = await unlockEntradasComSenha(password);
+              if (input) input.value = "";
+              await loadWithToken(token);
             } catch (err) {
-              if (status) status.textContent = "Não foi possível entrar como a casa.";
+              clearEntradasToken();
+              if (list) list.innerHTML = "";
+              setEntradasAuthUi(false);
+              if (err && err.code === "demasiadas_tentativas") {
+                const wait = err.retryAfterSec ? Math.ceil(err.retryAfterSec / 60) : 15;
+                if (status) status.textContent = "Muitas tentativas. Aguarde cerca de " + wait + " min.";
+              } else if (err && (err.code === "senha_incorreta" || err.status === 401)) {
+                if (status) status.textContent = "Senha incorreta.";
+              } else {
+                if (status) status.textContent = "Não foi possível abrir a lista agora.";
+              }
+              if (input) {
+                input.value = "";
+                input.focus();
+              }
             } finally {
-              btn.disabled = false;
+              if (btn) btn.disabled = false;
             }
           });
         }
-        await load(_auth.currentUser);
+
+        const existing = readEntradasToken();
+        if (existing) {
+          await loadWithToken(existing);
+        } else {
+          showLocked();
+          if (input && document.getElementById("entradasDialog") && document.getElementById("entradasDialog").open) {
+            setTimeout(() => input.focus(), 0);
+          }
+        }
       };
 
       // ===== Função: Carregar todos os conteúdos =====
@@ -12021,7 +12199,7 @@ function openVideo(videoId, isProtected) {
   const open=document.getElementById('abrirEntradasCompleta');
   if(!box||!open)return;
   const style=document.createElement('style');
-  style.textContent='#entradasDialog{width:min(850px,92vw);max-height:85vh;border:1px solid #d3b35d;border-radius:12px;background:#f7f0e4;color:#4a2c2a;padding:20px}#entradasDialog::backdrop{background:#241b16aa}#entradasDialog #entradasConsole{display:block!important;position:static!important;width:auto!important;max-width:none!important;max-height:none!important;margin:0!important;box-shadow:none!important}#entradasDialog #entradasConsoleList{max-height:60vh;overflow:auto}#entradasDialog>button{float:right;font:inherit;padding:8px 16px;cursor:pointer}';
+  style.textContent='#entradasDialog{width:min(850px,92vw);max-height:85vh;border:1px solid #d3b35d;border-radius:12px;background:#f7f0e4;color:#4a2c2a;padding:20px}#entradasDialog::backdrop{background:#241b16aa}#entradasDialog #entradasConsole{display:block!important;position:static!important;width:auto!important;max-width:none!important;max-height:none!important;margin:0!important;box-shadow:none!important}#entradasDialog #entradasConsoleList{max-height:60vh;overflow:auto}#entradasDialog>button{float:right;font:inherit;padding:8px 16px;cursor:pointer;border:1px solid #d4b45f;background:#d4b45f;color:#4a2c2a;border-radius:3px}#entradasDialog .entradas-senha-form{margin-top:0.35rem}';
   document.head.append(style);
   const dialog=document.createElement('dialog');dialog.id='entradasDialog';
   const close=document.createElement('button');close.type='button';close.textContent='← Voltar';
