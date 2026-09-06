@@ -231,6 +231,13 @@
       max-width:none!important;max-height:none!important;margin:0!important;
       border:0!important;border-radius:0!important;resize:none!important;transform:none!important;
     }
+    /* Hide Library navigation while a reader/player occupies the screen. */
+    html:has(#rdc-reader-dialog.rdc-fullscreen) :is(#scrollTopBtn,#nav-down-arrow),
+    html:has(#rdc-video-dialog.rdc-fullscreen) :is(#scrollTopBtn,#nav-down-arrow),
+    html:has(#rdc-reader-dialog :fullscreen) :is(#scrollTopBtn,#nav-down-arrow),
+    html:has(#rdc-video-dialog :fullscreen) :is(#scrollTopBtn,#nav-down-arrow) {
+      display:none!important;visibility:hidden!important;pointer-events:none!important;
+    }
     .rdc-fullscreen header {position:static!important;cursor:default!important;}
     .rdc-fullscreen [data-scale],.rdc-fullscreen [data-size],.rdc-fullscreen #rdc-video-resize {display:none!important;}
   `;
