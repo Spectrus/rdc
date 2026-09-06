@@ -8471,11 +8471,6 @@
             step(1);
           });
           window.addEventListener("keydown", function (e) {
-            if (e.key === "Escape" && isFs) {
-              e.preventDefault();
-              setFs(false);
-              return;
-            }
             const t = e.target;
             const typing =
               t &&
