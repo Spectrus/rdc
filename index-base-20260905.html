@@ -4676,6 +4676,7 @@ video-synopsis {
                 <button class="filter-button" data-filter="livro">Livros</button>
                 <button class="filter-button" data-filter="conto">Pessoas&Famílias</button>
                 <button class="filter-button" data-filter="poema">Contos&Poesia</button>
+                <button class="filter-button" data-filter="crônica">Crônica</button>
                 <button class="filter-button" data-filter="documento">Documentos</button>
                 <button class="filter-button" data-filter="mídia">Mídia</button>
             </div>
@@ -9426,6 +9427,7 @@ function openVideo(videoId, isProtected) {
                         <option value="Livro">Livro</option>
                         <option value="Conto">Conto</option>
                         <option value="Poema">Poema</option>
+                        <option value="Crônica">Crônica</option>
                         <option value="Documento">Documento</option>
                         <option value="Mídia">Mídia</option>
                         <option value="Vídeo">Vídeo</option>
@@ -9588,7 +9590,9 @@ function openVideo(videoId, isProtected) {
       async function inscreverAvisoGoogle(user) {
         const mail = String(user && user.email || "").trim().toLowerCase();
         if (!mail) return;
-        const nome = String(user.displayName || "").trim().split(/\s+/)[0] || "amigo da casa";
+        let nome = String(user.displayName || "").trim().split(/\s+/)[0] || "";
+        if (nome.length < 2) nome = "amigo da casa";
+        if (nome.length > 80) nome = nome.slice(0, 80);
         const id = mail.replace(/\//g, "");
         await setDoc(doc(db, "avisos", id), {
           comoChamar: nome,
@@ -9602,8 +9606,10 @@ function openVideo(videoId, isProtected) {
       }
 
       async function aposGoogleConfirmado(user) {
+        /* Inscrição = confirmar Google ("sou eu"), não o formulário do rodapé.
+           entradas e avisos são independentes: falha numa não bloqueia a outra. */
         if (!user || user.isAnonymous || !user.email) return user;
-        await registrarEntrada(user);
+        try { await registrarEntrada(user); } catch (err) { console.warn("Entrada Google:", err); }
         try { await inscreverAvisoGoogle(user); } catch (err) { console.warn("Aviso Google:", err); }
         const status = document.getElementById("googleEntradaStatus");
         if (status) {
