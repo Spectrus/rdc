@@ -46,7 +46,7 @@
       if(timelineKeys.has(key))item.remove();else timelineKeys.add(key);
     });
     const cards = all.filter(card => card.isConnected);
-    document.querySelectorAll('#obras-stat .stat-number,.stat-item.obras .stat-number').forEach(el=>{el.textContent='120+';});
+    document.querySelectorAll('#obras-stat .stat-number,.stat-item.obras .stat-number').forEach(el=>{if(el.textContent !== '120+') el.textContent='120+';});
     window.bibliotecaUniqueCount = cards.length;
     cards.forEach(card => {
       if (card.querySelector('.document-footer .read-button')) return;
@@ -86,7 +86,7 @@
           old.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
         });
       }
-      badge.textContent = String(code);
+      if (badge.textContent !== String(code)) badge.textContent = String(code);
       badge.title = 'Código por título · Código original: ' + original(card);
       old.hidden = mode !== originalMode;
       old.setAttribute('aria-hidden', String(mode !== originalMode));
