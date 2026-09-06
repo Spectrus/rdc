@@ -7683,9 +7683,11 @@ function openVideo(videoId, isProtected) {
                         }
                     }, 400);
                 };
-                // manual close only (no auto-dismiss)
+                // New-addition notices disappear automatically after twelve seconds.
+                const autoDismiss = message.startsWith('Novas Adições:') ? setTimeout(performDismiss, 12000) : null;
                 closeBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    if (autoDismiss) clearTimeout(autoDismiss);
                     performDismiss();
                 });
             }
@@ -10049,7 +10051,7 @@ function openVideo(videoId, isProtected) {
             author: d.autor,
             description: sinopse,
             sinopse: sinopse,
-            type: d.tipo,
+            type: String(d.titulo || '').trim().toLocaleUpperCase('pt-BR') === 'A FILA' ? 'Conto' : d.tipo,
             link: window.bibliotecaPdfUrl(d.url),
             code: d.codigo || 0,
             timestamp: d.createdAt?.toDate?.()?.toISOString?.() || ''
