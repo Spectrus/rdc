@@ -164,9 +164,9 @@
     });
     document.addEventListener('click', event => {
       if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-      const link = event.target.closest('#acervo .document-card a[href]');
+      const link = event.target.closest('#acervo .document-card a[href], .timeline-item-horizontal a[href]');
       if (!link || dialog.contains(link)) return;
-      const card = link.closest('.document-card');
+      const card = link.closest('.document-card,.timeline-item-horizontal');
       const type = card?.querySelector('.document-type')?.textContent.trim() || '';
       const label = link.textContent.trim();
       if (!/^ler$/i.test(label) || /^(mídia|midia|vídeo|video)$/i.test(type)) return;
@@ -187,7 +187,7 @@
       }
       event.preventDefault();
       event.stopPropagation();
-      heading.textContent = card?.querySelector('h3')?.textContent.trim() || 'Leitura';
+      heading.textContent = card?.querySelector('h3,.timeline-text-horizontal')?.textContent.trim() || 'Leitura';
       external.href = url.href;
       const iframe = document.createElement('iframe');
       iframe.title = heading.textContent;
