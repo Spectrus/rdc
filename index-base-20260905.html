@@ -4435,7 +4435,7 @@ video-synopsis {
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2026</div>
                             <div class="timeline-text-horizontal">Cine Regina</div>
-                            <div class="timeline-author-horizontal">RDC</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Mídia</div>
                             <a href="cine-regina.html?autoplay=1" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ver</a>
                         </div>
@@ -4446,7 +4446,7 @@ video-synopsis {
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2026</div>
                             <div class="timeline-text-horizontal">Meu Encantamento por Paris</div>
-                            <div class="timeline-author-horizontal">RDC</div>
+                            <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Conto</div>
                             <a href="/pdfs/drive-1veDIpHQ02Xcd3hghPmGhaF2BUcv3DZqs.pdf" class="timeline-button-horizontal" target="_blank" rel="noopener noreferrer">Ler</a>
                         </div>
@@ -4716,7 +4716,7 @@ video-synopsis {
                 <div class="document-card video-card" style="animation-delay: 0.5s;">
                     <div class="document-code">100</div>
                     <h3>Cine Regina</h3>
-                    <div class="document-author">RDC </div>
+                    <div class="document-author">Reinaldo Duarte Castanheira</div>
                     <div class="document-year">2026</div>
                     <p>Uma cápsula do tempo que celebra a história e o esplendor do Cine Regina. Através de registos raros e memórias preservadas, esta obra percorre os anos dourados do cinema, homenageando os seus protagonistas e transformando a nostalgia em legado. Uma jornada imperdível pelos momentos que ficaram guardados para sempre na película da nossa história.</p>
                     <div class="document-footer">
@@ -5102,7 +5102,7 @@ video-synopsis {
         protegido: false,
         codigo: "110",
         ano: "2010",
-        autor: "RDC",
+        autor: "Reinaldo Duarte Castanheira",
         tipo: "Pessoas&Famílias",
         sinopse: "Professora Avelina conversa na sala de sua casa, contando um pouco de momentos e aventuras vividas."
     },
@@ -5169,7 +5169,7 @@ video-synopsis {
         protegido: false,
         codigo: "117",
         ano: "1997",
-        autor: "RDC",
+        autor: "Reinaldo Duarte Castanheira",
         sinopse: "Com um almoço, que coincide com o aniversário do José Augusto -  63 anos, fizemos a despedida da casa que nascemos e fomos criados."
     },
     {
@@ -10123,7 +10123,7 @@ function openVideo(videoId, isProtected) {
             id: docSnap.id,
             title: d.titulo,
             year: d.ano,
-            author: d.autor,
+            author: /^rdc$/i.test(String(d.autor || '').trim()) ? 'Reinaldo Duarte Castanheira' : d.autor,
             description: sinopse,
             sinopse: sinopse,
             type: d.tipo,
