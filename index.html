@@ -333,12 +333,12 @@
         #rdc-librarian[hidden]{display:none}
         #rdc-librarian iframe{position:fixed;inset:0;width:100vw;height:100vh;border:0;background:transparent;pointer-events:auto;transition:inset .55s cubic-bezier(.22,1,.36,1),width .55s cubic-bezier(.22,1,.36,1),height .55s cubic-bezier(.22,1,.36,1)}
         #rdc-librarian.is-corner{pointer-events:none}
-        #rdc-librarian.is-corner iframe{inset:78px auto auto 18px;width:280px;height:190px;pointer-events:auto}
+        #rdc-librarian.is-corner iframe{inset:var(--mini-y,78px) auto auto var(--mini-x,18px);width:280px;height:190px;pointer-events:auto}
         #rdc-librarian-close{position:fixed;top:18px;right:22px;z-index:2;min-width:94px;height:38px;padding:0 16px;border:1px solid rgba(180,150,76,.45);border-radius:10px;background:rgba(247,240,228,.78);color:#4a2c2a;font:15px/36px Georgia,serif;cursor:pointer;box-shadow:0 4px 18px rgba(74,44,42,.12);opacity:.94;pointer-events:auto;backdrop-filter:blur(8px);transition:background .2s ease,transform .2s ease}
         #rdc-librarian.is-corner #rdc-librarian-close{display:none}
         #rdc-librarian-close:hover{background:#f7f0e4;transform:scale(1.08)}
         a[data-rdc-librarian][aria-expanded="true"]{text-decoration:underline;text-underline-offset:5px}
-        @media(max-width:600px){#rdc-librarian.is-corner iframe{top:64px;right:auto;left:8px;width:210px;height:142px}#rdc-librarian-close{top:10px;right:10px}}
+        @media(max-width:600px){#rdc-librarian.is-corner iframe{top:var(--mini-y,64px);right:auto;left:var(--mini-x,8px);width:210px;height:142px}#rdc-librarian-close{top:10px;right:10px}}
       `;
       doc.head.append(css);
       const host=doc.createElement('aside');host.id='rdc-librarian';host.hidden=true;host.setAttribute('aria-label','Bibliotecário');
@@ -346,6 +346,14 @@
       doc.body.append(host);
       const visual=host.querySelector('iframe'), exit=host.querySelector('button');
       let visible=false, fullscreen=false, loaded=false;
+      let miniPosition = null;
+      function moveMini(x,y){
+        const r=visual.getBoundingClientRect();
+        miniPosition={x:Math.max(0,Math.min(x,win.innerWidth-r.width)),y:Math.max(0,Math.min(y,win.innerHeight-r.height))};
+        host.style.setProperty('--mini-x',miniPosition.x+'px');
+        host.style.setProperty('--mini-y',miniPosition.y+'px');
+      }
+      win.addEventListener('resize',()=>{if(!fullscreen&&miniPosition)moveMini(miniPosition.x,miniPosition.y);});
       const links=()=>Array.from(doc.querySelectorAll('.nav-bar a,.mobile-nav a')).filter(a=>/bibliotecario/.test(a.getAttribute('href')||''));
       const speak=on=>{if(loaded)visual.contentWindow?.postMessage({type:'viz-dock',action:'hover-audio',on:!!on},win.location.origin);};
       function sync(){
@@ -377,6 +385,41 @@
           const style=child.createElement('style');
           style.textContent='html,body{background:transparent!important}body.embed-dock:not(.embed-fs) .stage{background:transparent!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important}.dock-tools,.dock-nav,.dock-chrome,.dock-exit-btn,#rdc-audio-controls{display:none!important}';
           child.head.append(style);
+          let drag=null, moved=false;
+          child.addEventListener('pointerdown',event=>{
+            if(fullscreen || event.button!==0) return;
+            const r=visual.getBoundingClientRect();
+            drag={id:event.pointerId,x:event.screenX,y:event.screenY,left:r.left,top:r.top};
+            moved=false;
+            child.documentElement.setPointerCapture(event.pointerId);
+            event.preventDefault();event.stopImmediatePropagation();
+            speak(false);
+          },true);
+          child.addEventListener('pointermove',event=>{
+            if(!drag||event.pointerId!==drag.id) return;
+            const dx=event.screenX-drag.x,dy=event.screenY-drag.y;
+            if(Math.abs(dx)+Math.abs(dy)>5)moved=true;
+            if(moved){
+              visual.style.transition='none';
+              moveMini(drag.left+dx,drag.top+dy);
+            }
+            event.stopImmediatePropagation();
+          },true);
+          const endDrag=event=>{
+            if(!drag) return;
+            const id=drag.id;drag=null;
+            if(child.documentElement.hasPointerCapture(id))child.documentElement.releasePointerCapture(id);
+            visual.style.transition='';
+            event.stopImmediatePropagation();
+          };
+          child.addEventListener('pointerup',endDrag,true);
+          child.addEventListener('pointercancel',endDrag,true);
+          child.addEventListener('click',event=>{
+            if(fullscreen)return;
+            event.preventDefault();event.stopImmediatePropagation();
+            if(!moved)showFull();
+            moved=false;
+          },true);
         }
         visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:fullscreen},win.location.origin);
       });
