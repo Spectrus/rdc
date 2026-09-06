@@ -2726,7 +2726,7 @@ video-synopsis {
         <a href="#intro">Início</a>
         <a href="#timeline">Linha do Tempo</a>
         <a href="#acervo">Acervo</a>
-        <a href="bibliotecario.html">Bibliotecário</a>
+        <a href="bibliotecario.html">Falar com o Bibliotecário</a>
         <a href="#" id="navVisualize" title="Visualização em ecrã inteiro">Visualizar</a>
     </div>
     
@@ -2742,7 +2742,7 @@ video-synopsis {
         <a href="#intro">Início</a>
         <a href="#timeline">Linha do Tempo</a>
         <a href="#acervo">Acervo</a>
-        <a href="bibliotecario.html">Bibliotecário</a>
+        <a href="bibliotecario.html">Falar com o Bibliotecário</a>
         <a href="#" id="navVisualizeMobile">Visualizar</a>
     </div>
     <!-- Fixed down arrow near header top-right -->
@@ -10009,7 +10009,7 @@ function openVideo(videoId, isProtected) {
       // ===== Inicializa carregamento =====
       carregarConteudos();
       
-      // One authoritative source for the badge: the global Firebase visit counter.
+      // One authoritative source for the badge: the existing weekly Firebase records.
       const visitsEl = document.querySelector("#visits-stat .stat-number");
       const visitsLabelEl = document.querySelector("#visits-stat .stat-label");
       if (visitsLabelEl) visitsLabelEl.textContent = "Visitas";
@@ -10017,16 +10017,16 @@ function openVideo(videoId, isProtected) {
       let countVisit = null;
       function listenToVisits(){
         if (stopVisits) stopVisits();
-        stopVisits = onSnapshot(doc(db, "stats", "global"), snapshot => {
-          const total = Number(snapshot.data()?.visits_total);
+        // The existing public counter is the sum of the stored weekly records.
+        stopVisits = onSnapshot(collection(db, "stats_weekly"), snapshot => {
+          let total = 0;
+          snapshot.forEach(record => {
+            const visits = Number(record.data().visits);
+            if (Number.isFinite(visits) && visits >= 0) total += Math.trunc(visits);
+          });
           if (!visitsEl) return;
-          if (!snapshot.exists() || !Number.isFinite(total) || total < 0) {
-            visitsEl.textContent = "—";
-            visitsEl.title = "Contador de visitas ainda indisponível";
-          } else {
-            visitsEl.textContent = Math.trunc(total).toLocaleString("pt-BR");
-            visitsEl.removeAttribute("title");
-          }
+          visitsEl.textContent = total.toLocaleString("pt-BR");
+          visitsEl.removeAttribute("title");
           visitsEl.setAttribute("aria-busy", "false");
         }, error => {
           if (visitsEl) {
