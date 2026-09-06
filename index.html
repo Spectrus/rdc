@@ -146,10 +146,12 @@
         }
         #acervo:not(.view-list) .rdc-masonry > .document-card {
           position:absolute; box-sizing:border-box; min-height:0;
+          height:auto;
           animation:none !important; transform:none !important; opacity:1 !important;
           transition:top 400ms cubic-bezier(.22,1,.36,1),
             height 400ms cubic-bezier(.22,1,.36,1), box-shadow .2s ease;
         }
+        #acervo:not(.view-list) .rdc-masonry > .document-card:not([data-rdc-ready]) { visibility:hidden; }
         #acervo:not(.view-list) .rdc-synopsis {
           flex:0 0 auto; box-sizing:content-box; min-height:0; overflow:hidden;
           transition:height 400ms cubic-bezier(.22,1,.36,1);
@@ -249,6 +251,7 @@
           set(card, 'height', height + 'px');
           set(card, 'left', (column * (state.cardWidth + state.gap)) + 'px');
           set(card, 'top', heights[column] + 'px');
+          card.setAttribute('data-rdc-ready', 'true');
           heights[column] += height + state.rowGap;
         });
         set(state.grid, 'height', Math.max(0, ...heights.map(h => h - state.rowGap)) + 'px');
