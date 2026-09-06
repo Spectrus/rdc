@@ -392,18 +392,20 @@
       if (doc.getElementById('rdc-video-dialog')) return;
       const style = doc.createElement('style');
       style.textContent = `
-        #rdc-video-dialog{box-sizing:border-box;width:min(1000px,94vw);max-width:94vw;max-height:92dvh;padding:0;border:3px solid #d3b35d;border-radius:12px;background:#f7f0e4;color:#4a2c2a;box-shadow:0 24px 90px #0008;overflow:auto}
+        #rdc-video-dialog{position:fixed;inset:auto;margin:0;box-sizing:border-box;max-width:none;max-height:none;padding:0;border:1px solid #d3b35d;border-radius:12px;background:#f7f0e4;color:#4a2c2a;box-shadow:0 24px 90px #0008;overflow:hidden}
         #rdc-video-dialog::backdrop{background:rgba(32,23,20,.78);backdrop-filter:blur(5px)}
-        #rdc-video-dialog[open]{animation:rdc-player-enter .24s ease-out}
-        #rdc-video-dialog header{display:flex;align-items:center;gap:16px;padding:16px 20px}
-        #rdc-video-title{flex:1;margin:0;font:600 clamp(17px,3vw,24px)/1.3 Georgia,serif}
-        #rdc-video-close{flex:none;width:44px;height:44px;border:1px solid #b4964c;border-radius:50%;background:transparent;color:#4a2c2a;font:30px/1 Georgia,serif;cursor:pointer}
-        #rdc-video-close:hover{background:#e9d7a3}
+        #rdc-video-dialog[open]{display:flex;flex-direction:column;animation:rdc-player-enter .24s ease-out}
+        #rdc-video-dialog header{position:static;display:flex;flex:none;align-items:center;gap:8px;padding:10px 12px;cursor:grab;touch-action:none;user-select:none;background:#f7f0e4}
+        #rdc-video-dialog header:active{cursor:grabbing}
+        #rdc-video-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0;font:600 clamp(16px,2vw,22px)/1.3 Georgia,serif}
+        #rdc-video-dialog header button{flex:none;width:44px;height:44px;border:1px solid #b4964c;border-radius:50%;background:transparent;color:#4a2c2a;font:30px/1 Georgia,serif;cursor:pointer}
+        #rdc-video-dialog header button:hover{background:#e9d7a3}
         #rdc-video-dialog :focus-visible{outline:3px solid #8a651b;outline-offset:3px}
-        #rdc-video-stage{position:relative;aspect-ratio:16/9;max-height:65dvh;background:#161311}
+        #rdc-video-stage{position:relative;flex:1;min-height:0;background:#161311}
         #rdc-video-stage iframe{display:block;position:absolute;inset:0;width:100%;height:100%;border:0}
-        #rdc-video-dialog footer{padding:12px 20px;font:14px/1.5 Georgia,serif}
-        #rdc-video-dialog footer a{color:#4a2c2a;text-underline-offset:3px}
+        #rdc-video-resize{position:absolute;bottom:0;right:0;width:26px;height:26px;z-index:2;border:0;border-radius:8px 0 0 0;background:#f7f0e4;color:#795a21;cursor:nwse-resize;touch-action:none;font:20px/1 sans-serif}
+        #rdc-video-dialog.is-adjusting iframe{pointer-events:none}
+        @media(max-width:480px){#rdc-video-dialog header{gap:4px;padding:8px}#rdc-video-dialog header button{width:34px;height:36px;font-size:23px}}
         @keyframes rdc-player-enter{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
         @media(prefers-reduced-motion:reduce){#rdc-video-dialog[open]{animation:none}}
       `;
@@ -411,18 +413,73 @@
       const dialog = doc.createElement('dialog');
       dialog.id = 'rdc-video-dialog';
       dialog.setAttribute('aria-labelledby','rdc-video-title');
-      dialog.innerHTML = '<header><h2 id="rdc-video-title"></h2><button id="rdc-video-close" type="button" aria-label="Fechar vídeo" autofocus>×</button></header><div id="rdc-video-stage"></div><footer>Não conseguiu assistir? <a target="_blank" rel="noopener noreferrer">Abrir vídeo no Drive</a></footer>';
+      dialog.innerHTML = '<header><h2 id="rdc-video-title"></h2><button type="button" data-size="smaller" aria-label="Reduzir janela" title="Reduzir janela">−</button><button type="button" data-size="larger" aria-label="Aumentar janela" title="Aumentar janela">+</button><button type="button" data-size="reset" aria-label="Centralizar e restaurar tamanho" title="Centralizar e restaurar tamanho">↺</button><button id="rdc-video-close" type="button" aria-label="Fechar vídeo" autofocus>×</button></header><div id="rdc-video-stage"></div><button id="rdc-video-resize" type="button" aria-label="Ajustar tamanho da janela pelas setas do teclado ou arrastando" title="Arraste para ajustar o tamanho">◢</button>';
       doc.body.append(dialog);
       const stage = dialog.querySelector('#rdc-video-stage');
       const title = dialog.querySelector('h2');
-      const fallback = dialog.querySelector('footer a');
+      const grip = dialog.querySelector('#rdc-video-resize');
+      const clamp = (n,min,max) => Math.max(min,Math.min(n,max));
+      let box = {x:0,y:0,w:0,h:0}, gesture = null;
+      function position(x,y,w,h){
+        const vw = win.innerWidth, vh = win.innerHeight;
+        box.w = clamp(w,Math.min(320,vw-16),vw-16);
+        box.h = clamp(h,Math.min(220,vh-16),vh-16);
+        box.x = clamp(x,8,Math.max(8,vw-box.w-8));
+        box.y = clamp(y,8,Math.max(8,vh-box.h-8));
+        Object.assign(dialog.style,{left:box.x+'px',top:box.y+'px',width:box.w+'px',height:box.h+'px'});
+      }
+      function resetSize(){
+        const w = Math.min(1000,win.innerWidth-32,(win.innerHeight-96)*16/9);
+        const h = w*9/16+66;
+        position((win.innerWidth-w)/2,(win.innerHeight-h)/2,w,h);
+      }
+      function scaleSize(factor){
+        const w = box.w*factor, h = box.h*factor;
+        position(box.x+(box.w-w)/2,box.y+(box.h-h)/2,w,h);
+      }
+      dialog.querySelectorAll('[data-size]').forEach(button=>button.addEventListener('click',()=>{
+        if(button.dataset.size === 'reset') resetSize();
+        else scaleSize(button.dataset.size === 'smaller' ? .85 : 1.15);
+      }));
+      function finishGesture(){
+        if(!gesture) return;
+        const {target,id} = gesture;
+        gesture = null;
+        dialog.classList.remove('is-adjusting');
+        if(target.hasPointerCapture(id)) target.releasePointerCapture(id);
+      }
+      function beginGesture(event,resize){
+        if(event.button !== 0 || (!resize && event.target.closest('button'))) return;
+        event.preventDefault();
+        gesture = {target:event.currentTarget,id:event.pointerId,x:event.clientX,y:event.clientY,box:{...box},resize};
+        gesture.target.setPointerCapture(event.pointerId);
+        dialog.classList.add('is-adjusting');
+      }
+      dialog.querySelector('header').addEventListener('pointerdown',e=>beginGesture(e,false));
+      grip.addEventListener('pointerdown',e=>beginGesture(e,true));
+      dialog.addEventListener('pointermove',event=>{
+        if(!gesture || event.pointerId !== gesture.id) return;
+        const dx = event.clientX-gesture.x, dy = event.clientY-gesture.y, b = gesture.box;
+        if(gesture.resize) position(b.x,b.y,Math.min(b.w+dx,win.innerWidth-b.x-8),Math.min(b.h+dy,win.innerHeight-b.y-8));
+        else position(b.x+dx,b.y+dy,b.w,b.h);
+      });
+      ['pointerup','pointercancel','lostpointercapture'].forEach(name=>dialog.addEventListener(name,finishGesture));
+      grip.addEventListener('keydown',event=>{
+        const steps = {ArrowLeft:[-24,0],ArrowRight:[24,0],ArrowUp:[0,-24],ArrowDown:[0,24]};
+        const step = steps[event.key];
+        if(!step) return;
+        event.preventDefault();
+        position(box.x,box.y,box.w+step[0],box.h+step[1]);
+      });
+      win.addEventListener('resize',()=>{if(dialog.open) position(box.x,box.y,box.w,box.h);});
       let trigger, oldOverflow;
       dialog.addEventListener('close',()=>{
+        finishGesture();
         stage.replaceChildren(); // Destroy the player so audio stops immediately.
         doc.documentElement.style.overflow = oldOverflow;
         if (trigger?.isConnected) trigger.focus({preventScroll:true});
       });
-      dialog.querySelector('button').addEventListener('click',()=>dialog.close());
+      dialog.querySelector('#rdc-video-close').addEventListener('click',()=>dialog.close());
       dialog.addEventListener('click',event=>{
         if(event.target !== dialog) return;
         const r = dialog.getBoundingClientRect();
@@ -451,9 +508,9 @@
         player.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
         player.allowFullscreen = true;
         player.src = preview.href;
-        fallback.href = url.href;
         stage.replaceChildren(player);
         oldOverflow = doc.documentElement.style.overflow;
+        resetSize();
         dialog.showModal();
         doc.documentElement.style.overflow = 'hidden';
       },true);
