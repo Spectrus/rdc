@@ -8514,6 +8514,20 @@
               }
               return;
             }
+            if (data.action === "hover-audio") {
+              if (data.on) {
+                if (!listening) {
+                  startListening(requestMicStream()).catch(function () {
+                    beginFsLiveAudio();
+                  });
+                }
+              } else if (listening) {
+                stopListening(false);
+              } else if (simulatingNoise) {
+                setSimulatingNoise(false);
+              }
+              return;
+            }
             if (data.action === "set-overlay") setOverlay(!!data.overlay, false);
             if (data.action === "resize") {
               resizeWaveCanvas();
