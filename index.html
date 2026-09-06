@@ -60,6 +60,9 @@
     }
 
     function corrigirGalo(doc){
+      doc.querySelectorAll('.document-author,.timeline-author-horizontal').forEach(author=>{
+        if (/^rdc$/i.test(author.textContent.trim())) author.textContent='Reinaldo Duarte Castanheira';
+      });
       doc.querySelectorAll('.document-card').forEach(card => {
         const link = card.querySelector('a[href]')?.getAttribute('href') || '';
         if (cardTitle(card) !== 'Galo de Briga – versão já OK' && !link.includes('1MvVnk8HCNt88x1JbnDvW2wt9O7jHKC3D')) return;
