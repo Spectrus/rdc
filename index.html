@@ -320,6 +320,112 @@
       rebuild();
     }
 
+    function instalarBibliotecario(doc, win){
+      if (doc.getElementById('rdc-librarian')) return;
+      const css = doc.createElement('style');
+      css.textContent = `
+        #rdc-librarian{position:fixed;right:20px;top:76px;width:340px;max-width:calc(100vw - 24px);height:300px;z-index:1000050;background:rgba(247,240,228,.96);border:1px solid #d4b45f66;border-radius:22px;box-shadow:0 16px 48px #4a2c2a25;overflow:hidden;opacity:1;transform:translateY(0);transition:opacity .22s,transform .35s,filter .3s}
+        #rdc-librarian[hidden]{display:none}
+        #rdc-librarian.rdc-dissolving{opacity:0;filter:blur(8px);transform:translateY(-24px) scale(.94);pointer-events:none}
+        #rdc-librarian header{height:44px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;color:#4a2c2a;font:600 15px Georgia,serif}
+        #rdc-librarian header button{border:0;background:transparent;color:inherit;cursor:pointer;font:24px Georgia;padding:4px 10px;border-radius:50%}
+        #rdc-librarian iframe{display:block;width:100%;height:256px;border:0;background:transparent}
+        #rdc-librarian-vapor{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1000051}
+        a[data-rdc-librarian][aria-expanded="true"]{text-decoration:underline;text-underline-offset:5px}
+        @media(max-width:600px){#rdc-librarian{right:12px;top:70px;width:310px;height:280px}#rdc-librarian iframe{height:236px}}
+        @media(prefers-reduced-motion:reduce){#rdc-librarian{transition:opacity .12s}}
+      `;
+      doc.head.append(css);
+      const panel = doc.createElement('section');
+      panel.id='rdc-librarian';panel.hidden=true;panel.setAttribute('aria-label','Falar com o Bibliotecário');
+      panel.innerHTML='<header><span>Bibliotecário</span><button type="button" aria-label="Fechar bibliotecário">×</button></header><iframe title="Animação e áudio do Bibliotecário" allow="microphone; autoplay" src="about:blank"></iframe>';
+      doc.body.append(panel);
+      const visual=panel.querySelector('iframe'), close=panel.querySelector('button');
+      const vapor=doc.createElement('canvas');vapor.id='rdc-librarian-vapor';vapor.hidden=true;vapor.setAttribute('aria-hidden','true');doc.body.append(vapor);
+      let open=false, generation=0, raf=0;
+      const reduced=()=>win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const links=()=>Array.from(doc.querySelectorAll('.nav-bar a, .mobile-nav a')).filter(a=>/bibliotecario/.test(a.getAttribute('href')||''));
+      function sync(){links().forEach(a=>{a.dataset.rdcLibrarian='';a.setAttribute('aria-controls',panel.id);a.setAttribute('aria-expanded',String(open));});}
+      visual.addEventListener('load',()=>{
+        const child=visual.contentDocument;
+        if(!child || !child.getElementById('btnListen'))return;
+        const s=child.createElement('style');
+        s.textContent=`
+          html,body{background:transparent!important}
+          body.embed-dock .dock-shell{height:calc(100% - 50px)!important}
+          .dock-tools,.dock-nav,.dock-chrome{display:none!important}
+          #rdc-audio-controls{position:fixed;bottom:8px;left:12px;right:12px;display:flex;justify-content:center;gap:8px;z-index:999999}
+          #rdc-audio-controls button{display:inline-flex!important;visibility:visible!important;align-items:center;border:1px solid #d4b45f;border-radius:20px;background:#f7f0e4;color:#4a2c2a;padding:7px 14px;font:14px Georgia;cursor:pointer}
+          #rdc-audio-controls button:disabled{opacity:.4;cursor:default}
+        `;
+        child.head.append(s);
+        const controls=child.createElement('div');controls.id='rdc-audio-controls';
+        ['btnListen','btnStop'].forEach(id=>{const b=child.getElementById(id);if(b){b.hidden=false;b.removeAttribute('aria-hidden');controls.append(b);}});
+        child.body.append(controls);
+        visual.contentWindow.postMessage({type:'viz-dock',action:'resize'},win.location.origin);
+      });
+      function particles(){
+        const out=[], box=visual.getBoundingClientRect();
+        try{
+          const sample=doc.createElement('canvas');sample.width=Math.ceil(box.width);sample.height=Math.ceil(box.height);
+          const ctx=sample.getContext('2d');
+          visual.contentDocument.querySelectorAll('canvas').forEach(c=>{
+            const r=c.getBoundingClientRect();
+            if(r.width&&r.height&&r.right>0&&r.left<box.width&&r.bottom>0&&r.top<box.height)ctx.drawImage(c,r.left,r.top,r.width,r.height);
+          });
+          const pixels=ctx.getImageData(0,0,sample.width,sample.height).data;
+          for(let y=0;y<sample.height;y+=3)for(let x=0;x<sample.width;x+=3){
+            const i=(y*sample.width+x)*4;
+            if(pixels[i+3]>45 && (pixels[i]<225||pixels[i+1]<205||pixels[i+2]<185)){
+              out.push({x:box.left+x,y:box.top+y,r:pixels[i],g:pixels[i+1],b:pixels[i+2],delay:Math.random()*.22,drift:(Math.random()-.5)*45,size:.5+Math.random()*1.1});
+            }
+          }
+        }catch(error){console.warn('Bibliotecário: captura visual indisponível',error);}
+        return out;
+      }
+      function shut(){
+        if(!open)return;
+        open=false;sync();const token=++generation;
+        const dots=particles();
+        try{visual.contentDocument.getElementById('btnStop')?.click();}catch(_){}
+        panel.classList.add('rdc-dissolving');
+        const finish=()=>{if(token!==generation)return;panel.hidden=true;vapor.hidden=true;visual.src='about:blank';panel.classList.remove('rdc-dissolving');};
+        if(reduced()||!dots.length){win.setTimeout(finish,140);return;}
+        vapor.width=win.innerWidth;vapor.height=win.innerHeight;vapor.hidden=false;
+        const ctx=vapor.getContext('2d'),targetX=panel.getBoundingClientRect().right-40;
+        const start=win.performance.now();
+        function draw(now){
+          if(token!==generation)return;
+          const t=(now-start)/1150;ctx.clearRect(0,0,vapor.width,vapor.height);
+          dots.forEach(p=>{
+            const u=Math.max(0,Math.min(1,(t-p.delay)/(1-p.delay))),s=u*u;
+            if(u>=1)return;
+            ctx.fillStyle='rgba('+p.r+','+p.g+','+p.b+','+(1-u)+')';
+            const x=p.x+(targetX-p.x)*s+Math.sin(u*7)*p.drift*(1-u);
+            const y=p.y+(-60-p.y)*s-35*Math.sin(u*Math.PI);
+            ctx.beginPath();ctx.arc(x,y,p.size*(1-.75*u),0,Math.PI*2);ctx.fill();
+          });
+          if(t<1)raf=win.requestAnimationFrame(draw);else finish();
+        }
+        raf=win.requestAnimationFrame(draw);
+      }
+      function show(){
+        open=true;++generation;win.cancelAnimationFrame(raf);vapor.hidden=true;panel.classList.remove('rdc-dissolving');panel.hidden=false;
+        if(visual.getAttribute('src')==='about:blank')visual.src='bibliotecario.html?embed=dock&corner=1';
+        if(!reduced())panel.animate([{opacity:0,transform:'translateY(-18px) scale(.96)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:380,easing:'cubic-bezier(.22,1,.36,1)'});
+        sync();
+      }
+      doc.addEventListener('click',event=>{
+        const a=event.target.closest('a');
+        if(!a || !links().includes(a))return;
+        event.preventDefault();event.stopImmediatePropagation();
+        if(open)shut();else show();
+      },true);
+      close.addEventListener('click',()=>{shut();links().find(a=>a.getBoundingClientRect().width)?.focus();});
+      doc.addEventListener('keydown',event=>{if(event.key==='Escape'&&open)shut();});
+      sync();
+    }
+
     frame.addEventListener('load', async function(){
       let doc, win;
       try { doc = frame.contentDocument; win = frame.contentWindow; } catch (_) { return; }
@@ -327,6 +433,7 @@
       document.title = doc.title || document.title;
       for (let i=0; i<40 && !injetar(doc); i++) await sleep(150);
       instalarSinopses(doc, win);
+      instalarBibliotecario(doc, win);
       // Reveal only after the initial uniform layout has been measured and placed.
       frame.style.visibility = 'visible';
       const obs = new MutationObserver(() => deduplicar(doc));
