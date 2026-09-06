@@ -48,6 +48,25 @@
     const cards = all.filter(card => card.isConnected);
     document.querySelectorAll('#obras-stat .stat-number,.stat-item.obras .stat-number').forEach(el=>{el.textContent='120+';});
     window.bibliotecaUniqueCount = cards.length;
+    cards.forEach(card => {
+      if (card.querySelector('.document-footer .read-button')) return;
+      const source = card.querySelector('.video-thumbnail a[href],.media-thumbnail-container a[href]');
+      if (!source || !source.getAttribute('href') || source.getAttribute('href') === '#') return;
+      let footer = card.querySelector('.document-footer');
+      if (!footer) {
+        footer = document.createElement('div');
+        footer.className = 'document-footer';
+        card.appendChild(footer);
+      }
+      const button = document.createElement('a');
+      button.className = 'read-button';
+      button.href = source.href;
+      button.target = '_blank';
+      button.rel = 'noopener noreferrer';
+      button.textContent = 'Ver';
+      button.setAttribute('aria-label', 'Ver ' + title(card));
+      footer.appendChild(button);
+    });
     const alphabetical = [...cards].sort(byTitle);
     let next = 101;
     alphabetical.forEach(card => {
