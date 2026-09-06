@@ -48,6 +48,7 @@
 
     const frame = document.getElementById('site');
     const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sinopseGalo = 'Em um causo cheio de humor e saudade, Beatriz Marques Castanheira recorda o pai, as brigas de galos e a tentativa improvável de disfarçar um belo galo com tinta preta. O episódio termina em derrota, costura e uma frase inesquecível, mas abre caminho para uma reflexão sobre memória, luto e as histórias de infância e adolescência que permanecem vivas. Entre irreverência e afeto, o conto transforma os galos herdados após a morte do pai em símbolos de uma herança maior: lembranças das quais a narradora jamais consegue se desfazer.';
 
     function cardCode(card){
       const el = card && card.querySelector('.document-code');
@@ -60,10 +61,14 @@
 
     function corrigirGalo(doc){
       doc.querySelectorAll('.document-card').forEach(card => {
-        if (cardTitle(card) === 'Galo de Briga – versão já OK' && cardCode(card) === '370') {
-          const code = card.querySelector('.document-code');
-          if (code) code.textContent = '350';
-        }
+        const link = card.querySelector('a[href]')?.getAttribute('href') || '';
+        if (cardTitle(card) !== 'Galo de Briga – versão já OK' && !link.includes('1MvVnk8HCNt88x1JbnDvW2wt9O7jHKC3D')) return;
+        const code = card.querySelector('.document-code');
+        const title = card.querySelector('h3');
+        const synopsis = card.querySelector(':scope > p, :scope > .video-synopsis');
+        if (code && code.textContent.trim() === '370') code.textContent = '350';
+        if (title && title.textContent !== 'Galo de Briga') title.textContent = 'Galo de Briga';
+        if (synopsis && synopsis.textContent !== sinopseGalo) synopsis.textContent = sinopseGalo;
       });
     }
 
@@ -328,12 +333,12 @@
         #rdc-librarian[hidden]{display:none}
         #rdc-librarian iframe{position:fixed;inset:0;width:100vw;height:100vh;border:0;background:transparent;pointer-events:auto;transition:inset .55s cubic-bezier(.22,1,.36,1),width .55s cubic-bezier(.22,1,.36,1),height .55s cubic-bezier(.22,1,.36,1)}
         #rdc-librarian.is-corner{pointer-events:none}
-        #rdc-librarian.is-corner iframe{inset:78px 18px auto auto;width:280px;height:190px;pointer-events:auto}
+        #rdc-librarian.is-corner iframe{inset:78px auto auto 18px;width:280px;height:190px;pointer-events:auto}
         #rdc-librarian-close{position:fixed;top:18px;right:22px;z-index:2;min-width:94px;height:38px;padding:0 16px;border:1px solid rgba(180,150,76,.45);border-radius:10px;background:rgba(247,240,228,.78);color:#4a2c2a;font:15px/36px Georgia,serif;cursor:pointer;box-shadow:0 4px 18px rgba(74,44,42,.12);opacity:.94;pointer-events:auto;backdrop-filter:blur(8px);transition:background .2s ease,transform .2s ease}
         #rdc-librarian.is-corner #rdc-librarian-close{display:none}
         #rdc-librarian-close:hover{background:#f7f0e4;transform:scale(1.08)}
         a[data-rdc-librarian][aria-expanded="true"]{text-decoration:underline;text-underline-offset:5px}
-        @media(max-width:600px){#rdc-librarian.is-corner iframe{top:64px;right:8px;width:210px;height:142px}#rdc-librarian-close{top:10px;right:10px}}
+        @media(max-width:600px){#rdc-librarian.is-corner iframe{top:64px;right:auto;left:8px;width:210px;height:142px}#rdc-librarian-close{top:10px;right:10px}}
       `;
       doc.head.append(css);
       const host=doc.createElement('aside');host.id='rdc-librarian';host.hidden=true;host.setAttribute('aria-label','Bibliotecário');
