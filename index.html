@@ -329,7 +329,7 @@
         #rdc-librarian iframe{position:fixed;inset:0;width:100vw;height:100vh;border:0;background:transparent;pointer-events:auto;transition:inset .55s cubic-bezier(.22,1,.36,1),width .55s cubic-bezier(.22,1,.36,1),height .55s cubic-bezier(.22,1,.36,1)}
         #rdc-librarian.is-corner{pointer-events:none}
         #rdc-librarian.is-corner iframe{inset:78px 18px auto auto;width:280px;height:190px;pointer-events:auto}
-        #rdc-librarian-close{position:fixed;top:18px;right:22px;z-index:2;width:38px;height:38px;border:0;border-radius:50%;background:rgba(247,240,228,.72);color:#4a2c2a;font:28px/34px Georgia,serif;cursor:pointer;box-shadow:0 4px 18px rgba(74,44,42,.16);opacity:.9;pointer-events:auto}
+        #rdc-librarian-close{position:fixed;top:18px;right:22px;z-index:2;min-width:94px;height:38px;padding:0 16px;border:1px solid rgba(180,150,76,.45);border-radius:10px;background:rgba(247,240,228,.78);color:#4a2c2a;font:15px/36px Georgia,serif;cursor:pointer;box-shadow:0 4px 18px rgba(74,44,42,.12);opacity:.94;pointer-events:auto;backdrop-filter:blur(8px);transition:background .2s ease,transform .2s ease}
         #rdc-librarian.is-corner #rdc-librarian-close{display:none}
         #rdc-librarian-close:hover{background:#f7f0e4;transform:scale(1.08)}
         a[data-rdc-librarian][aria-expanded="true"]{text-decoration:underline;text-underline-offset:5px}
@@ -337,7 +337,7 @@
       `;
       doc.head.append(css);
       const host=doc.createElement('aside');host.id='rdc-librarian';host.hidden=true;host.setAttribute('aria-label','Bibliotecário');
-      host.innerHTML='<iframe title="Bibliotecário reativo" allow="microphone; autoplay" src="about:blank"></iframe><button id="rdc-librarian-close" type="button" aria-label="Voltar o Bibliotecário ao canto">×</button>';
+      host.innerHTML='<iframe title="Bibliotecário reativo" allow="microphone; autoplay" src="about:blank"></iframe><button id="rdc-librarian-close" type="button" aria-label="Voltar o Bibliotecário ao canto">← Voltar</button>';
       doc.body.append(host);
       const visual=host.querySelector('iframe'), exit=host.querySelector('button');
       let visible=false, fullscreen=false, loaded=false;
@@ -370,7 +370,7 @@
         const child=visual.contentDocument;
         if(child){
           const style=child.createElement('style');
-          style.textContent='html,body{background:transparent!important}.dock-tools,.dock-nav,.dock-chrome,#rdc-audio-controls{display:none!important}';
+          style.textContent='html,body{background:transparent!important}body.embed-dock:not(.embed-fs) .stage{background:transparent!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important}.dock-tools,.dock-nav,.dock-chrome,.dock-exit-btn,#rdc-audio-controls{display:none!important}';
           child.head.append(style);
         }
         visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:fullscreen},win.location.origin);
