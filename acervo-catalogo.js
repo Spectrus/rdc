@@ -219,3 +219,73 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
+
+/* Shared in-place fullscreen for document and video windows. */
+(() => {
+  const selector = '#rdc-reader-dialog,#rdc-video-dialog';
+  let active = null, owned = false, saved = '';
+  const css = document.createElement('style');
+  css.textContent = `
+    #rdc-reader-dialog.rdc-fullscreen,#rdc-video-dialog.rdc-fullscreen {
+      position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;
+      max-width:none!important;max-height:none!important;margin:0!important;
+      border:0!important;border-radius:0!important;resize:none!important;transform:none!important;
+    }
+    .rdc-fullscreen header {position:static!important;cursor:default!important;}
+    .rdc-fullscreen [data-scale],.rdc-fullscreen [data-size],.rdc-fullscreen #rdc-video-resize {display:none!important;}
+  `;
+  document.head.append(css);
+  function restore() {
+    if (!active) return;
+    active.classList.remove('rdc-fullscreen');
+    active.style.cssText = saved;
+    const b = active.querySelector('[data-rdc-fullscreen]');
+    if (b) { b.title = 'Tela cheia'; b.setAttribute('aria-label',b.title); b.setAttribute('aria-pressed','false'); }
+    active = null;
+  }
+  async function leave() {
+    const exit = owned && document.fullscreenElement;
+    owned = false;
+    restore();
+    if (exit) { try { await document.exitFullscreen(); } catch (_) {} }
+  }
+  function prepare() {
+    document.querySelectorAll(selector).forEach(dialog => {
+      if (dialog.querySelector('[data-rdc-fullscreen]')) return;
+      const header = dialog.querySelector('header');
+      if (!header) return;
+      const button = document.createElement('button');
+      button.type = 'button'; button.dataset.rdcFullscreen = '';
+      button.textContent = '⛶'; button.title = 'Tela cheia';
+      button.setAttribute('aria-label','Tela cheia'); button.setAttribute('aria-pressed','false');
+      const external = header.querySelector('.rdc-reader-external');
+      if (external) external.replaceWith(button);
+      else header.insertBefore(button,header.lastElementChild);
+      button.addEventListener('click', async event => {
+        event.preventDefault(); event.stopPropagation();
+        if (active === dialog) { await leave(); return; }
+        saved = dialog.style.cssText; active = dialog;
+        dialog.classList.add('rdc-fullscreen');
+        button.title = 'Sair da tela cheia';
+        button.setAttribute('aria-label',button.title); button.setAttribute('aria-pressed','true');
+        // Fullscreen the document, not a modal dialog (dialogs are in the top layer).
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+          try { await document.documentElement.requestFullscreen(); owned = true; }
+          catch (_) { owned = false; } // Remain full-viewport on unsupported devices.
+        }
+      });
+      dialog.addEventListener('close', () => { if (active === dialog) void leave(); });
+      dialog.addEventListener('cancel', event => {
+        if (active === dialog) { event.preventDefault(); void leave(); }
+      });
+      header.addEventListener('pointerdown', event => {
+        if (active === dialog && !event.target.closest('button,a')) event.stopImmediatePropagation();
+      },true);
+    });
+  }
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && owned) { owned = false; restore(); }
+  });
+  new MutationObserver(prepare).observe(document.body,{childList:true});
+  prepare();
+})();
