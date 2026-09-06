@@ -10,7 +10,7 @@
   </style>
 </head>
 <body>
-  <iframe id="site" title="Biblioteca Digital" src="index-base-20260905.html"></iframe>
+  <iframe id="site" title="Biblioteca Digital" allow="fullscreen; autoplay" allowfullscreen src="index-base-20260905.html"></iframe>
   <script>
   (function(){
     const itens = [
@@ -388,6 +388,77 @@
       sync();
     }
 
+    function instalarPlayerBiblioteca(doc, win){
+      if (doc.getElementById('rdc-video-dialog')) return;
+      const style = doc.createElement('style');
+      style.textContent = `
+        #rdc-video-dialog{box-sizing:border-box;width:min(1000px,94vw);max-width:94vw;max-height:92dvh;padding:0;border:3px solid #d3b35d;border-radius:12px;background:#f7f0e4;color:#4a2c2a;box-shadow:0 24px 90px #0008;overflow:auto}
+        #rdc-video-dialog::backdrop{background:rgba(32,23,20,.78);backdrop-filter:blur(5px)}
+        #rdc-video-dialog[open]{animation:rdc-player-enter .24s ease-out}
+        #rdc-video-dialog header{display:flex;align-items:center;gap:16px;padding:16px 20px}
+        #rdc-video-title{flex:1;margin:0;font:600 clamp(17px,3vw,24px)/1.3 Georgia,serif}
+        #rdc-video-close{flex:none;width:44px;height:44px;border:1px solid #b4964c;border-radius:50%;background:transparent;color:#4a2c2a;font:30px/1 Georgia,serif;cursor:pointer}
+        #rdc-video-close:hover{background:#e9d7a3}
+        #rdc-video-dialog :focus-visible{outline:3px solid #8a651b;outline-offset:3px}
+        #rdc-video-stage{position:relative;aspect-ratio:16/9;max-height:65dvh;background:#161311}
+        #rdc-video-stage iframe{display:block;position:absolute;inset:0;width:100%;height:100%;border:0}
+        #rdc-video-dialog footer{padding:12px 20px;font:14px/1.5 Georgia,serif}
+        #rdc-video-dialog footer a{color:#4a2c2a;text-underline-offset:3px}
+        @keyframes rdc-player-enter{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+        @media(prefers-reduced-motion:reduce){#rdc-video-dialog[open]{animation:none}}
+      `;
+      doc.head.append(style);
+      const dialog = doc.createElement('dialog');
+      dialog.id = 'rdc-video-dialog';
+      dialog.setAttribute('aria-labelledby','rdc-video-title');
+      dialog.innerHTML = '<header><h2 id="rdc-video-title"></h2><button id="rdc-video-close" type="button" aria-label="Fechar vídeo" autofocus>×</button></header><div id="rdc-video-stage"></div><footer>Não conseguiu assistir? <a target="_blank" rel="noopener noreferrer">Abrir vídeo no Drive</a></footer>';
+      doc.body.append(dialog);
+      const stage = dialog.querySelector('#rdc-video-stage');
+      const title = dialog.querySelector('h2');
+      const fallback = dialog.querySelector('footer a');
+      let trigger, oldOverflow;
+      dialog.addEventListener('close',()=>{
+        stage.replaceChildren(); // Destroy the player so audio stops immediately.
+        doc.documentElement.style.overflow = oldOverflow;
+        if (trigger?.isConnected) trigger.focus({preventScroll:true});
+      });
+      dialog.querySelector('button').addEventListener('click',()=>dialog.close());
+      dialog.addEventListener('click',event=>{
+        if(event.target !== dialog) return;
+        const r = dialog.getBoundingClientRect();
+        if(event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) dialog.close();
+      });
+      doc.addEventListener('click',event=>{
+        if(event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        const link = event.target.closest('a[href]');
+        if(!link || dialog.contains(link)) return;
+        const card = link.closest('.document-card');
+        const type = card?.querySelector('.document-type')?.textContent.trim() || '';
+        const isVideo = card && (card.classList.contains('video-card') || card.querySelector('.video-thumbnail') || /^(mídia|midia|vídeo|video)$/i.test(type));
+        if(!isVideo && !(link.matches('.timeline-button-horizontal') && /vídeo/i.test(link.textContent))) return;
+        let url;
+        try { url = new URL(link.href,win.location.href); } catch (_) { return; }
+        if(url.hostname !== 'drive.google.com' || url.protocol !== 'https:') return;
+        const id = url.pathname.match(/^\/file\/d\/([\w-]+)/)?.[1] || url.searchParams.get('id');
+        if(!id || !/^[\w-]+$/.test(id)) return;
+        event.preventDefault();event.stopImmediatePropagation();
+        trigger = link;
+        title.textContent = cardTitle(card) || link.closest('.timeline-item-horizontal')?.querySelector('h3')?.textContent || 'Vídeo da Biblioteca';
+        const preview = new URL('https://drive.google.com/file/d/' + id + '/preview');
+        if(url.searchParams.has('resourcekey')) preview.searchParams.set('resourcekey',url.searchParams.get('resourcekey'));
+        const player = doc.createElement('iframe');
+        player.title = title.textContent;
+        player.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
+        player.allowFullscreen = true;
+        player.src = preview.href;
+        fallback.href = url.href;
+        stage.replaceChildren(player);
+        oldOverflow = doc.documentElement.style.overflow;
+        dialog.showModal();
+        doc.documentElement.style.overflow = 'hidden';
+      },true);
+    }
+
     frame.addEventListener('load', async function(){
       let doc, win;
       try { doc = frame.contentDocument; win = frame.contentWindow; } catch (_) { return; }
@@ -396,6 +467,7 @@
       for (let i=0; i<40 && !injetar(doc); i++) await sleep(150);
       instalarSinopses(doc, win);
       instalarBibliotecario(doc, win);
+      instalarPlayerBiblioteca(doc, win);
       // Reveal only after the initial uniform layout has been measured and placed.
       frame.style.visibility = 'visible';
       const obs = new MutationObserver(() => deduplicar(doc));
