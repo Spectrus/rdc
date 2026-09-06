@@ -16,7 +16,38 @@
     const select = section?.querySelector('.sort-select');
     if (!section || !select) return;
     observer?.disconnect();
-    const cards = [...section.querySelectorAll('.document-card')];
+    const all = [...section.querySelectorAll('.document-card')];
+    const identity = card => {
+      const raw = card.querySelector('a.read-button,.video-thumbnail a,a.timeline-button-horizontal')?.getAttribute('href');
+      if (!raw || raw === '#') return null;
+      try {
+        const u = new URL(window.bibliotecaPdfUrl(raw),location.href);
+        const drive = u.pathname.match(/(?:\/file\/d\/|\/pdfs\/drive-)([\w-]+?)(?:\.pdf|\/|$)/);
+        if (drive) return 'drive:' + drive[1];
+        if (u.hostname === 'youtu.be') return 'youtube:' + u.pathname.slice(1);
+        if (u.hostname.endsWith('youtube.com')) return 'youtube:' + (u.searchParams.get('v') || u.searchParams.get('list') || u.pathname);
+        return u.origin + decodeURIComponent(u.pathname);
+      } catch (_) { return raw; }
+    };
+    const keepers = new Map();
+    const priority = card => ['376','377'].includes(original(card)) ? -1 : Number(original(card));
+    all.forEach(card => {
+      const key = identity(card);
+      if (!key) return;
+      const previous = keepers.get(key);
+      if (!previous) keepers.set(key,card);
+      else if (priority(card) < priority(previous)) { previous.remove(); keepers.set(key,card); }
+      else card.remove();
+    });
+    const timelineKeys = new Set();
+    document.querySelectorAll('.timeline-item-horizontal').forEach(item=>{
+      const key=identity(item);
+      if(!key)return;
+      if(timelineKeys.has(key))item.remove();else timelineKeys.add(key);
+    });
+    const cards = all.filter(card => card.isConnected);
+    document.querySelectorAll('#obras-stat .stat-number,.stat-item.obras .stat-number').forEach(el=>{el.textContent=String(cards.length);});
+    window.bibliotecaUniqueCount = cards.length;
     const alphabetical = [...cards].sort(byTitle);
     let next = 101;
     alphabetical.forEach(card => {
