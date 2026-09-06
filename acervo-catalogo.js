@@ -231,6 +231,29 @@
       max-width:none!important;max-height:none!important;margin:0!important;
       border:0!important;border-radius:0!important;resize:none!important;transform:none!important;
     }
+    /* Isolate the fullscreen reader from the Library's positioned layers. */
+    html:has(.rdc-fullscreen) body > :not(.rdc-fullscreen):not(script):not(style) {
+      visibility:hidden!important;pointer-events:none!important;
+    }
+    html:has(.rdc-fullscreen) body > :not(.rdc-fullscreen) * {
+      visibility:hidden!important;pointer-events:none!important;
+    }
+    html:has(.rdc-fullscreen),html:has(.rdc-fullscreen) body {
+      overflow:hidden!important;
+    }
+    #rdc-reader-dialog.rdc-fullscreen,#rdc-video-dialog.rdc-fullscreen {
+      visibility:visible!important;opacity:1!important;background:#f7f0e4!important;
+      z-index:2147483647!important;isolation:isolate;
+    }
+    #rdc-reader-dialog.rdc-fullscreen > header,#rdc-video-dialog.rdc-fullscreen > header {
+      flex:0 0 auto!important;width:100%!important;box-sizing:border-box!important;
+      margin:0!important;transform:none!important;
+    }
+    #rdc-reader-dialog.rdc-fullscreen #rdc-reader-stage,
+    #rdc-video-dialog.rdc-fullscreen #rdc-video-stage {
+      position:relative!important;flex:1 1 0!important;min-height:0!important;
+      width:100%!important;overflow:hidden!important;opacity:1!important;
+    }
     /* Hide Library navigation while a reader/player occupies the screen. */
     html:has(#rdc-reader-dialog.rdc-fullscreen) :is(#scrollTopBtn,#nav-down-arrow),
     html:has(#rdc-video-dialog.rdc-fullscreen) :is(#scrollTopBtn,#nav-down-arrow),
