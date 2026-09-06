@@ -2368,9 +2368,41 @@
         .aviso-acervo .aviso-google-label {
             font-weight: 600;
         }
-        /* Public: hide footer Google button box; keep #avisoGoogleBtn in DOM for One Tap */
+        /* Discreet footer signup — compact, no marketing block */
         #avisoAcervo {
-            display: none !important;
+            display: block;
+            max-width: 22rem;
+            margin: 1.1rem auto 0;
+            padding: 0.85rem 0.95rem 0.95rem;
+            background: transparent;
+            border: 1px solid rgba(212, 180, 95, 0.28);
+        }
+        #avisoAcervo .aviso-lead {
+            margin: 0 0 0.55rem;
+            font-size: 0.95rem;
+            font-style: italic;
+            opacity: 0.9;
+        }
+        #avisoAcervo .aviso-google {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+        #avisoAcervo .aviso-google button {
+            max-width: none;
+            width: 100%;
+        }
+        #avisoAcervo form#avisoForm {
+            margin-top: 0.75rem;
+            padding-top: 0.7rem;
+            border-top: 1px solid rgba(212, 180, 95, 0.22);
+        }
+        #avisoAcervo form#avisoForm label {
+            margin-top: 0.35rem;
+        }
+        #avisoAcervo form#avisoForm button {
+            margin-top: 0.65rem;
+            width: 100%;
         }
         .entradas-console {
             display: none;
@@ -3953,7 +3985,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Felipe 2007 Vila da Criança</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Mídia</div>
-                            <a href="https://drive.google.com/file/d/1eY3gBlfMF7m0kcI0pqgFV5XI4pN0I99p/view?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
+                            <a href="https://drive.google.com/file/d/14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6/view?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
                         </div>
                     </div>
                     
@@ -5010,15 +5042,23 @@ video-synopsis {
         <p>Biblioteca Digital Pessoal de Reinaldo Duarte Castanheira &copy; 2024</p>
         <p>Quem conta suas histórias e relembra os seus, celebra a vida. Um trabalho contínuo por Reinaldo e Felipe Castanheira</p>
         <p>Contato: <a href="mailto:reinaldoduarte080@gmail.com ">reinaldoduarte080@gmail.com </a></p>
-        <div class="aviso-acervo" id="avisoAcervo" hidden aria-hidden="true">
+        <div class="aviso-acervo" id="avisoAcervo">
+            <p class="aviso-lead">Quer receber aviso quando chegar peça nova?</p>
             <div class="aviso-google" id="avisoGoogle">
-                <p hidden>Peça ao Google para o reconhecer — se confirmar a conta, a casa passa a escrever-lhe.</p>
                 <button type="button" id="avisoGoogleBtn" aria-label="Continuar com o Google">
                     <span class="aviso-google-mark" aria-hidden="true">G</span>
                     <span class="aviso-google-label">Continuar com o Google</span>
                 </button>
                 <p class="aviso-status" id="googleEntradaStatus" role="status"></p>
             </div>
+            <form id="avisoForm" autocomplete="on">
+                <label for="avisoComoChamar">Como lhe chamamos</label>
+                <input id="avisoComoChamar" name="comoChamar" type="text" maxlength="80" required placeholder="o seu nome">
+                <label for="avisoEmail">Correio</label>
+                <input id="avisoEmail" name="email" type="email" maxlength="120" required placeholder="voce@exemplo.com">
+                <button type="submit" id="avisoBtn">Inscrever</button>
+                <p class="aviso-status" id="avisoStatus" role="status"></p>
+            </form>
         </div>
     </footer>
     <!-- Password protection removed -->
@@ -5485,7 +5525,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 ano: "2007",
                 descricao: "Documentário sobre as atividades de Felipe na Vila da Criança em 2007, registrando momentos importantes de sua infância.",
                 tipo: "Mídia",
-                link: "https://drive.google.com/file/d/1eY3gBlfMF7m0kcI0pqgFV5XI4pN0I99p/view?usp=sharing",
+                link: "https://drive.google.com/file/d/14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6/view?usp=sharing",
                 capa: "Capa-5.jpg"
             },
             {
@@ -10119,6 +10159,7 @@ function openVideo(videoId, isProtected) {
       };
 
       window.firebaseInscreverAviso = async (comoChamar, email) => {
+        await window.ensureFirebaseAuth();
         const nome = String(comoChamar || "").trim().slice(0, 80);
         const mail = String(email || "").trim().toLowerCase();
         const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail);
@@ -10150,7 +10191,7 @@ function openVideo(videoId, isProtected) {
           if (status) status.textContent = "A guardar o seu lugar na lista…";
           if (btn) btn.disabled = true;
           try {
-            if (window.waitForFirebaseAuth) await window.waitForFirebaseAuth;
+            await window.ensureFirebaseAuth();
             await window.firebaseInscreverAviso(nome, email);
             if (status) status.textContent = "Está na lista. Escrevemos a cada peça nova e, de quinze em quinze dias, um recado do acervo.";
             form.reset();
@@ -10172,7 +10213,11 @@ function openVideo(videoId, isProtected) {
         const q = query(collection(db, "conteudos"), orderBy("createdAt", "desc"));
         onSnapshot(q, (snap) => {
           const cards = [];
-          snap.forEach(docSnap => cards.push({ id: docSnap.id, ...docSnap.data() }));
+          snap.forEach(docSnap => {
+            const data = docSnap.data() || {};
+            if (data.oculto === true) return;
+            cards.push({ id: docSnap.id, ...data });
+          });
           if (window.editSystem && typeof window.editSystem.renderCloudCards === 'function') {
             window.editSystem.renderCloudCards(cards);
           }
