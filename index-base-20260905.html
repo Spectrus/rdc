@@ -7240,7 +7240,7 @@ function openVideo(videoId, isProtected) {
         <p id="entradasConsoleStatus">Só visível à conta da casa.</p>
         <button type="button" id="btnEntradasGoogle">Entrar como a casa</button>
         <ul id="entradasConsoleList"></ul>
-        <p><a href="entradas.html" style="color:#4a2c2a;">Abrir lista completa</a></p>
+        <p><button type="button" id="abrirEntradasCompleta">Abrir lista completa</button></p>
     </div>
     <div id="addMemoryFloating" class="add-memory-floating">
         <span>+</span>
@@ -12014,5 +12014,28 @@ function openVideo(videoId, isProtected) {
         });
       })();
     </script>
-  </body>
+  
+<script>
+(function(){
+  const box=document.getElementById('entradasConsole');
+  const open=document.getElementById('abrirEntradasCompleta');
+  if(!box||!open)return;
+  const style=document.createElement('style');
+  style.textContent='#entradasDialog{width:min(850px,92vw);max-height:85vh;border:1px solid #d3b35d;border-radius:12px;background:#f7f0e4;color:#4a2c2a;padding:20px}#entradasDialog::backdrop{background:#241b16aa}#entradasDialog #entradasConsole{display:block!important;position:static!important;width:auto!important;max-width:none!important;max-height:none!important;margin:0!important;box-shadow:none!important}#entradasDialog #entradasConsoleList{max-height:60vh;overflow:auto}#entradasDialog>button{float:right;font:inherit;padding:8px 16px;cursor:pointer}';
+  document.head.append(style);
+  const dialog=document.createElement('dialog');dialog.id='entradasDialog';
+  const close=document.createElement('button');close.type='button';close.textContent='← Voltar';
+  dialog.append(close);document.body.append(dialog);
+  const anchor=document.createComment('lista de entradas');box.before(anchor);
+  open.addEventListener('click',()=>{
+    dialog.append(box);open.hidden=true;dialog.showModal();
+    if(window.firebaseAbrirListaEntradas)window.firebaseAbrirListaEntradas();
+  });
+  close.addEventListener('click',()=>dialog.close());
+  dialog.addEventListener('close',()=>{anchor.after(box);open.hidden=false;open.focus();});
+  new MutationObserver(()=>{if(!document.body.classList.contains('edit-mode')&&dialog.open)dialog.close();}).observe(document.body,{attributes:true,attributeFilter:['class']});
+})();
+</script>
+
+</body>
 </html>
