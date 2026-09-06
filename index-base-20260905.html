@@ -7683,11 +7683,9 @@ function openVideo(videoId, isProtected) {
                         }
                     }, 400);
                 };
-                // New-addition notices disappear automatically after twelve seconds.
-                const autoDismiss = message.startsWith('Novas Adições:') ? setTimeout(performDismiss, 12000) : null;
+                // manual close only (no auto-dismiss)
                 closeBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (autoDismiss) clearTimeout(autoDismiss);
                     performDismiss();
                 });
             }
@@ -9526,9 +9524,27 @@ function openVideo(videoId, isProtected) {
         return !!(user && user.email && String(user.email).trim().toLowerCase() === HOUSE_EMAIL);
       }
 
-      async function registrarEntrada(user) {
-        if (!user || user.isAnonymous || !user.email) return;
-        const email = String(user.email).trim().toLowerCase();
+      function emailDoUtilizadorGoogle(user, idToken) {
+        let mail = String((user && user.email) || "").trim().toLowerCase();
+        if (mail) return mail;
+        const fromProvider = ((user && user.providerData) || []).find((p) => p && p.providerId === "google.com");
+        mail = String((fromProvider && fromProvider.email) || "").trim().toLowerCase();
+        if (mail) return mail;
+        if (idToken) {
+          try {
+            const payload = String(idToken).split(".")[1] || "";
+            const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+            const data = JSON.parse(json);
+            mail = String((data && data.email) || "").trim().toLowerCase();
+          } catch (_) { /* ignore malformed token */ }
+        }
+        return mail;
+      }
+
+      async function registrarEntrada(user, idToken) {
+        if (!user || user.isAnonymous) return;
+        const email = emailDoUtilizadorGoogle(user, idToken);
+        if (!email) return;
         const ref = doc(db, "entradas", user.uid);
         const sessKey = "rdc_entrada_sessao";
         let snap;
@@ -9555,8 +9571,8 @@ function openVideo(videoId, isProtected) {
         sessionStorage.setItem(sessKey, user.uid);
       }
 
-      async function inscreverAvisoGoogle(user) {
-        const mail = String(user && user.email || "").trim().toLowerCase();
+      async function inscreverAvisoGoogle(user, idToken) {
+        const mail = emailDoUtilizadorGoogle(user, idToken);
         if (!mail) return;
         let nome = String(user.displayName || "").trim().split(/\s+/)[0] || "";
         if (nome.length < 2) nome = "amigo da casa";
@@ -9573,12 +9589,13 @@ function openVideo(videoId, isProtected) {
         }, { merge: true });
       }
 
-      async function aposGoogleConfirmado(user) {
+      async function aposGoogleConfirmado(user, idToken) {
         /* Inscrição = confirmar Google ("sou eu"), não o formulário do rodapé.
            entradas e avisos são independentes: falha numa não bloqueia a outra. */
-        if (!user || user.isAnonymous || !user.email) return user;
-        try { await registrarEntrada(user); } catch (err) { console.warn("Entrada Google:", err); }
-        try { await inscreverAvisoGoogle(user); } catch (err) { console.warn("Aviso Google:", err); }
+        if (!user || user.isAnonymous) return user;
+        if (!emailDoUtilizadorGoogle(user, idToken)) return user;
+        try { await registrarEntrada(user, idToken); } catch (err) { console.warn("Entrada Google:", err); }
+        try { await inscreverAvisoGoogle(user, idToken); } catch (err) { console.warn("Aviso Google:", err); }
         const status = document.getElementById("googleEntradaStatus");
         if (status) {
           status.textContent = "A casa reconheceu-lhe. Escrevemos a cada peça nova e, de quinze em quinze dias, um recado do acervo.";
@@ -9592,7 +9609,8 @@ function openVideo(videoId, isProtected) {
       }
 
       function jaEntrouComGoogle(user) {
-        if (!user || user.isAnonymous || !user.email) return false;
+        if (!user || user.isAnonymous) return false;
+        if (!emailDoUtilizadorGoogle(user)) return false;
         return (user.providerData || []).some((p) => p && p.providerId === "google.com");
       }
 
@@ -9633,27 +9651,25 @@ function openVideo(videoId, isProtected) {
       }
 
       async function entrarComGoogleIdToken(idToken) {
+        /* Always sign in with the One Tap JWT. Do not link the anonymous session:
+           link fails when the Google account already exists, and the JWT is often
+           consumed — so returning visitors never reached avisos/entradas. */
         _googleAuthBusy = true;
         try {
-          const credential = GoogleAuthProvider.credential(idToken);
-          const current = _auth.currentUser;
-          if (current && current.isAnonymous) {
-            try {
-              const cred = await linkWithCredential(current, credential);
-              await aposGoogleConfirmado(cred.user);
-              try { window.google.accounts.id.cancel(); } catch (_e) { /* ignore */ }
-              return cred.user;
-            } catch (err) {
-              const code = err && err.code;
-              if (code !== "auth/credential-already-in-use" && code !== "auth/email-already-in-use" && code !== "auth/provider-already-linked") {
-                throw err;
-              }
-            }
+          let credential = GoogleAuthProvider.credential(idToken);
+          try {
+            const cred = await signInWithCredential(_auth, credential);
+            await aposGoogleConfirmado(cred.user, idToken);
+            try { window.google.accounts.id.cancel(); } catch (_e) { /* ignore */ }
+            return cred.user;
+          } catch (err) {
+            const recovered = GoogleAuthProvider.credentialFromError(err);
+            if (!recovered) throw err;
+            const cred = await signInWithCredential(_auth, recovered);
+            await aposGoogleConfirmado(cred.user, idToken);
+            try { window.google.accounts.id.cancel(); } catch (_e) { /* ignore */ }
+            return cred.user;
           }
-          const cred = await signInWithCredential(_auth, credential);
-          await aposGoogleConfirmado(cred.user);
-          try { window.google.accounts.id.cancel(); } catch (_e) { /* ignore */ }
-          return cred.user;
         } finally {
           _googleAuthBusy = false;
         }
@@ -9667,11 +9683,14 @@ function openVideo(videoId, isProtected) {
           return;
         }
         let fedcm = true;
+        let started = false;
         function promptWhenReady() {
+          if (started) return;
           if (!window.google || !window.google.accounts || !window.google.accounts.id) {
             window.setTimeout(promptWhenReady, 250);
             return;
           }
+          started = true;
           window.google.accounts.id.initialize({
             client_id: clientId,
             auto_select: false,
@@ -9692,6 +9711,7 @@ function openVideo(videoId, isProtected) {
               || (notification.isSkippedMoment && notification.isSkippedMoment());
             if (skipped && fedcm) {
               fedcm = false;
+              started = false;
               try { window.google.accounts.id.cancel(); } catch (_e) { /* ignore */ }
               window.setTimeout(promptWhenReady, 400);
               return;
@@ -9701,7 +9721,21 @@ function openVideo(videoId, isProtected) {
             }
           });
         }
-        promptWhenReady();
+        /* Parent wrapper keeps the iframe visibility:hidden until layout is ready.
+           Wait for that signal (FedCM is happier in a visible frame), with a fallback. */
+        function onParentMessage(ev) {
+          if (ev.origin !== window.location.origin) return;
+          const data = ev.data || {};
+          if (data.type === "rdc-parent" && data.action === "iframe-visible") {
+            window.removeEventListener("message", onParentMessage);
+            promptWhenReady();
+          }
+        }
+        window.addEventListener("message", onParentMessage);
+        window.setTimeout(() => {
+          window.removeEventListener("message", onParentMessage);
+          promptWhenReady();
+        }, 5000);
       }
 
       async function concluirRedirectGoogle() {
@@ -10092,7 +10126,7 @@ function openVideo(videoId, isProtected) {
             author: d.autor,
             description: sinopse,
             sinopse: sinopse,
-            type: String(d.titulo || '').trim().toLocaleUpperCase('pt-BR') === 'A FILA' ? 'Conto' : d.tipo,
+            type: d.tipo,
             link: window.bibliotecaPdfUrl(d.url),
             code: d.codigo || 0,
             timestamp: d.createdAt?.toDate?.()?.toISOString?.() || ''
@@ -10288,7 +10322,7 @@ function openVideo(videoId, isProtected) {
           console.error("Falha ao atualizar contadores:", error);
         });
         await countVisit;
-        if (!user.isAnonymous && user.email) {
+        if (!user.isAnonymous && emailDoUtilizadorGoogle(user)) {
           try { await aposGoogleConfirmado(user); } catch (e) { console.warn("Entrada não registada:", e); }
         }
       });

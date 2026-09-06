@@ -61,12 +61,6 @@
 
     function corrigirGalo(doc){
       doc.querySelectorAll('.document-card').forEach(card => {
-        if (cardTitle(card).toLocaleUpperCase('pt-BR') === 'A FILA') {
-          const category=card.querySelector('.document-type');
-          const action=card.querySelector('.read-button');
-          if(category && category.textContent !== 'Conto') category.textContent='Conto';
-          if(action && action.textContent !== 'Ler') action.textContent='Ler';
-        }
         const link = card.querySelector('a[href]')?.getAttribute('href') || '';
         if (cardTitle(card) !== 'Galo de Briga – versão já OK' && !link.includes('1MvVnk8HCNt88x1JbnDvW2wt9O7jHKC3D')) return;
         const code = card.querySelector('.document-code');
@@ -438,6 +432,7 @@
         event.preventDefault();event.stopImmediatePropagation();
         if(!visible)showFull();else dismiss();
       },true);
+      doc.addEventListener('keydown',event=>{if(event.key==='Escape'&&visible){if(fullscreen)collapse();else dismiss();}});
       sync();
     }
 
@@ -594,7 +589,9 @@
       instalarBibliotecario(doc, win);
       instalarPlayerBiblioteca(doc, win);
       // Reveal only after the initial uniform layout has been measured and placed.
+      // One Tap / FedCM in the child needs a visible iframe; notify after reveal.
       frame.style.visibility = 'visible';
+      try { win.postMessage({ type: 'rdc-parent', action: 'iframe-visible' }, win.location.origin); } catch (_) {}
       const obs = new MutationObserver(() => deduplicar(doc));
       try { obs.observe(doc.documentElement, {childList:true, subtree:true}); } catch (_) {}
       sincronizarFirebase(win).then(() => {
