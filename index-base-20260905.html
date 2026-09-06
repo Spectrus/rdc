@@ -9480,11 +9480,24 @@ function openVideo(videoId, isProtected) {
       // Sign in as soon as the module loads — do not wait until the bottom of this file.
       // Writes to `conteudos` require request.auth (see firestore.rules).
       let _authInFlight = null;
+      let _googleAuthBusy = false;
+      let _anonAuthEnabled = false;
       window.ensureFirebaseAuth = async function ensureFirebaseAuth() {
         if (_auth.currentUser) return _auth.currentUser;
+        if (_googleAuthBusy) {
+          for (let i = 0; i < 40 && _googleAuthBusy; i++) {
+            await new Promise((r) => setTimeout(r, 100));
+            if (_auth.currentUser) return _auth.currentUser;
+          }
+        }
+        if (_auth.currentUser) return _auth.currentUser;
         if (_authInFlight) return _authInFlight;
+        _anonAuthEnabled = true;
         _authInFlight = signInAnonymously(_auth)
-          .then((cred) => cred.user)
+          .then((cred) => {
+            if (_auth.currentUser && !_auth.currentUser.isAnonymous) return _auth.currentUser;
+            return cred.user;
+          })
           .catch((err) => {
             console.error("[conteudos] autenticação anónima falhou; a gravação no Firebase vai ser recusada.", err);
             throw err;
@@ -9492,7 +9505,11 @@ function openVideo(videoId, isProtected) {
           .finally(() => { _authInFlight = null; });
         return _authInFlight;
       };
-      window.ensureFirebaseAuth().catch(() => { /* logged above */ });
+      window.setTimeout(() => {
+        if (!_auth.currentUser && !_googleAuthBusy) {
+          window.ensureFirebaseAuth().catch(() => { /* logged above */ });
+        }
+      }, 3500);
 
       const HOUSE_EMAIL = "reinaldoduarte080@gmail.com";
       /* Web client ID from Firebase Google sign-in (mark-2-111f9).
@@ -9616,29 +9633,40 @@ function openVideo(videoId, isProtected) {
       }
 
       async function entrarComGoogleIdToken(idToken) {
-        const credential = GoogleAuthProvider.credential(idToken);
-        const current = _auth.currentUser;
-        if (current && current.isAnonymous) {
-          try {
-            const cred = await linkWithCredential(current, credential);
-            await aposGoogleConfirmado(cred.user);
-            return cred.user;
-          } catch (err) {
-            const code = err && err.code;
-            if (code !== "auth/credential-already-in-use" && code !== "auth/email-already-in-use" && code !== "auth/provider-already-linked") {
-              throw err;
+        _googleAuthBusy = true;
+        try {
+          const credential = GoogleAuthProvider.credential(idToken);
+          const current = _auth.currentUser;
+          if (current && current.isAnonymous) {
+            try {
+              const cred = await linkWithCredential(current, credential);
+              await aposGoogleConfirmado(cred.user);
+              try { window.google.accounts.id.cancel(); } catch (_e) { /* ignore */ }
+              return cred.user;
+            } catch (err) {
+              const code = err && err.code;
+              if (code !== "auth/credential-already-in-use" && code !== "auth/email-already-in-use" && code !== "auth/provider-already-linked") {
+                throw err;
+              }
             }
           }
+          const cred = await signInWithCredential(_auth, credential);
+          await aposGoogleConfirmado(cred.user);
+          try { window.google.accounts.id.cancel(); } catch (_e) { /* ignore */ }
+          return cred.user;
+        } finally {
+          _googleAuthBusy = false;
         }
-        const cred = await signInWithCredential(_auth, credential);
-        await aposGoogleConfirmado(cred.user);
-        return cred.user;
       }
 
       function startGoogleOneTap() {
         const clientId = googleWebClientIdPronto();
         if (!clientId) return;
-        if (jaEntrouComGoogle(_auth.currentUser)) return;
+        if (jaEntrouComGoogle(_auth.currentUser)) {
+          aposGoogleConfirmado(_auth.currentUser).catch(() => {});
+          return;
+        }
+        let fedcm = true;
         function promptWhenReady() {
           if (!window.google || !window.google.accounts || !window.google.accounts.id) {
             window.setTimeout(promptWhenReady, 250);
@@ -9648,7 +9676,7 @@ function openVideo(videoId, isProtected) {
             client_id: clientId,
             auto_select: false,
             cancel_on_tap_outside: true,
-            use_fedcm_for_prompt: true,
+            use_fedcm_for_prompt: fedcm,
             callback: async (response) => {
               if (!response || !response.credential) return;
               try {
@@ -9658,7 +9686,20 @@ function openVideo(videoId, isProtected) {
               }
             }
           });
-          window.google.accounts.id.prompt();
+          window.google.accounts.id.prompt((notification) => {
+            if (!notification) return;
+            const skipped = (notification.isNotDisplayed && notification.isNotDisplayed())
+              || (notification.isSkippedMoment && notification.isSkippedMoment());
+            if (skipped && fedcm) {
+              fedcm = false;
+              try { window.google.accounts.id.cancel(); } catch (_e) { /* ignore */ }
+              window.setTimeout(promptWhenReady, 400);
+              return;
+            }
+            if (skipped || (notification.isDismissedMoment && notification.isDismissedMoment())) {
+              if (!_auth.currentUser) window.ensureFirebaseAuth().catch(() => {});
+            }
+          });
         }
         promptWhenReady();
       }
@@ -10237,7 +10278,9 @@ function openVideo(videoId, isProtected) {
       onAuthStateChanged(auth, async (user) => {
         if (!user) {
           if (stopVisits) { stopVisits(); stopVisits = null; }
-          signInAnonymously(auth).catch(console.error);
+          if (!_googleAuthBusy && _anonAuthEnabled) {
+            signInAnonymously(auth).catch(console.error);
+          }
           return;
         }
         listenToVisits();
