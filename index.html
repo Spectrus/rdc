@@ -233,7 +233,8 @@
         state.cards.forEach((card, index) => {
           const entry = entries.get(card.querySelector('.rdc-synopsis'));
           const open = entry && expanded.get(entry.key);
-          const extra = open ? Math.max(0, entry.full - entry.preview) : 0;
+          const spare = Math.max(0, state.baseHeight - state.collapsedHeights.get(card));
+          const extra = open ? Math.max(0, entry.full - entry.preview - spare) : 0;
           const height = state.baseHeight + extra;
           const column = index % state.columns;
           if (entry) {
@@ -277,7 +278,7 @@
           const width = grid.clientWidth;
           const cardWidth = (width - gap * (columns - 1)) / columns;
           const cards = all.filter(card => win.getComputedStyle(card).display !== 'none');
-          const state = {grid, cards, width, columns, gap, rowGap, cardWidth, baseHeight:0};
+          const state = {grid, cards, width, columns, gap, rowGap, cardWidth, baseHeight:0, collapsedHeights:new Map()};
           if (!grids.has(grid)) resize.observe(grid);
           grids.set(grid, state);
           grid.classList.add('rdc-masonry', 'rdc-measuring');
@@ -302,7 +303,11 @@
               set(p, 'height', entry.preview + 'px');
             }
           });
-          cards.forEach(card => { state.baseHeight = Math.max(state.baseHeight, Math.ceil(card.getBoundingClientRect().height)); });
+          cards.forEach(card => {
+            const naturalHeight = Math.ceil(card.getBoundingClientRect().height);
+            state.collapsedHeights.set(card, naturalHeight);
+            state.baseHeight = Math.max(state.baseHeight, naturalHeight);
+          });
           place(state);
           void grid.offsetHeight;
           grid.classList.remove('rdc-measuring');
