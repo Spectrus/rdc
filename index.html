@@ -432,7 +432,6 @@
         event.preventDefault();event.stopImmediatePropagation();
         if(!visible)showFull();else dismiss();
       },true);
-      doc.addEventListener('keydown',event=>{if(event.key==='Escape'&&visible){if(fullscreen)collapse();else dismiss();}});
       sync();
     }
 
