@@ -290,26 +290,31 @@
           if (!grids.has(grid)) resize.observe(grid);
           grids.set(grid, state);
           grid.classList.add('rdc-masonry', 'rdc-measuring');
-          // Measure collapsed content once, before painting. All cards share its maximum.
-          cards.forEach(card => {
+          // Write sizes together, then read all geometry before the next write.
+          const measured = cards.map(card => {
             set(card, 'width', cardWidth + 'px'); set(card, 'height', 'auto');
             const entry = prepare(card);
-            if (entry) {
-              const {p, button} = entry;
-              set(p, 'height', 'auto');
-              const pc = win.getComputedStyle(p);
-              const fontSize = parseFloat(pc.fontSize) || 16;
-              if (pc.lineHeight === 'normal') set(p, 'lineHeight', '1.5');
-              const line = parseFloat(win.getComputedStyle(p).lineHeight) || fontSize * 1.5;
-              const padding = (parseFloat(pc.paddingTop) || 0) + (parseFloat(pc.paddingBottom) || 0);
-              const border = (parseFloat(pc.borderTopWidth) || 0) + (parseFloat(pc.borderBottomWidth) || 0);
-              entry.full = Math.ceil(p.getBoundingClientRect().height - padding - border);
-              entry.preview = line * 3;
-              button.toggleAttribute('data-unneeded', entry.full <= entry.preview + 1);
-              button.tabIndex = button.hasAttribute('data-unneeded') ? -1 : 0;
-              button.textContent = expanded.get(entry.key) ? 'Ler menos' : 'Ler mais';
-              set(p, 'height', entry.preview + 'px');
-            }
+            if (entry) set(entry.p, 'height', 'auto');
+            return entry;
+          }).filter(Boolean);
+          measured.forEach(({p}) => {
+            if (win.getComputedStyle(p).lineHeight === 'normal') set(p, 'lineHeight', '1.5');
+          });
+          measured.forEach(entry => {
+            const pc = win.getComputedStyle(entry.p);
+            const line = parseFloat(pc.lineHeight) || (parseFloat(pc.fontSize) || 16) * 1.5;
+            const padding = (parseFloat(pc.paddingTop) || 0) + (parseFloat(pc.paddingBottom) || 0);
+            const border = (parseFloat(pc.borderTopWidth) || 0) + (parseFloat(pc.borderBottomWidth) || 0);
+            entry.full = Math.ceil(entry.p.getBoundingClientRect().height - padding - border);
+            entry.preview = line * 3;
+          });
+          measured.forEach(entry => {
+            const {p, button} = entry;
+            button.toggleAttribute('data-unneeded', entry.full <= entry.preview + 1);
+            button.tabIndex = button.hasAttribute('data-unneeded') ? -1 : 0;
+            const label = expanded.get(entry.key) ? 'Ler menos' : 'Ler mais';
+            if (button.textContent !== label) button.textContent = label;
+            set(p, 'height', entry.preview + 'px');
           });
           cards.forEach(card => {
             const naturalHeight = Math.ceil(card.getBoundingClientRect().height);
@@ -595,7 +600,18 @@
       // One Tap / FedCM in the child needs a visible iframe; notify after reveal.
       frame.style.visibility = 'visible';
       try { win.postMessage({ type: 'rdc-parent', action: 'iframe-visible' }, win.location.origin); } catch (_) {}
-      const obs = new MutationObserver(() => deduplicar(doc));
+      let normalizePending = false;
+      const obs = new MutationObserver(records => {
+        const relevant = records.some(record => {
+          const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
+          return target?.closest('.document-card,.timeline-item-horizontal') ||
+            [...record.addedNodes].some(node => node.nodeType === 1 &&
+              (node.matches('.document-card,.timeline-item-horizontal') || node.querySelector('.document-card,.timeline-item-horizontal')));
+        });
+        if (!relevant || normalizePending) return;
+        normalizePending = true;
+        win.requestAnimationFrame(() => { normalizePending = false; deduplicar(doc); });
+      });
       try { obs.observe(doc.documentElement, {childList:true, subtree:true}); } catch (_) {}
       sincronizarFirebase(win).then(() => {
         setTimeout(() => { try { deduplicar(doc); } catch (_) {} }, 1200);
