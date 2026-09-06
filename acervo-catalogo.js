@@ -319,3 +319,17 @@
   new MutationObserver(prepare).observe(document.body,{childList:true});
   prepare();
 })();
+
+/* One rounded launcher; authentication stays inside the existing list dialog. */
+(() => {
+  const style = document.createElement('style');
+  style.textContent = `
+    body > #entradasConsole > #entradasSenhaForm,
+    body > #entradasConsole > #entradasConsoleStatus,
+    body > #entradasConsole > #entradasConsoleList { display:none!important; }
+    #entradasConsole { border-radius:18px!important; }
+    #abrirEntradasCompleta,#btnEntradasSenha,#entradasDialog > button { border-radius:12px!important; }
+    #entradasSenhaInput { border-radius:10px!important; }
+  `;
+  document.head.append(style);
+})();
