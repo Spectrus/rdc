@@ -374,7 +374,7 @@
       }
       function showFull(){
         visible=true;fullscreen=true;host.hidden=false;host.classList.remove('is-corner');
-        if(visual.src==='about:blank')visual.src='bibliotecario.html?embed=dock&v=full-reactive';
+        if(visual.src==='about:blank')visual.src='bibliotecario.html?embed=dock&fs=1&v=full-reactive';
         else if(loaded)visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:true},win.location.origin);
         sync();
       }
