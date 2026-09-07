@@ -352,3 +352,50 @@
   `;
   document.head.append(style);
 })();
+
+/* Prefer available Portuguese captions on existing and future YouTube embeds. */
+(() => {
+  const watched = new WeakSet();
+  function watch(doc) {
+    if (watched.has(doc) || !doc.documentElement) return;
+    watched.add(doc);
+    function configure(frame) {
+      const raw = frame.getAttribute('src');
+      if (!raw) return;
+      let url;
+      try { url = new URL(raw, doc.baseURI); } catch (_) { return; }
+      const hosts = ['youtube.com','www.youtube.com','youtube-nocookie.com','www.youtube-nocookie.com'];
+      if (hosts.includes(url.hostname) && url.pathname.startsWith('/embed/')) {
+        if (url.searchParams.get('cc_lang_pref') === 'pt' &&
+            url.searchParams.get('cc_load_policy') === '1' &&
+            url.searchParams.get('hl') === 'pt-BR') return;
+        url.searchParams.set('cc_lang_pref','pt');
+        url.searchParams.set('cc_load_policy','1');
+        url.searchParams.set('hl','pt-BR');
+        frame.setAttribute('src',url.href);
+        return;
+      }
+      if (url.origin === new URL(doc.baseURI).origin && !frame.dataset.rdcCaptionsWatched) {
+        frame.dataset.rdcCaptionsWatched = '1';
+        const inspect = () => {
+          try { if (frame.contentDocument) watch(frame.contentDocument); } catch (_) {}
+        };
+        frame.addEventListener('load',inspect);
+        inspect();
+      }
+    }
+    function scan(root) {
+      if (root.nodeType !== 1 && root.nodeType !== 9) return;
+      if (root.matches?.('iframe')) configure(root);
+      root.querySelectorAll('iframe').forEach(configure);
+    }
+    new MutationObserver(records => {
+      for (const record of records) {
+        if (record.type === 'attributes') configure(record.target);
+        else record.addedNodes.forEach(scan);
+      }
+    }).observe(doc.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['src']});
+    scan(doc);
+  }
+  watch(document);
+})();
