@@ -2925,8 +2925,7 @@ video-synopsis {
                         padding:0.4rem 0.55rem; border:1px solid rgba(209,168,75,0.55);
                         border-radius:8px; background:rgba(255,250,242,0.12); color:inherit;
                     }
-                    .weekly-dest-panel .dest-senha-form button,
-                    .weekly-dest-panel .dest-subtle-btn{
+                    .weekly-dest-panel .dest-senha-form button{
                         font:inherit; font-size:0.9rem; font-weight:800; cursor:pointer;
                         padding:0.4rem 0.85rem; border-radius:10px;
                         border:1px solid #d1a84b; background:#d4b45f; color:#2a1d12;
@@ -2937,7 +2936,20 @@ video-synopsis {
                     }
                     .weekly-dest-panel li strong{ display:block; word-break:break-all; }
                     .weekly-dest-panel li span{ opacity:0.88; font-size:0.86rem; font-weight:600; }
-                    .weekly-dest-panel .dest-subtle{ margin-top:0.85rem; opacity:0.9; }
+                    .weekly-dest-panel .dest-subtle{
+                        margin:1.1rem 0 0; padding:0; border:0; background:transparent;
+                        font:inherit; font-weight:800; color:#f3d27a;
+                        letter-spacing:0.04em; text-transform:uppercase;
+                        cursor:pointer; user-select:none;
+                        text-shadow: 0 0.4px 0 rgba(0,0,0,0.25);
+                        -webkit-text-stroke:0.1px rgba(0,0,0,0.35);
+                    }
+                    .weekly-dest-panel .dest-subtle:hover,
+                    .weekly-dest-panel .dest-subtle:focus-visible{
+                        color:#ffe9a0; outline:none;
+                        text-decoration: underline;
+                        text-underline-offset: 3px;
+                    }
                     @media (max-width:720px){
                       #weekly-toolbar{ right:44px; grid-template-columns:1.45fr 1fr 1fr 1fr; }
                       #weekly-toolbar button{ font-size:0.72rem; height:44px; }
@@ -10954,9 +10966,22 @@ function openVideo(videoId, isProtected) {
               <button type="submit" id="btnDestSenha">Abrir lista</button>
             </form>
             <ul id="destList"></ul>
-            <p class="dest-subtle"><button type="button" class="dest-subtle-btn" id="destOpenEntradas">Lista de visitantes</button></p>
+            <div class="dest-subtle" id="destOpenEntradas" role="button" tabindex="0" title="Abrir lista de visitantes">LISTA DE VISITANTES</div>
           `;
           cont.appendChild(panel);
+        } else {
+          const oldBtn = panel.querySelector('#destOpenEntradas.dest-subtle-btn, button#destOpenEntradas, .dest-subtle-btn');
+          const wrap = panel.querySelector('.dest-subtle');
+          if (oldBtn || (wrap && wrap.tagName === 'P')) {
+            const next = document.createElement('div');
+            next.className = 'dest-subtle';
+            next.id = 'destOpenEntradas';
+            next.setAttribute('role', 'button');
+            next.tabIndex = 0;
+            next.title = 'Abrir lista de visitantes';
+            next.textContent = 'LISTA DE VISITANTES';
+            (wrap || oldBtn).replaceWith(next);
+          }
         }
         const status = document.getElementById('destStatus');
         const list = document.getElementById('destList');
@@ -11038,9 +11063,16 @@ function openVideo(videoId, isProtected) {
 
         if (openEntradas && !openEntradas.dataset.bound) {
           openEntradas.dataset.bound = '1';
-          openEntradas.addEventListener('click', () => {
+          const openVisitors = () => {
             if (typeof window.abrirListaEntradasDialog === 'function') {
               window.abrirListaEntradasDialog();
+            }
+          };
+          openEntradas.addEventListener('click', openVisitors);
+          openEntradas.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter' || ev.key === ' ') {
+              ev.preventDefault();
+              openVisitors();
             }
           });
         }
