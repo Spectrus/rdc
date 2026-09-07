@@ -95,8 +95,14 @@
 
     function deduplicar(doc){
       corrigirGalo(doc);
+      const cardsByCode = new Map();
+      doc.querySelectorAll('.document-card').forEach(card => {
+        const code = cardCode(card);
+        if (!cardsByCode.has(code)) cardsByCode.set(code, []);
+        cardsByCode.get(code).push(card);
+      });
       itens.forEach(item => {
-        const cards = Array.from(doc.querySelectorAll('.document-card')).filter(c => cardCode(c) === item.code);
+        const cards = cardsByCode.get(item.code) || [];
         if (cards.length <= 1) return;
         let keeper = cards.find(c => !c.dataset.publicacaoTemporaria && cardTitle(c) === item.title)
                   || cards.find(c => cardTitle(c) === item.title)
@@ -109,9 +115,14 @@
       corrigirGalo(doc);
       const grid = doc.getElementById('visible-documents');
       if (!grid) return false;
+      const existing = new Set(Array.from(doc.querySelectorAll('.document-card'),
+        card => JSON.stringify([cardCode(card), cardTitle(card)])));
       itens.forEach(item => {
-        const exact = Array.from(doc.querySelectorAll('.document-card')).some(c => cardCode(c) === item.code && cardTitle(c) === item.title);
-        if (!exact) grid.prepend(criarCard(doc, item));
+        const key = JSON.stringify([item.code, item.title]);
+        if (!existing.has(key)) {
+          grid.prepend(criarCard(doc, item));
+          existing.add(key);
+        }
       });
       deduplicar(doc);
       return true;
@@ -150,19 +161,19 @@
       style.textContent = `
         #acervo:not(.view-list) .rdc-masonry {
           position:relative; overflow-anchor:none;
-          transition:height 400ms cubic-bezier(.22,1,.36,1);
+          transition:height 240ms cubic-bezier(.22,1,.36,1);
         }
         #acervo:not(.view-list) .rdc-masonry > .document-card {
           position:absolute; box-sizing:border-box; min-height:0;
           height:auto;
           animation:none !important; transform:none !important; opacity:1 !important;
-          transition:top 400ms cubic-bezier(.22,1,.36,1),
-            height 400ms cubic-bezier(.22,1,.36,1), box-shadow .2s ease;
+          transition:top 240ms cubic-bezier(.22,1,.36,1),
+            height 240ms cubic-bezier(.22,1,.36,1), box-shadow .2s ease;
         }
         #acervo:not(.view-list) .rdc-masonry > .document-card:not([data-rdc-ready]) { visibility:hidden; }
         #acervo:not(.view-list) .rdc-synopsis {
           flex:0 0 auto; box-sizing:content-box; min-height:0; overflow:hidden;
-          transition:height 400ms cubic-bezier(.22,1,.36,1);
+          transition:height 240ms cubic-bezier(.22,1,.36,1);
         }
         #acervo:not(.view-list) .rdc-masonry > .document-card h3 { margin:24px 0 8px; }
         #acervo:not(.view-list) .rdc-masonry > .document-card .document-year { margin:0 0 12px; }
@@ -297,9 +308,9 @@
             if (entry) set(entry.p, 'height', 'auto');
             return entry;
           }).filter(Boolean);
-          measured.forEach(({p}) => {
-            if (win.getComputedStyle(p).lineHeight === 'normal') set(p, 'lineHeight', '1.5');
-          });
+          const normalLineHeights = measured.filter(({p}) =>
+            win.getComputedStyle(p).lineHeight === 'normal');
+          normalLineHeights.forEach(({p}) => set(p, 'lineHeight', '1.5'));
           measured.forEach(entry => {
             const pc = win.getComputedStyle(entry.p);
             const line = parseFloat(pc.lineHeight) || (parseFloat(pc.fontSize) || 16) * 1.5;
@@ -409,7 +420,7 @@
           visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:expand},win.location.origin);
           await settled();
           if(version!==transitionVersion)return;
-          await fadeTo(1,160);
+          await fadeTo(1,80);
           if(version===transitionVersion)exit.disabled=false;
         }
       }
@@ -528,7 +539,7 @@
         visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:fullscreen},win.location.origin);
         await settled();
         if(version!==transitionVersion||!visible)return;
-        await fadeTo(1,160);
+        await fadeTo(1,80);
         if(version===transitionVersion)exit.disabled=false;
       });
       visual.addEventListener('pointerenter',()=>speak(true));
