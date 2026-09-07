@@ -2926,6 +2926,10 @@ video-synopsis {
                     .weekly-dest-panel .dest-senha-form{
                         display:flex; flex-wrap:wrap; gap:0.45rem; align-items:center; margin:0 0 0.75rem;
                     }
+                    /* display:flex above would otherwise override the HTML hidden attribute */
+                    .weekly-dest-panel .dest-senha-form[hidden]{
+                        display:none !important;
+                    }
                     .weekly-dest-panel .dest-senha-form input[type="password"]{
                         flex:1 1 8rem; min-width:0; font:inherit; font-size:0.92rem;
                         padding:0.4rem 0.55rem; border:1px solid rgba(209,168,75,0.55);
