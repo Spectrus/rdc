@@ -384,7 +384,7 @@
         if(expansionAnimation) expansionAnimation.cancel();
         visual.style.opacity=String(opacity);
         if(win.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-        const animation=visual.animate([{opacity:from},{opacity}],{duration,easing:'ease-out'});
+        const animation=visual.animate([{opacity:from},{opacity}],{duration,easing:'cubic-bezier(.22,1,.36,1)'});
         expansionAnimation=animation;
         try{await animation.finished;}catch(_){}
         if(expansionAnimation===animation)expansionAnimation=null;
@@ -407,7 +407,7 @@
           visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:expand},win.location.origin);
           await settled();
           if(version!==transitionVersion)return;
-          await fadeTo(1,expand ? 100 : 240);
+          await fadeTo(1,expand ? 480 : 240);
           if(version===transitionVersion)exit.disabled=false;
         }
       }
@@ -460,7 +460,7 @@
         visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:fullscreen},win.location.origin);
         await settled();
         if(version!==transitionVersion||!visible)return;
-        await fadeTo(1,100);
+        await fadeTo(1,fullscreen ? 480 : 240);
         if(version===transitionVersion)exit.disabled=false;
       });
       visual.addEventListener('pointerenter',()=>speak(true));
