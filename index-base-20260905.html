@@ -2387,8 +2387,9 @@
             padding: 0.9rem 1rem 1rem;
             font-family: "EB Garamond", Georgia, serif;
         }
+        /* Floating "Quem entrou" removed — lista vive em Destinatários / dialog */
         body.edit-mode .entradas-console {
-            display: block;
+            display: none;
         }
         .entradas-console h3 {
             font-family: "Playfair Display", Georgia, serif;
@@ -2878,32 +2879,123 @@ video-synopsis {
                         /* Hide scrollbars across browsers while keeping scroll */
                         scrollbar-width:none; -ms-overflow-style:none;
                     }
-                    /* Toolbar inside the panel */
-                    #weekly-toolbar{ position:absolute; top:0; left:0; right:0; display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:0; align-items:stretch; z-index:2; padding:0; }
-                    #weekly-toolbar button{ width:100%; height:48px; background:#2a1d12; color:#f3d27a; border:1px solid #d1a84b; border-bottom:none; border-right:1px solid #d1a84b; cursor:pointer; font-weight:800; transition: background .15s ease; border-radius:0; }
-                    #weekly-toolbar .tab-spacer{ width:100%; height:48px; background:#2a1d12; border:1px solid #d1a84b; border-bottom:none; border-right:1px solid #d1a84b; border-top-right-radius:16px; }
-                    #weekly-toolbar button:first-child{ border-top-left-radius:16px; }
-                    #weekly-toolbar button:last-child{ border-right:1px solid #d1a84b; border-top-right-radius:16px; }
+                    /* Toolbar inside the panel: circle + Semanal · Mensal · Anual · Destinatários */
+                    #weekly-toolbar{ position:absolute; top:0; left:0; right:0; display:grid; grid-template-columns:48px 1fr 1fr 1fr 1fr; gap:0; align-items:stretch; z-index:2; padding:0; }
+                    #weekly-toolbar button{ width:100%; height:48px; background:#2a1d12; color:#f3d27a; border:1px solid #d1a84b; border-bottom:none; border-right:1px solid #d1a84b; cursor:pointer; font-weight:800; transition: background .15s ease, color .15s ease, box-shadow .2s ease, filter .15s ease; border-radius:0; }
+                    #weekly-toolbar .tab-spacer{ display:none; }
+                    #weekly-toolbar .crystal-toggle{
+                        width:36px; height:36px; min-width:36px; margin:6px auto; padding:0;
+                        border-radius:50%; border:1px solid #8e8e8e;
+                        background: radial-gradient(circle at 35% 30%, #bdbdbd 0%, #8a8a8a 55%, #6e6e6e 100%);
+                        box-shadow: inset 0 1px 1px rgba(255,255,255,0.35);
+                        color:transparent; font-size:0; line-height:0;
+                    }
+                    #weekly-toolbar .crystal-toggle:hover,
+                    #weekly-toolbar .crystal-toggle:focus-visible{
+                        background: radial-gradient(circle at 35% 30%, #cbcbcb 0%, #959595 55%, #777 100%);
+                        outline:none;
+                    }
+                    #weekly-toolbar .crystal-toggle.is-on{
+                        border-color:#f3e7b0;
+                        background:
+                          radial-gradient(circle at 32% 28%, #ffffff 0%, #fff8e6 28%, #f0d78a 62%, #d4af37 100%);
+                        box-shadow:
+                          0 0 0 1px rgba(255,255,255,0.55),
+                          inset 0 1px 2px rgba(255,255,255,0.95),
+                          0 2px 8px rgba(209,168,75,0.35);
+                    }
+                    #weekly-toolbar .seg{ border-top-left-radius:0; }
+                    #weekly-toolbar button.crystal-toggle{ border-top-left-radius:16px; border-right:1px solid #d1a84b; }
+                    #weekly-toolbar button.dest{ border-right:1px solid #d1a84b; border-top-right-radius:16px; }
                     #weekly-toolbar button:hover, #weekly-toolbar button:focus-visible{ background:#4a3323; outline:none; }
-                    /* Hover inversion specifically for 'Semanal' */
-                    #weekly-toolbar .seg:hover, #weekly-toolbar .seg:focus-visible {
-                        background: var(--gold-color);
-                        color: #2a1d12;
-                        border-color: #2a1d12;
-                    }
-                    #weekly-toolbar .seg.active:hover {
-                        background: var(--gold-color);
-                        color: #2a1d12;
-                        border-color: #2a1d12;
-                    }
-                    /* Apply same hover inversion to 'Mensal' and 'Anual' */
+                    #weekly-toolbar .seg:hover, #weekly-toolbar .seg:focus-visible,
                     #weekly-toolbar .mes:hover, #weekly-toolbar .mes:focus-visible,
-                    #weekly-toolbar .ano:hover, #weekly-toolbar .ano:focus-visible {
+                    #weekly-toolbar .ano:hover, #weekly-toolbar .ano:focus-visible,
+                    #weekly-toolbar .dest:hover, #weekly-toolbar .dest:focus-visible {
                         background: var(--gold-color);
                         color: #2a1d12;
                         border-color: #2a1d12;
                     }
                     #weekly-toolbar button.active{ background:#3b2a1d; }
+                    #weekly-toolbar button.crystal-toggle:hover,
+                    #weekly-toolbar button.crystal-toggle:focus-visible{
+                        color:transparent;
+                        border-color:#8e8e8e;
+                    }
+                    #weekly-toolbar button.crystal-toggle.is-on:hover,
+                    #weekly-toolbar button.crystal-toggle.is-on:focus-visible{
+                        border-color:#f3e7b0;
+                        background:
+                          radial-gradient(circle at 32% 28%, #ffffff 0%, #fff8e6 28%, #f0d78a 62%, #d4af37 100%);
+                    }
+                    /* Gold + white crystal disposition for the counter window only */
+                    #weekly-extract.crystal-look #weekly-dos.dos,
+                    #weekly-extract.crystal-look .weekly-dest-panel{
+                        background:
+                          linear-gradient(155deg, rgba(255,255,255,0.96) 0%, rgba(255,250,235,0.92) 38%, rgba(240,215,138,0.72) 72%, rgba(212,175,55,0.82) 100%),
+                          linear-gradient(180deg, #fffef9 0%, #f3e2b0 100%);
+                        color:#3b2a1d;
+                        text-shadow: 0 0.5px 0 rgba(255,255,255,0.45);
+                        box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 10px 28px rgba(209,168,75,0.22);
+                    }
+                    #weekly-extract.crystal-look #weekly-toolbar button:not(.crystal-toggle){
+                        background: linear-gradient(180deg, #fffaf0 0%, #ead28a 100%);
+                        color:#3b2a1d;
+                        border-color:#d1a84b;
+                    }
+                    #weekly-extract.crystal-look #weekly-toolbar button.active:not(.crystal-toggle){
+                        background: linear-gradient(180deg, #ffffff 0%, #f0d78a 100%);
+                    }
+                    #weekly-extract.crystal-look #inline-left,
+                    #weekly-extract.crystal-look #inline-right{ color:#3b2a1d !important; }
+                    #weekly-extract.mode-dest #weekly-dos{ display:none !important; }
+                    #weekly-extract.mode-dest #inline-left,
+                    #weekly-extract.mode-dest #inline-right,
+                    #weekly-extract.mode-dest #title-hit{ display:none !important; }
+                    .weekly-dest-panel{
+                        display:none;
+                        position:relative; z-index:0;
+                        background:#3b2a1d; color:#f3d27a;
+                        border-radius:18px; overflow:auto;
+                        padding:56px 16px 16px 16px; margin-top:12px;
+                        min-height:300px; text-align:left;
+                        font-family:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace;
+                        line-height:1.55; font-weight:700;
+                        scrollbar-width:none; -ms-overflow-style:none;
+                    }
+                    #weekly-extract.mode-dest .weekly-dest-panel{ display:block; }
+                    .weekly-dest-panel h3{
+                        margin:0 0 0.55rem; font-size:1.05rem; font-weight:800;
+                        font-family:'Playfair Display',Georgia,serif; color:inherit;
+                    }
+                    .weekly-dest-panel .dest-status{ margin:0 0 0.65rem; font-size:0.92rem; opacity:0.95; }
+                    .weekly-dest-panel .dest-senha-form{
+                        display:flex; flex-wrap:wrap; gap:0.45rem; align-items:center; margin:0 0 0.75rem;
+                    }
+                    .weekly-dest-panel .dest-senha-form input[type="password"]{
+                        flex:1 1 8rem; min-width:0; font:inherit; font-size:0.92rem;
+                        padding:0.4rem 0.55rem; border:1px solid rgba(209,168,75,0.55);
+                        border-radius:8px; background:rgba(255,250,242,0.12); color:inherit;
+                    }
+                    #weekly-extract.crystal-look .weekly-dest-panel .dest-senha-form input[type="password"]{
+                        background:rgba(255,255,255,0.75); color:#3b2a1d; border-color:#d1a84b;
+                    }
+                    .weekly-dest-panel .dest-senha-form button,
+                    .weekly-dest-panel .dest-subtle-btn{
+                        font:inherit; font-size:0.9rem; font-weight:800; cursor:pointer;
+                        padding:0.4rem 0.85rem; border-radius:10px;
+                        border:1px solid #d1a84b; background:#d4b45f; color:#2a1d12;
+                    }
+                    .weekly-dest-panel ul{ list-style:none; margin:0; padding:0; }
+                    .weekly-dest-panel li{
+                        border-top:1px solid rgba(243,210,122,0.22); padding:0.45rem 0; font-size:0.9rem;
+                    }
+                    #weekly-extract.crystal-look .weekly-dest-panel li{
+                        border-top-color:rgba(59,42,29,0.14);
+                    }
+                    .weekly-dest-panel li strong{ display:block; word-break:break-all; }
+                    .weekly-dest-panel li span{ opacity:0.88; font-size:0.86rem; font-weight:600; }
+                    .weekly-dest-panel .dest-subtle{ margin-top:0.85rem; opacity:0.9; }
                     /* inner bevel & liner */
                     #weekly-dos.dos::before{ content:none; }
                     /* outer museum frame highlights */
@@ -7257,7 +7349,7 @@ function openVideo(videoId, isProtected) {
         </div>
     </div>
     
-    <div id="entradasConsole" class="entradas-console">
+    <div id="entradasConsole" class="entradas-console" hidden aria-hidden="true">
         <h3>Quem entrou</h3>
         <p id="entradasConsoleStatus">Digite a segunda senha para ver a lista.</p>
         <form id="entradasSenhaForm" class="entradas-senha-form" autocomplete="off">
@@ -7266,7 +7358,7 @@ function openVideo(videoId, isProtected) {
             <button type="submit" id="btnEntradasSenha">Desbloquear</button>
         </form>
         <ul id="entradasConsoleList"></ul>
-        <p><button type="button" id="abrirEntradasCompleta">Abrir lista completa</button></p>
+        <p hidden><button type="button" id="abrirEntradasCompleta" hidden tabindex="-1">Abrir lista completa</button></p>
     </div>
     <div id="addMemoryFloating" class="add-memory-floating">
         <span>+</span>
@@ -7347,9 +7439,6 @@ function openVideo(videoId, isProtected) {
                     document.body.classList.add('authenticated');
                     this.enableEditMode();
                     this.showSuccessMessage();
-                    if (typeof window.firebaseAbrirListaEntradas === "function") {
-                        window.firebaseAbrirListaEntradas();
-                    }
                 } else {
                     errorDiv.textContent = '❌ Senha incorreta. Tente novamente.';
                     errorDiv.style.display = 'block';
@@ -9884,6 +9973,42 @@ function openVideo(videoId, isProtected) {
         return Array.isArray(data.entradas) ? data.entradas : [];
       }
 
+      async function fetchAvisosViaApi(token) {
+        const res = await fetch(ENTRADAS_LIST_API + "?resource=avisos", {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + token,
+            Accept: "application/json"
+          }
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const err = new Error((data && data.error) || "nao_autorizado");
+          err.code = data && data.error;
+          err.status = res.status;
+          throw err;
+        }
+        return Array.isArray(data.avisos) ? data.avisos : [];
+      }
+
+      function renderAvisosList(docs, listEl) {
+        if (!listEl) return;
+        listEl.innerHTML = "";
+        docs.forEach((row) => {
+          const li = document.createElement("li");
+          li.innerHTML = "<strong></strong><span></span>";
+          li.querySelector("strong").textContent = row.email || "sem correio";
+          const flags = [];
+          if (row.ativo === false) flags.push("inativo");
+          else flags.push("ativo");
+          if (row.novaPeca !== false) flags.push("novidades");
+          if (row.quinzenal) flags.push("quinzenal");
+          li.querySelector("span").textContent =
+            (row.comoChamar ? row.comoChamar + " · " : "") + flags.join(" · ");
+          listEl.appendChild(li);
+        });
+      }
+
       async function unlockEntradasComSenha(password) {
         const res = await fetch(ENTRADAS_LIST_API, {
           method: "POST",
@@ -9904,6 +10029,12 @@ function openVideo(videoId, isProtected) {
         storeEntradasToken(data.token, data.expiresAt);
         return data.token;
       }
+
+      window.firebaseFetchAvisosLista = fetchAvisosViaApi;
+      window.firebaseRenderAvisosList = renderAvisosList;
+      window.readEntradasListToken = readEntradasToken;
+      window.unlockEntradasComSenha = unlockEntradasComSenha;
+      window.clearEntradasListToken = clearEntradasToken;
 
       window.firebaseAbrirListaEntradas = async function () {
         const box = document.getElementById("entradasConsole");
@@ -10706,7 +10837,7 @@ function openVideo(videoId, isProtected) {
       let unsub = null;
       // period pivot state
       let currentPivotDate = new Date();
-      let currentMode = 'week'; // 'week' | 'month' | 'year'
+      let currentMode = 'week'; // 'week' | 'month' | 'year' | 'dest'
       const MIN_YEAR = 2025;
       const MAX_YEAR = 2026;
       const MIN_WEEK = 1;        // earliest week available
@@ -10731,28 +10862,64 @@ function openVideo(videoId, isProtected) {
             tb = document.createElement('div');
             tb.id = 'weekly-toolbar';
             tb.innerHTML = `
-              <button class="seg active">Semanal</button>
-              <button class="mes">Mensal</button>
-              <button class="ano">Anual</button>
-              <span class="tab-spacer"></span>
+              <button type="button" class="crystal-toggle" aria-label="Alternar aparência dourada do painel" title="Aparência do painel"></button>
+              <button type="button" class="seg active">Semanal</button>
+              <button type="button" class="mes">Mensal</button>
+              <button type="button" class="ano">Anual</button>
+              <button type="button" class="dest">Destinatários</button>
+            `;
+          } else if (!tb.querySelector('.dest') || !tb.querySelector('.crystal-toggle')) {
+            tb.innerHTML = `
+              <button type="button" class="crystal-toggle" aria-label="Alternar aparência dourada do painel" title="Aparência do painel"></button>
+              <button type="button" class="seg active">Semanal</button>
+              <button type="button" class="mes">Mensal</button>
+              <button type="button" class="ano">Anual</button>
+              <button type="button" class="dest">Destinatários</button>
             `;
           }
           // attach to container so renderPeriod() text updates on <pre> don't remove the toolbar
           const cont = document.getElementById('weekly-extract');
           cont.style.position = 'relative';
           if (tb.parentElement !== cont) cont.appendChild(tb);
-          const setMode = (m)=>{ currentMode=m; tb.querySelectorAll('button').forEach(b=>b.classList.remove('active')); tb.querySelector(m==='week'?'.seg':m==='month'?'.mes':'.ano').classList.add('active'); renderPeriod(); };
+          try {
+            if (sessionStorage.getItem('rdc_counter_crystal') === '1') {
+              cont.classList.add('crystal-look');
+              tb.querySelector('.crystal-toggle')?.classList.add('is-on');
+            }
+          } catch (_e) { /* ignore */ }
+          const setMode = (m)=>{
+            currentMode = m;
+            tb.querySelectorAll('button.seg, button.mes, button.ano, button.dest').forEach(b=>b.classList.remove('active'));
+            const sel = m==='week' ? '.seg' : m==='month' ? '.mes' : m==='year' ? '.ano' : '.dest';
+            tb.querySelector(sel)?.classList.add('active');
+            cont.classList.toggle('mode-dest', m === 'dest');
+            if (m !== 'dest') {
+              const destPanel = document.getElementById('weekly-dest-panel');
+              if (destPanel) destPanel.style.display = '';
+            }
+            renderPeriod();
+          };
+          tb.querySelector('.crystal-toggle').onclick = (ev)=>{
+            ev.preventDefault();
+            ev.stopPropagation();
+            const on = cont.classList.toggle('crystal-look');
+            tb.querySelector('.crystal-toggle').classList.toggle('is-on', on);
+            try { sessionStorage.setItem('rdc_counter_crystal', on ? '1' : '0'); } catch (_e) { /* ignore */ }
+          };
           tb.querySelector('.seg').onclick = ()=> setMode('week');
           tb.querySelector('.mes').onclick = ()=> setMode('month');
           tb.querySelector('.ano').onclick = ()=> setMode('year');
+          tb.querySelector('.dest').onclick = ()=> setMode('dest');
           // geral removed as requested
           // seed July demo docs once
           ensureSeedJuly().catch(()=>{});
           // Make hover behavior and inline nav buttons available immediately on open
           try {
-            const wk = isoWeek(currentPivotDate).week;
-            const initialLabel = currentMode==='week' ? `Semana ${String(wk)}` : (currentMode==='month' ? (currentPivotDate.toLocaleDateString('pt-BR', { month:'long' })) : `ANO: ${String(currentPivotDate.getFullYear())}`);
-            updateInlineNav(initialLabel);
+            if (currentMode !== 'dest') {
+              const wk = isoWeek(currentPivotDate).week;
+              const initialLabel = currentMode==='week' ? `Semana ${String(wk)}` : (currentMode==='month' ? (currentPivotDate.toLocaleDateString('pt-BR', { month:'long' })) : `ANO: ${String(currentPivotDate.getFullYear())}`);
+              updateInlineNav(initialLabel);
+            }
           } catch {}
         } else {
           animateLayoutDuring(()=>{ $pre.classList.remove('open'); const c=getWeeklyContainer(); if(c) c.style.marginBottom='0px'; });
@@ -10836,7 +11003,128 @@ function openVideo(videoId, isProtected) {
         return { year: t.getUTCFullYear(), week: wk };
       }
 
+      async function renderDestinatariosPanel(){
+        const cont = document.getElementById('weekly-extract');
+        if (!cont) return;
+        let panel = document.getElementById('weekly-dest-panel');
+        if (!panel) {
+          panel = document.createElement('div');
+          panel.id = 'weekly-dest-panel';
+          panel.className = 'weekly-dest-panel';
+          panel.innerHTML = `
+            <h3>Destinatários das novidades</h3>
+            <p class="dest-status" id="destStatus">Digite a segunda senha para ver a lista de inscritos.</p>
+            <form id="destSenhaForm" class="dest-senha-form" autocomplete="off">
+              <label for="destSenhaInput" class="visually-hidden">Segunda senha</label>
+              <input type="password" id="destSenhaInput" name="dest-senha" inputmode="numeric" autocomplete="off" placeholder="Segunda senha" aria-label="Segunda senha">
+              <button type="submit" id="btnDestSenha">Abrir lista</button>
+            </form>
+            <ul id="destList"></ul>
+            <p class="dest-subtle"><button type="button" class="dest-subtle-btn" id="destOpenEntradas">Lista de visitantes</button></p>
+          `;
+          cont.appendChild(panel);
+        }
+        const status = document.getElementById('destStatus');
+        const list = document.getElementById('destList');
+        const form = document.getElementById('destSenhaForm');
+        const input = document.getElementById('destSenhaInput');
+        const btn = document.getElementById('btnDestSenha');
+        const openEntradas = document.getElementById('destOpenEntradas');
+
+        const showLocked = (msg) => {
+          if (form) form.hidden = false;
+          if (status) status.textContent = msg || 'Digite a segunda senha para ver a lista de inscritos.';
+          if (list) list.innerHTML = '';
+        };
+
+        const loadAvisos = async (token) => {
+          if (!token) {
+            showLocked();
+            return false;
+          }
+          if (status) status.textContent = 'A carregar destinatários…';
+          try {
+            const rows = await window.firebaseFetchAvisosLista(token);
+            if (form) form.hidden = true;
+            if (status) {
+              status.textContent = rows.length
+                ? rows.length + (rows.length === 1 ? ' destinatário na lista de novidades.' : ' destinatários na lista de novidades.')
+                : 'Ainda não há destinatários inscritos.';
+            }
+            window.firebaseRenderAvisosList(rows, list);
+            return true;
+          } catch (err) {
+            if (window.clearEntradasListToken) window.clearEntradasListToken();
+            if (err && err.status === 401) {
+              showLocked('Sessão expirada. Digite a segunda senha novamente.');
+            } else {
+              showLocked('Não foi possível carregar a lista agora.');
+            }
+            return false;
+          }
+        };
+
+        if (form && !form.dataset.bound) {
+          form.dataset.bound = '1';
+          form.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const password = input ? String(input.value || '') : '';
+            if (!password) {
+              showLocked('Digite a segunda senha para ver a lista de inscritos.');
+              if (input) input.focus();
+              return;
+            }
+            if (btn) btn.disabled = true;
+            if (status) status.textContent = 'A verificar…';
+            try {
+              const token = await window.unlockEntradasComSenha(password);
+              if (input) input.value = '';
+              await loadAvisos(token);
+            } catch (err) {
+              if (window.clearEntradasListToken) window.clearEntradasListToken();
+              if (list) list.innerHTML = '';
+              if (form) form.hidden = false;
+              if (err && err.code === 'demasiadas_tentativas') {
+                const wait = err.retryAfterSec ? Math.ceil(err.retryAfterSec / 60) : 15;
+                if (status) status.textContent = 'Muitas tentativas. Aguarde cerca de ' + wait + ' min.';
+              } else if (err && (err.code === 'senha_incorreta' || err.status === 401)) {
+                if (status) status.textContent = 'Senha incorreta.';
+              } else {
+                if (status) status.textContent = 'Não foi possível abrir a lista agora.';
+              }
+              if (input) {
+                input.value = '';
+                input.focus();
+              }
+            } finally {
+              if (btn) btn.disabled = false;
+            }
+          });
+        }
+
+        if (openEntradas && !openEntradas.dataset.bound) {
+          openEntradas.dataset.bound = '1';
+          openEntradas.addEventListener('click', () => {
+            if (typeof window.abrirListaEntradasDialog === 'function') {
+              window.abrirListaEntradasDialog();
+            }
+          });
+        }
+
+        const existing = window.readEntradasListToken ? window.readEntradasListToken() : '';
+        if (existing) await loadAvisos(existing);
+        else showLocked();
+      }
+
       async function renderPeriod(){
+        const cont = document.getElementById('weekly-extract');
+        if (currentMode === 'dest') {
+          if (unsub) { unsub(); unsub = null; }
+          if (cont) cont.classList.add('mode-dest');
+          await renderDestinatariosPanel();
+          return;
+        }
+        if (cont) cont.classList.remove('mode-dest');
         if (currentMode === 'week'){
           const {year, week} = isoWeek(currentPivotDate);
           const k = `${year}-W${String(week).padStart(2,'0')}`;
@@ -12255,21 +12543,31 @@ function openVideo(videoId, isProtected) {
 (function(){
   const box=document.getElementById('entradasConsole');
   const open=document.getElementById('abrirEntradasCompleta');
-  if(!box||!open)return;
+  if(!box)return;
   const style=document.createElement('style');
-  style.textContent='#entradasDialog{width:min(850px,92vw);max-height:85vh;border:1px solid #d3b35d;border-radius:12px;background:#f7f0e4;color:#4a2c2a;padding:20px}#entradasDialog::backdrop{background:#241b16aa}#entradasDialog #entradasConsole{display:block!important;position:static!important;width:auto!important;max-width:none!important;max-height:none!important;margin:0!important;box-shadow:none!important}#entradasDialog #entradasConsoleList{max-height:60vh;overflow:auto}#entradasDialog>button{float:right;font:inherit;padding:8px 16px;cursor:pointer;border:1px solid #d4b45f;background:#d4b45f;color:#4a2c2a;border-radius:3px}#entradasDialog .entradas-senha-form{margin-top:0.35rem}';
-  style.textContent += '#entradasConsole:not(#entradasDialog #entradasConsole) .entradas-senha-form,#entradasConsole:not(#entradasDialog #entradasConsole) #entradasConsoleStatus,#entradasConsole:not(#entradasDialog #entradasConsole) #entradasConsoleList{display:none!important}#abrirEntradasCompleta,#btnEntradasSenha,#entradasDialog>button{border-radius:14px!important;padding:10px 18px}#entradasSenhaInput{border-radius:12px!important}#abrirEntradasCompleta[hidden]{display:none!important}';
+  style.textContent='#entradasDialog{width:min(850px,92vw);max-height:85vh;border:1px solid #d3b35d;border-radius:12px;background:#f7f0e4;color:#4a2c2a;padding:20px}#entradasDialog::backdrop{background:#241b16aa}#entradasDialog #entradasConsole{display:block!important;position:static!important;width:auto!important;max-width:none!important;max-height:none!important;margin:0!important;box-shadow:none!important}#entradasDialog #entradasConsole[hidden]{display:block!important}#entradasDialog #entradasConsoleList{max-height:60vh;overflow:auto}#entradasDialog>button{float:right;font:inherit;padding:8px 16px;cursor:pointer;border:1px solid #d4b45f;background:#d4b45f;color:#4a2c2a;border-radius:14px}#entradasDialog .entradas-senha-form{margin-top:0.35rem;display:flex!important}#entradasDialog #entradasConsoleStatus,#entradasDialog #entradasConsoleList{display:block!important}#abrirEntradasCompleta{display:none!important}';
   document.head.append(style);
   const dialog=document.createElement('dialog');dialog.id='entradasDialog';
   const close=document.createElement('button');close.type='button';close.textContent='← Voltar';
   dialog.append(close);document.body.append(dialog);
   const anchor=document.createComment('lista de entradas');box.before(anchor);
-  open.addEventListener('click',()=>{
-    dialog.append(box);open.hidden=true;dialog.showModal();
+  function openEntradasDialog(){
+    box.hidden=false;
+    box.removeAttribute('aria-hidden');
+    dialog.append(box);
+    if(open)open.hidden=true;
+    dialog.showModal();
     if(window.firebaseAbrirListaEntradas)window.firebaseAbrirListaEntradas();
-  });
+  }
+  window.abrirListaEntradasDialog=openEntradasDialog;
+  if(open)open.addEventListener('click',openEntradasDialog);
   close.addEventListener('click',()=>dialog.close());
-  dialog.addEventListener('close',()=>{anchor.after(box);open.hidden=false;open.focus();});
+  dialog.addEventListener('close',()=>{
+    box.hidden=true;
+    box.setAttribute('aria-hidden','true');
+    anchor.after(box);
+    if(open){open.hidden=true;}
+  });
   new MutationObserver(()=>{if(!document.body.classList.contains('edit-mode')&&dialog.open)dialog.close();}).observe(document.body,{attributes:true,attributeFilter:['class']});
 })();
 </script>
