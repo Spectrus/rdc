@@ -344,13 +344,14 @@
         #rdc-librarian.is-corner iframe{inset:var(--mini-y,78px) auto auto var(--mini-x,18px);width:336px;height:228px;pointer-events:auto}
         #rdc-librarian-close{position:fixed;top:18px;right:22px;z-index:2;min-width:94px;height:38px;padding:0 16px;border:1px solid rgba(180,150,76,.45);border-radius:10px;background:rgba(247,240,228,.78);color:#4a2c2a;font:15px/36px Georgia,serif;cursor:pointer;box-shadow:0 4px 18px rgba(74,44,42,.12);opacity:.94;pointer-events:auto;backdrop-filter:blur(8px);transition:background .2s ease,transform .2s ease}
         #rdc-librarian.is-corner #rdc-librarian-close{display:none}
+        #rdc-librarian-close:disabled{visibility:hidden;pointer-events:none}
         #rdc-librarian-close:hover{background:#f7f0e4;transform:scale(1.08)}
         a[data-rdc-librarian][aria-expanded="true"]{text-decoration:underline;text-underline-offset:5px}
         @media(max-width:600px){#rdc-librarian.is-corner iframe{top:var(--mini-y,64px);right:auto;left:var(--mini-x,8px);width:252px;height:170px}#rdc-librarian-close{top:10px;right:10px}}
       `;
       doc.head.append(css);
       const host=doc.createElement('aside');host.id='rdc-librarian';host.hidden=true;host.setAttribute('aria-label','Bibliotecário');
-      host.innerHTML='<iframe title="Bibliotecário reativo" allow="microphone; autoplay" src="about:blank"></iframe><button id="rdc-librarian-close" type="button" aria-label="Voltar o Bibliotecário ao canto">← Voltar</button>';
+      host.innerHTML='<iframe title="Bibliotecário reativo" allow="microphone; autoplay" src="about:blank"></iframe><button id="rdc-librarian-close" type="button" disabled aria-label="Voltar o Bibliotecário ao canto">← Voltar</button>';
       doc.body.append(host);
       const visual=host.querySelector('iframe'), exit=host.querySelector('button');
       let visible=false, fullscreen=false, loaded=false;
@@ -407,7 +408,7 @@
           visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:expand},win.location.origin);
           await settled();
           if(version!==transitionVersion)return;
-          await fadeTo(1,expand ? 480 : 240);
+          await fadeTo(1,240);
           if(version===transitionVersion)exit.disabled=false;
         }
       }
@@ -460,7 +461,7 @@
         visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:fullscreen},win.location.origin);
         await settled();
         if(version!==transitionVersion||!visible)return;
-        await fadeTo(1,fullscreen ? 480 : 240);
+        await fadeTo(1,240);
         if(version===transitionVersion)exit.disabled=false;
       });
       visual.addEventListener('pointerenter',()=>speak(true));
