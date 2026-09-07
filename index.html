@@ -372,15 +372,33 @@
           a.setAttribute('aria-expanded',String(visible));
         });
       }
+      let expansionAnimation = null;
+      function animateBibliotecario(change){
+        const before = visual.getBoundingClientRect();
+        const wasHidden = host.hidden;
+        if(expansionAnimation) expansionAnimation.cancel();
+        visual.style.transition = 'none';
+        change();
+        const after = visual.getBoundingClientRect();
+        if(win.matchMedia('(prefers-reduced-motion: reduce)').matches || !after.width || !after.height) return;
+        const from = wasHidden
+          ? {transform:'translateY(16px) scale(.96)',opacity:0}
+          : {transform:'translate('+(before.left-after.left)+'px,'+(before.top-after.top)+'px) scale('+(before.width/after.width)+','+(before.height/after.height)+')',opacity:1};
+        visual.style.transformOrigin = '0 0';
+        expansionAnimation = visual.animate([from,{transform:'none',opacity:1}],{
+          duration:650,easing:'cubic-bezier(.22,1,.36,1)'
+        });
+        expansionAnimation.onfinish=()=>{expansionAnimation=null;};
+      }
       function showFull(){
-        visible=true;fullscreen=true;host.hidden=false;host.classList.remove('is-corner');
+        animateBibliotecario(()=>{visible=true;fullscreen=true;host.hidden=false;host.classList.remove('is-corner');});
         if(visual.src==='about:blank')visual.src='bibliotecario.html?embed=dock&fs=1&v=full-reactive';
         else if(loaded)visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:true},win.location.origin);
         sync();
       }
       function collapse(){
         if(!visible)return;
-        speak(false);fullscreen=false;host.classList.add('is-corner');
+        speak(false);animateBibliotecario(()=>{fullscreen=false;host.classList.add('is-corner');});
         if(loaded)visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:false},win.location.origin);
       }
       function dismiss(){
@@ -429,7 +447,6 @@
         event.preventDefault();event.stopImmediatePropagation();
         if(!visible)showFull();else dismiss();
       },true);
-      doc.addEventListener('keydown',event=>{if(event.key==='Escape'&&visible){if(fullscreen)collapse();else dismiss();}});
       sync();
     }
 
