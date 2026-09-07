@@ -372,6 +372,11 @@
           a.setAttribute('aria-expanded',String(visible));
         });
       }
+      // Warm the document cache without running the voice or requesting microphone access.
+      const librarianPrefetch=doc.createElement('link');
+      librarianPrefetch.rel='prefetch';
+      librarianPrefetch.href='bibliotecario.html?embed=dock&fs=1&v=full-reactive';
+      doc.head.append(librarianPrefetch);
       let expansionAnimation = null, transitionVersion = 0;
       const settled = () => new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
       async function fadeTo(opacity,duration){
@@ -387,7 +392,7 @@
       async function transitionTo(expand){
         const version=++transitionVersion;
         exit.disabled=true;
-        if(visible&&loaded)await fadeTo(0,120);
+        if(visible&&loaded)await fadeTo(0,expand ? 40 : 120);
         else visual.style.opacity='0';
         if(version!==transitionVersion)return;
         visible=true;fullscreen=expand;host.hidden=false;
@@ -402,7 +407,7 @@
           visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:expand},win.location.origin);
           await settled();
           if(version!==transitionVersion)return;
-          await fadeTo(1,240);
+          await fadeTo(1,expand ? 100 : 240);
           if(version===transitionVersion)exit.disabled=false;
         }
       }
@@ -455,7 +460,7 @@
         visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:fullscreen},win.location.origin);
         await settled();
         if(version!==transitionVersion||!visible)return;
-        await fadeTo(1,240);
+        await fadeTo(1,100);
         if(version===transitionVersion)exit.disabled=false;
       });
       visual.addEventListener('pointerenter',()=>speak(true));
