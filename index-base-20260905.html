@@ -2843,7 +2843,13 @@ video-synopsis {
                 
                 <style>
                     body.edit-mode #stat-badge,
-                    body.authenticated #stat-badge { cursor: pointer; }
+                    body.authenticated #stat-badge {
+                        cursor: pointer;
+                        /* Sit above/right of the tab row so labels stay clear and the badge stays visible */
+                        top: -18px;
+                        right: -42px;
+                        z-index: 10010;
+                    }
                     #weekly-extract{display:none; position: relative; overflow:hidden; transition: margin-bottom .75s cubic-bezier(0.4, 0, 0.2, 1);} 
                     #btn-weekly-extract{display:none!important;}
                     #btn-weekly-extract{
@@ -2881,7 +2887,7 @@ video-synopsis {
                     }
                     /* Toolbar: Destinatários · Semanal · Mensal · Anual (traditional brown + gold) */
                     /* Large right inset: 100px visitas badge must not cover Anual */
-                    #weekly-toolbar{ position:absolute; top:0; left:0; right:118px; display:grid; grid-template-columns:1.35fr 1fr 1fr 1fr; gap:0; align-items:stretch; z-index:5; padding:0; }
+                    #weekly-toolbar{ position:absolute; top:0; left:0; right:118px; display:grid; grid-template-columns:1.35fr 1fr 1fr 1fr; gap:0; align-items:stretch; z-index:2; padding:0; }
                     #weekly-toolbar button{ width:100%; height:48px; background:#2a1d12; color:#f3d27a; border:1px solid #d1a84b; border-bottom:none; border-right:1px solid #d1a84b; cursor:pointer; font-weight:800; font-size:0.84rem; letter-spacing:0.01em; transition: background .15s ease, color .15s ease; border-radius:0; white-space:nowrap; padding:0 4px; }
                     #weekly-toolbar .tab-spacer{ display:none; }
                     #weekly-toolbar button.dest{ border-top-left-radius:16px; }
@@ -2953,15 +2959,6 @@ video-synopsis {
                     @media (max-width:720px){
                       #weekly-toolbar{ right:96px; grid-template-columns:1.45fr 1fr 1fr 1fr; }
                       #weekly-toolbar button{ font-size:0.72rem; height:44px; }
-                    }
-                    /* While counter panel is open, keep tabs above the circular badge */
-                    body.rdc-counter-open #stat-badge{
-                      z-index: 1;
-                      pointer-events: auto;
-                    }
-                    body.rdc-counter-open #weekly-extract{
-                      z-index: 4;
-                      position: relative;
                     }
                     /* inner bevel & liner */
                     #weekly-dos.dos::before{ content:none; }
@@ -10818,7 +10815,6 @@ function openVideo(videoId, isProtected) {
         container.style.textAlign = 'right';
         $pre.hidden = false;
         if (willOpen) {
-          document.body.classList.add('rdc-counter-open');
           animateLayoutDuring(()=>{ $pre.classList.add('open'); const c=getWeeklyContainer(); if(c) c.style.marginBottom='18px'; });
           // prepare smooth expansion from 0 height
           container.style.overflow = 'hidden';
@@ -10878,7 +10874,6 @@ function openVideo(videoId, isProtected) {
             }
           } catch {}
         } else {
-          document.body.classList.remove('rdc-counter-open');
           animateLayoutDuring(()=>{ $pre.classList.remove('open'); const c=getWeeklyContainer(); if(c) c.style.marginBottom='0px'; });
           // animate collapse
           const startH = container.offsetHeight;
