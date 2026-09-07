@@ -2879,13 +2879,13 @@ video-synopsis {
                         /* Hide scrollbars across browsers while keeping scroll */
                         scrollbar-width:none; -ms-overflow-style:none;
                     }
-                    /* Toolbar: Semanal · Mensal · Anual · Destinatários (traditional brown + gold) */
-                    /* right inset clears the bronze visitas badge so Destinatários stays readable */
-                    #weekly-toolbar{ position:absolute; top:0; left:0; right:58px; display:grid; grid-template-columns:1fr 1fr 1fr 1.35fr; gap:0; align-items:stretch; z-index:2; padding:0; }
+                    /* Toolbar: Destinatários · Semanal · Mensal · Anual (traditional brown + gold) */
+                    /* right inset clears the bronze visitas badge so Anual stays readable */
+                    #weekly-toolbar{ position:absolute; top:0; left:0; right:58px; display:grid; grid-template-columns:1.35fr 1fr 1fr 1fr; gap:0; align-items:stretch; z-index:2; padding:0; }
                     #weekly-toolbar button{ width:100%; height:48px; background:#2a1d12; color:#f3d27a; border:1px solid #d1a84b; border-bottom:none; border-right:1px solid #d1a84b; cursor:pointer; font-weight:800; font-size:0.84rem; letter-spacing:0.01em; transition: background .15s ease, color .15s ease; border-radius:0; white-space:nowrap; padding:0 4px; }
                     #weekly-toolbar .tab-spacer{ display:none; }
-                    #weekly-toolbar .seg{ border-top-left-radius:16px; }
-                    #weekly-toolbar button.dest{ border-right:1px solid #d1a84b; border-top-right-radius:16px; }
+                    #weekly-toolbar button.dest{ border-top-left-radius:16px; }
+                    #weekly-toolbar button.ano{ border-top-right-radius:16px; }
                     #weekly-toolbar button:hover, #weekly-toolbar button:focus-visible{ background:#4a3323; outline:none; }
                     #weekly-toolbar .seg:hover, #weekly-toolbar .seg:focus-visible,
                     #weekly-toolbar .mes:hover, #weekly-toolbar .mes:focus-visible,
@@ -2939,7 +2939,7 @@ video-synopsis {
                     .weekly-dest-panel li span{ opacity:0.88; font-size:0.86rem; font-weight:600; }
                     .weekly-dest-panel .dest-subtle{ margin-top:0.85rem; opacity:0.9; }
                     @media (max-width:720px){
-                      #weekly-toolbar{ right:44px; grid-template-columns:1fr 1fr 1fr 1.45fr; }
+                      #weekly-toolbar{ right:44px; grid-template-columns:1.45fr 1fr 1fr 1fr; }
                       #weekly-toolbar button{ font-size:0.72rem; height:44px; }
                     }
                     /* inner bevel & liner */
@@ -10804,22 +10804,23 @@ function openVideo(videoId, isProtected) {
           container.style.transition = 'height .8s cubic-bezier(0.4, 0, 0.2, 1)';
           // ensure toolbar exists and is inside the panel element
           let tb = document.getElementById('weekly-toolbar');
+          const toolbarHtml = `
+              <button type="button" class="dest">Destinatários</button>
+              <button type="button" class="seg active">Semanal</button>
+              <button type="button" class="mes">Mensal</button>
+              <button type="button" class="ano">Anual</button>
+            `;
           if (!tb) {
             tb = document.createElement('div');
             tb.id = 'weekly-toolbar';
-            tb.innerHTML = `
-              <button type="button" class="seg active">Semanal</button>
-              <button type="button" class="mes">Mensal</button>
-              <button type="button" class="ano">Anual</button>
-              <button type="button" class="dest">Destinatários</button>
-            `;
-          } else if (!tb.querySelector('.dest') || tb.querySelector('.crystal-toggle')) {
-            tb.innerHTML = `
-              <button type="button" class="seg active">Semanal</button>
-              <button type="button" class="mes">Mensal</button>
-              <button type="button" class="ano">Anual</button>
-              <button type="button" class="dest">Destinatários</button>
-            `;
+            tb.innerHTML = toolbarHtml;
+          } else if (
+            !tb.querySelector('.dest') ||
+            tb.querySelector('.crystal-toggle') ||
+            !tb.firstElementChild ||
+            !tb.firstElementChild.classList.contains('dest')
+          ) {
+            tb.innerHTML = toolbarHtml;
           }
           // attach to container so renderPeriod() text updates on <pre> don't remove the toolbar
           const cont = document.getElementById('weekly-extract');
