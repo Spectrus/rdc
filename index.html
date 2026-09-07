@@ -354,7 +354,7 @@
       host.innerHTML='<iframe title="Bibliotecário reativo" allow="microphone; autoplay" src="about:blank"></iframe><button id="rdc-librarian-close" type="button" disabled aria-label="Voltar o Bibliotecário ao canto">← Voltar</button>';
       doc.body.append(host);
       const visual=host.querySelector('iframe'), exit=host.querySelector('button');
-      let visible=false, fullscreen=false, loaded=false;
+      let visible=false, fullscreen=false, loaded=false, dismissing=false;
       let miniPosition = null;
       function moveMini(x,y){
         const r=visual.getBoundingClientRect();
@@ -364,7 +364,7 @@
       }
       win.addEventListener('resize',()=>{if(!fullscreen&&miniPosition)moveMini(miniPosition.x,miniPosition.y);});
       const links=()=>Array.from(doc.querySelectorAll('.nav-bar a,.mobile-nav a')).filter(a=>/bibliotecario/.test(a.getAttribute('href')||''));
-      const speak=on=>{if(loaded)visual.contentWindow?.postMessage({type:'viz-dock',action:'hover-audio',on:!!on},win.location.origin);};
+      const speak=on=>{if(on&&dismissing)return;if(loaded)visual.contentWindow?.postMessage({type:'viz-dock',action:'hover-audio',on:!!on},win.location.origin);};
       function sync(){
         links().forEach(a=>{
           a.dataset.rdcLibrarian='';
@@ -391,9 +391,10 @@
         if(expansionAnimation===animation)expansionAnimation=null;
       }
       async function transitionTo(expand){
+        if(dismissing)return;
         const version=++transitionVersion;
         exit.disabled=true;
-        if(visible&&loaded)await fadeTo(0,expand ? 40 : 120);
+        if(visible&&loaded)await fadeTo(0,160);
         else visual.style.opacity='0';
         if(version!==transitionVersion)return;
         visible=true;fullscreen=expand;host.hidden=false;
@@ -408,7 +409,7 @@
           visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:expand},win.location.origin);
           await settled();
           if(version!==transitionVersion)return;
-          await fadeTo(1,240);
+          await fadeTo(1,160);
           if(version===transitionVersion)exit.disabled=false;
         }
       }
@@ -417,15 +418,81 @@
         if(!visible)return;
         speak(false);void transitionTo(false);
       }
-      function dismiss(){
-        ++transitionVersion;
-        if(expansionAnimation){expansionAnimation.cancel();expansionAnimation=null;}
-        speak(false);visible=false;fullscreen=false;host.hidden=true;
+      // Sample the actual visible dots, then disperse them upward before unloading.
+      async function pulverize(){
+        if(win.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+        let dust;
+        const sources=[];
+        try{
+          const child=visual.contentDocument;
+          if(!child)return;
+          const bounds=visual.getBoundingClientRect();
+          const particles=[];
+          const sample=doc.createElement('canvas');
+          sample.width=96;sample.height=32;
+          const sampleCtx=sample.getContext('2d',{willReadFrequently:true});
+          for(const source of child.querySelectorAll('.wave canvas')){
+            const r=source.getBoundingClientRect();
+            if(!r.width||!r.height||r.bottom<=0||r.top>=bounds.height||r.right<=0||r.left>=bounds.width)continue;
+            if(child.defaultView.getComputedStyle(source).visibility==='hidden')continue;
+            sampleCtx.clearRect(0,0,96,32);
+            sampleCtx.drawImage(source,0,0,96,32);
+            const pixels=sampleCtx.getImageData(0,0,96,32).data;
+            for(let y=0;y<32;y+=2)for(let x=0;x<96;x+=2){
+              const i=(y*96+x)*4;
+              if(pixels[i+3]<20)continue;
+              particles.push({x:bounds.left+r.left+x*r.width/96,y:bounds.top+r.top+y*r.height/32,
+                dx:(Math.random()-.5)*70,up:55+Math.random()*120,
+                color:'rgb('+pixels[i]+','+pixels[i+1]+','+pixels[i+2]+')',alpha:pixels[i+3]/255});
+            }
+            sources.push({source,visibility:source.style.visibility});
+            if(particles.length>=1600)break;
+          }
+          if(!particles.length)return;
+          dust=doc.createElement('canvas');
+          dust.width=win.innerWidth;dust.height=win.innerHeight;
+          dust.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none';
+          host.append(dust);
+          const ctx=dust.getContext('2d');
+          sources.forEach(({source})=>{source.style.visibility='hidden';});
+          await new Promise(resolve=>{
+            let start;
+            function draw(now){
+              if(start===undefined)start=now;
+              const t=Math.min(1,(now-start)/360);
+              ctx.clearRect(0,0,dust.width,dust.height);
+              for(const p of particles){
+                ctx.globalAlpha=p.alpha*(1-t);
+                ctx.fillStyle=p.color;
+                ctx.beginPath();
+                ctx.arc(p.x+p.dx*t,p.y-p.up*t*t,Math.max(.35,1.6*(1-t)),0,Math.PI*2);
+                ctx.fill();
+              }
+              if(t<1)win.requestAnimationFrame(draw);else resolve();
+            }
+            win.requestAnimationFrame(draw);
+          });
+        }catch(_){
+          // Unreadable canvas: the matching opacity fade still completes dismissal.
+        }finally{
+          dust?.remove();
+          sources.forEach(({source,visibility})=>{source.style.visibility=visibility;});
+        }
+      }
+      async function dismiss(){
+        if(dismissing||!visible)return;
+        dismissing=true;
+        const version=++transitionVersion;
+        exit.disabled=true;
+        speak(false);
+        await Promise.all([pulverize(),fadeTo(0,160)]);
+        if(version!==transitionVersion){dismissing=false;return;}
+        visible=false;fullscreen=false;host.hidden=true;
         host.classList.remove('is-corner');visual.style.opacity='0';
-        visual.src='about:blank';loaded=false;sync();
+        visual.src='about:blank';loaded=false;dismissing=false;sync();
       }
       visual.addEventListener('load',async ()=>{
-        if(visual.src==='about:blank'||!visible)return;
+        if(visual.src==='about:blank'||!visible||dismissing)return;
         const version=transitionVersion;
         loaded=true;
         const child=visual.contentDocument;
@@ -461,7 +528,7 @@
         visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:fullscreen},win.location.origin);
         await settled();
         if(version!==transitionVersion||!visible)return;
-        await fadeTo(1,240);
+        await fadeTo(1,160);
         if(version===transitionVersion)exit.disabled=false;
       });
       visual.addEventListener('pointerenter',()=>speak(true));
