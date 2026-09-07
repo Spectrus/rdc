@@ -399,3 +399,22 @@
   }
   watch(document);
 })();
+
+/* Dismiss Library notification banners ten seconds after they appear. */
+(() => {
+  const scheduled = new WeakSet();
+  function schedule(node) {
+    if (node.nodeType !== 1) return;
+    const close = node.querySelector('button[aria-label="Fechar notificação"]');
+    if (!close || scheduled.has(close)) return;
+    scheduled.add(close);
+    const timer = setTimeout(() => {
+      if (close.isConnected) close.click();
+    }, 10000);
+    close.addEventListener('click', () => clearTimeout(timer), {once:true});
+  }
+  new MutationObserver(records => {
+    records.forEach(record => record.addedNodes.forEach(schedule));
+  }).observe(document.body, {childList:true});
+  Array.from(document.body.children).forEach(schedule);
+})();
