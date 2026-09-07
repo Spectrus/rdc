@@ -2943,6 +2943,8 @@ video-synopsis {
                     .weekly-dest-panel li strong{ display:block; word-break:break-all; }
                     .weekly-dest-panel li span{ opacity:0.88; font-size:0.86rem; font-weight:600; }
                     .weekly-dest-panel .dest-subtle{
+                        /* Hidden for now — keep DOM + JS for future entradas access */
+                        display: none !important;
                         margin:1.1rem 0 0; padding:0; border:0; background:transparent;
                         font:inherit; font-weight:800; color:#f3d27a;
                         letter-spacing:0.04em; text-transform:uppercase;
@@ -2956,6 +2958,7 @@ video-synopsis {
                         text-decoration: underline;
                         text-underline-offset: 3px;
                     }
+                    #destOpenEntradas{ display: none !important; }
                     @media (max-width:720px){
                       #weekly-toolbar{ right:96px; grid-template-columns:1.45fr 1fr 1fr 1fr; }
                       #weekly-toolbar button{ font-size:0.72rem; height:44px; }
@@ -10972,7 +10975,7 @@ function openVideo(videoId, isProtected) {
               <button type="submit" id="btnDestSenha">Abrir lista</button>
             </form>
             <ul id="destList"></ul>
-            <div class="dest-subtle" id="destOpenEntradas" role="button" tabindex="0" title="Abrir lista de visitantes">LISTA DE VISITANTES</div>
+            <div class="dest-subtle" id="destOpenEntradas" hidden aria-hidden="true" role="button" tabindex="-1" title="Abrir lista de visitantes">LISTA DE VISITANTES</div>
           `;
           cont.appendChild(panel);
         } else {
@@ -10982,11 +10985,17 @@ function openVideo(videoId, isProtected) {
             const next = document.createElement('div');
             next.className = 'dest-subtle';
             next.id = 'destOpenEntradas';
+            next.hidden = true;
+            next.setAttribute('aria-hidden', 'true');
             next.setAttribute('role', 'button');
-            next.tabIndex = 0;
+            next.tabIndex = -1;
             next.title = 'Abrir lista de visitantes';
             next.textContent = 'LISTA DE VISITANTES';
             (wrap || oldBtn).replaceWith(next);
+          } else if (wrap && wrap.id === 'destOpenEntradas') {
+            wrap.hidden = true;
+            wrap.setAttribute('aria-hidden', 'true');
+            wrap.tabIndex = -1;
           }
         }
         const status = document.getElementById('destStatus');
