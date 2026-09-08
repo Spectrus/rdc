@@ -349,7 +349,8 @@
       const css=doc.createElement('style');
       css.textContent=`
         #rdc-librarian{position:fixed;inset:0;z-index:1000050;pointer-events:none;opacity:1;transition:opacity .28s ease}
-        #rdc-librarian[hidden]{display:none}
+        #rdc-librarian[hidden]{display:block;visibility:hidden}
+        #rdc-librarian[hidden] iframe{pointer-events:none}
         #rdc-librarian iframe{position:fixed;inset:0;width:100vw;height:100vh;border:0;background:transparent;pointer-events:auto;transition:none;will-change:opacity}
         #rdc-librarian.is-corner{pointer-events:none}
         #rdc-librarian.is-corner iframe{inset:var(--mini-y,78px) auto auto var(--mini-x,18px);width:336px;height:228px;pointer-events:auto}
@@ -361,12 +362,12 @@
         @media(max-width:600px){#rdc-librarian.is-corner iframe{top:var(--mini-y,64px);right:auto;left:var(--mini-x,8px);width:252px;height:170px}#rdc-librarian-close{top:10px;right:10px}}
       `;
       doc.head.append(css);
-      const host=doc.createElement('aside');host.id='rdc-librarian';host.hidden=true;host.setAttribute('aria-label','Bibliotecário');
+      const host=doc.createElement('aside');host.id='rdc-librarian';host.hidden=true;host.inert=true;host.setAttribute('aria-label','Bibliotecário');
       host.innerHTML='<iframe title="Bibliotecário reativo" allow="microphone; autoplay" src="about:blank"></iframe><button id="rdc-librarian-close" type="button" disabled aria-label="Voltar o Bibliotecário ao canto">← Voltar</button>';
       doc.body.append(host);
       const visual=host.querySelector('iframe'), exit=host.querySelector('button');
       let visible=false, fullscreen=false, loaded=false, dismissing=false;
-      let miniPosition = null;
+      let miniPosition = null, frameFullscreen=true;
       function moveMini(x,y){
         const r=visual.getBoundingClientRect();
         miniPosition={x:Math.max(-r.width/2+48,Math.min(x,win.innerWidth-r.width/2-48)),y:Math.max(-r.height/2+48,Math.min(y,win.innerHeight-r.height/2-48))};
@@ -375,7 +376,7 @@
       }
       win.addEventListener('resize',()=>{if(!fullscreen&&miniPosition)moveMini(miniPosition.x,miniPosition.y);});
       const links=()=>Array.from(doc.querySelectorAll('.nav-bar a,.mobile-nav a')).filter(a=>/bibliotecario/.test(a.getAttribute('href')||''));
-      const speak=on=>{if(on&&dismissing)return;if(loaded)visual.contentWindow?.postMessage({type:'viz-dock',action:'hover-audio',on:!!on},win.location.origin);};
+      const speak=on=>{if(on&&(!visible||dismissing))return;if(loaded)visual.contentWindow?.postMessage({type:'viz-dock',action:'hover-audio',on:!!on},win.location.origin);};
       function sync(){
         links().forEach(a=>{
           a.dataset.rdcLibrarian='';
@@ -384,11 +385,7 @@
           a.setAttribute('aria-expanded',String(visible));
         });
       }
-      // Warm the document cache without running the voice or requesting microphone access.
-      const librarianPrefetch=doc.createElement('link');
-      librarianPrefetch.rel='prefetch';
-      librarianPrefetch.href='bibliotecario.html?embed=dock&fs=1&v=full-reactive';
-      doc.head.append(librarianPrefetch);
+      // Prepare the real frame once, rather than just caching its document.
       let expansionAnimation = null, transitionVersion = 0;
       const settled = () => new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
       async function fadeTo(opacity,duration){
@@ -408,7 +405,8 @@
         if(visible&&loaded)await fadeTo(0,160);
         else visual.style.opacity='0';
         if(version!==transitionVersion)return;
-        visible=true;fullscreen=expand;host.hidden=false;
+        const modeChanged=frameFullscreen!==expand;
+        visible=true;fullscreen=expand;host.hidden=false;host.inert=false;
         host.classList.toggle('is-corner',!expand);
         sync();
         if(visual.src==='about:blank'){
@@ -418,9 +416,10 @@
         }
         if(loaded){
           visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:expand},win.location.origin);
-          await settled();
+          frameFullscreen=expand;
+          if(modeChanged)await settled();
           if(version!==transitionVersion)return;
-          await fadeTo(1,80);
+          await fadeTo(1,240);
           if(version===transitionVersion)exit.disabled=false;
         }
       }
@@ -498,12 +497,18 @@
         speak(false);
         await Promise.all([pulverize(),fadeTo(0,160)]);
         if(version!==transitionVersion){dismissing=false;return;}
-        visible=false;fullscreen=false;host.hidden=true;
+        visible=false;fullscreen=false;host.hidden=true;host.inert=true;
         host.classList.remove('is-corner');visual.style.opacity='0';
-        visual.src='about:blank';loaded=false;dismissing=false;sync();
+        // Retain the initialized document for the next opening.
+        if(loaded){
+          visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:true},win.location.origin);
+          speak(false);
+          frameFullscreen=true;
+        }
+        dismissing=false;sync();
       }
       visual.addEventListener('load',async ()=>{
-        if(visual.src==='about:blank'||!visible||dismissing)return;
+        if(visual.src==='about:blank')return;
         const version=transitionVersion;
         loaded=true;
         const child=visual.contentDocument;
@@ -536,12 +541,16 @@
             try{shield.setPointerCapture(event.pointerId);}catch(_){}
           },true);
         }
+        if(!visible||dismissing){speak(false);return;}
         visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:fullscreen},win.location.origin);
+        frameFullscreen=fullscreen;
         await settled();
         if(version!==transitionVersion||!visible)return;
-        await fadeTo(1,80);
+        await fadeTo(1,240);
         if(version===transitionVersion)exit.disabled=false;
       });
+      visual.style.opacity='0';
+      visual.src='bibliotecario.html?embed=dock&fs=1&v=full-reactive';
       visual.addEventListener('pointerenter',()=>speak(true));
       visual.addEventListener('pointerleave',()=>speak(false));
       exit.addEventListener('click',collapse);
