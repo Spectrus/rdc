@@ -1,3 +1,4 @@
+// ELEVENLABS_API_KEY is supplied by Netlify's Production Functions environment.
 export default async (req: Request) => {
   const headers = { "Cache-Control": "no-store" };
   const fail = (status: number, error: string) => Response.json({ error }, { status, headers });
