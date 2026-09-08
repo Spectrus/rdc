@@ -35,8 +35,10 @@ export default async (req: Request) => {
         "insufficient_credits", "unusual_activity", "too_many_concurrent_requests",
         "system_busy", "invalid_voice_id", "voice_not_allowed"
       ];
-      const code = allowed.includes(detail?.detail?.status)
-        ? detail.detail.status : "provider_error";
+      const category = detail?.detail?.status;
+      const code = typeof category === "string" && category.length <= 80 &&
+        (allowed.includes(category) || /^[a-z]+(?:_[a-z]+){1,8}$/.test(category))
+        ? category : "provider_error";
       console.warn("Bibliotecario voice failure", { providerStatus: response.status, code });
       return Response.json({
         error: "A voz está indisponível neste momento. Tente novamente.",
