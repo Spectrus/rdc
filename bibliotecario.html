@@ -8987,6 +8987,9 @@
         style.textContent = `
           .librarian-standalone .dock-exit-btn,.librarian-standalone .dock-exit-hint,
           .librarian-standalone .dock-fs{display:none!important}
+          .librarian-standalone .dock-tools{opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+          .librarian-standalone .controls{display:flex!important;position:fixed;top:62px;right:16px;z-index:100001;gap:8px}
+          .librarian-standalone .controls button{border-radius:20px;padding:8px 14px;font-size:14px}
           #conversation-start{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:100000;
             border:1px solid #d3b35f;border-radius:24px;padding:10px 20px;background:#fffaf2;
             color:#4a2c2a;font:16px Georgia,serif;cursor:pointer;box-shadow:0 3px 14px #4a2c2a18}
@@ -8994,6 +8997,7 @@
           @media(max-width:600px){#conversation-start{top:78px;font-size:14px}}
         `;
         document.head.append(style);
+        if (btnListen) { btnListen.hidden=false; btnListen.removeAttribute("aria-hidden"); }
         const start = document.createElement("button");
         start.id = "conversation-start"; start.textContent = "Conversar com Álvaro";
         start.addEventListener("click", speakWelcome);
