@@ -2964,10 +2964,11 @@
 ];
 
     (function () {
-      const SCRIPT =
-        "Bem-vindo à Biblioteca Digital. Sou o Bibliotecário, e estou aqui para acompanhar a sua visita. " +
-        "Explore o acervo com calma, descubra obras especiais e deixe que as páginas abram novos caminhos. " +
-        "Quando precisar de orientação, é só me chamar — a leitura começa com um bom encontro.";
+      function welcomeText(hour = new Date().getHours()) {
+        const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+        return greeting + "! Bem-vindo à biblioteca digital de meu filho, Reinaldo Duarte Castanheira. " +
+          "Eu sou seu bibliotecário Álvaro. Com o que eu posso te ajudar?";
+      }
 
       const THEME_KEY = "bibliotecario-wave-theme";
       const DEFAULT_FILTERED_CHOICES = [
@@ -6934,6 +6935,7 @@
             if (version !== voiceVersion) return;
             cancelVoice();
             endSpeaking("ended");
+            if (opts.onEnd) opts.onEnd();
           };
           voiceAudio.onerror = function () {
             if (version !== voiceVersion) return;
@@ -7088,18 +7090,20 @@
       }
 
       function buildRecommendationSpeech(items) {
-        if (!items.length) return "Não encontrei recomendações.";
-        if (items.length === 1) {
-          const it = items[0];
-          return "Recomendo " + it.title +
-            (it.author ? ", de " + it.author : "") +
-            (it.code ? ", código " + it.code : "") +
-            (it.year ? ", de " + it.year : "") + ".";
-        }
-        const parts = items.map(function (it, idx) {
-          return (idx + 1) + ": " + it.title + (it.author ? ", de " + it.author : "");
+        if (!items.length) return "Não encontrei uma obra correspondente. Pode me dizer o título, o autor ou o assunto?";
+        const parts = items.slice(0, 3).map(function (it) {
+          const description = String(it.description || "").replace(/\s+/g, " ").trim();
+          const firstSentences = description.match(/[^.!?]+[.!?]+(?:\s|$)/g);
+          let summary = firstSentences ? firstSentences.slice(0, 2).join(" ").trim() : description;
+          if (summary.length > 420) summary = summary.slice(0, 420).replace(/\s+\S*$/, "") + "…";
+          const action = /m[ií]dia|v[ií]deo/i.test(it.type || "") ? "Ver" : "Ler";
+          return it.title + (it.author ? ", de " + it.author : "") + ". " +
+            (summary || "Esta obra ainda não tem uma sinopse cadastrada.") +
+            " Você encontra no acervo" + (it.code ? ", código " + it.code : "") +
+            ", e pode abrir pelo botão " + action + " no cartão que mostrei.";
         });
-        return "Encontrei estas obras: " + parts.join("; ") + ".";
+        return "É isso que eu achei. " + parts.join(" ") +
+          (items.length > 3 ? " Há mais opções nos cartões apresentados." : "");
       }
 
       function buildRecCardInner(it) {
@@ -7604,6 +7608,7 @@
           recEmpty.hidden = false;
           recEmpty.textContent = "Não encontrei no acervo algo bem próximo disso. Tente um código, autor ou título.";
           syncFsRecPanel({ reveal: true });
+          if (opts.speak !== false) speakText(buildRecommendationSpeech([]), {allowWhileListening:true});
           return;
         }
 
@@ -7981,11 +7986,64 @@
         }
       }
 
-      function speakWelcome() {
-        if (listening) return;
-        speakText(SCRIPT, {});
-        hint.textContent = "O Bibliotecário está falando. (Opcional — Escutar usa o seu microfone.)";
+      let welcomeTimer = null;
+      let welcomeVersion = 0;
+      let bubbleNodes = [];
+      function stopWelcome() {
+        welcomeVersion++;
+        clearTimeout(welcomeTimer);
+        bubbleNodes.forEach(function (node) { try { node.stop(); } catch (_) {} });
+        bubbleNodes = [];
       }
+      function speakWelcome() {
+        stopWelcome();
+        if (listening) stopListening(false);
+        setSimulatingNoise(false);
+        cancelVoice();
+        const version = welcomeVersion;
+        // Refresh from the actual visible library, including newly published works.
+        try {
+          const cards = Array.from(parent.document.querySelectorAll(".document-card"));
+          const items = cards.map(function (card) {
+            const text = selector => (card.querySelector(selector)?.textContent || "").trim();
+            return {title:text("h3"), author:text(".document-author"), code:text(".document-code"),
+              year:text(".document-year"), type:text(".document-type"),
+              description:text(":scope > p, .video-synopsis"),
+              link:card.querySelector(".read-button[href]")?.href || ""};
+          }).filter(item => item.title);
+          if (items.length) ACERVO_CATALOG.splice(0, ACERVO_CATALOG.length, ...items);
+        } catch (_) {}
+        const ctx = ensureAudioContext();
+        if (ctx) {
+          ctx.resume().catch(function () {});
+          [0, 0.14].forEach(function (offset, index) {
+            const oscillator = ctx.createOscillator(), gain = ctx.createGain();
+            const t = ctx.currentTime + offset;
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(index ? 820 : 640, t);
+            oscillator.frequency.exponentialRampToValueAtTime(index ? 380 : 290, t + 0.11);
+            gain.gain.setValueAtTime(0.001, t);
+            gain.gain.exponentialRampToValueAtTime(0.13, t + 0.012);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+            oscillator.connect(gain); gain.connect(ctx.destination);
+            oscillator.start(t); oscillator.stop(t + 0.13);
+            oscillator.onended = function () { oscillator.disconnect(); gain.disconnect(); };
+            bubbleNodes.push(oscillator);
+          });
+        }
+        const text = welcomeText();
+        ackText.textContent = text;
+        welcomeTimer = setTimeout(function () {
+          if (version !== welcomeVersion) return;
+          speakText(text, {onEnd: function () {
+            if (version !== welcomeVersion) return;
+            startListening().catch(function () {
+              hint.textContent = "Você pode digitar sua pergunta na busca ou permitir o microfone.";
+            });
+          }});
+        }, 300);
+      }
+      window.rdcStartConversation = speakWelcome;
 
       if (btnFilterMarked) {
         btnFilterMarked.addEventListener("click", function (e) {
@@ -8549,6 +8607,7 @@
             }
             if (data.action === "hover-audio") {
               if (!data.on) {
+                stopWelcome();
                 clearTimeout(recommendTimer);
                 cancelVoice();
               }

@@ -423,7 +423,15 @@
           if(version===transitionVersion)exit.disabled=false;
         }
       }
-      function showFull(){void transitionTo(true);}
+      let welcomePending=false;
+      function startConversation(){
+        if(!visible||dismissing)return;
+        if(loaded&&visual.contentWindow?.rdcStartConversation){
+          welcomePending=false;
+          visual.contentWindow.rdcStartConversation();
+        }else welcomePending=true;
+      }
+      function showFull(){const opening=!visible;void transitionTo(true);if(opening)startConversation();}
       function collapse(){
         if(!visible)return;
         speak(false);void transitionTo(false);
@@ -494,6 +502,7 @@
         dismissing=true;
         const version=++transitionVersion;
         exit.disabled=true;
+        welcomePending=false;
         speak(false);
         await Promise.all([pulverize(),fadeTo(0,160)]);
         if(version!==transitionVersion){dismissing=false;return;}
@@ -544,6 +553,7 @@
         if(!visible||dismissing){speak(false);return;}
         visual.contentWindow?.postMessage({type:'viz-dock',action:'set-fs',fs:fullscreen},win.location.origin);
         frameFullscreen=fullscreen;
+        if(welcomePending)startConversation();
         await settled();
         if(version!==transitionVersion||!visible)return;
         await fadeTo(1,240);
@@ -551,8 +561,8 @@
       });
       visual.style.opacity='0';
       visual.src='bibliotecario.html?embed=dock&fs=1&v=full-reactive';
-      visual.addEventListener('pointerenter',()=>speak(true));
-      visual.addEventListener('pointerleave',()=>speak(false));
+      visual.addEventListener('pointerenter',()=>{if(!fullscreen)speak(true);});
+      visual.addEventListener('pointerleave',()=>{if(!fullscreen)speak(false);});
       exit.addEventListener('click',collapse);
       doc.addEventListener('click',event=>{
         const link=event.target.closest('a');
