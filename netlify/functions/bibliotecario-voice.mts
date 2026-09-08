@@ -26,8 +26,22 @@ export default async (req: Request) => {
       signal: AbortSignal.any([req.signal, AbortSignal.timeout(45000)])
     });
     if (!response.ok) {
-      await response.body?.cancel();
-      return fail(response.status === 429 ? 429 : 502, "A voz está indisponível neste momento. Tente novamente.");
+      // Only expose known error categories, never provider messages, keys or text.
+      let detail;
+      try { detail = await response.json(); } catch { detail = null; }
+      const allowed = [
+        "invalid_api_key", "missing_permissions", "quota_exceeded", "voice_not_found",
+        "model_not_found", "subscription_required", "payment_required",
+        "insufficient_credits", "unusual_activity", "too_many_concurrent_requests",
+        "system_busy", "invalid_voice_id", "voice_not_allowed"
+      ];
+      const code = allowed.includes(detail?.detail?.status)
+        ? detail.detail.status : "provider_error";
+      console.warn("Bibliotecario voice failure", { providerStatus: response.status, code });
+      return Response.json({
+        error: "A voz está indisponível neste momento. Tente novamente.",
+        code, providerStatus: response.status
+      }, { status: response.status === 429 ? 429 : 502, headers });
     }
     return new Response(response.body, { headers: { ...headers, "Content-Type": "audio/mpeg" } });
   } catch { return fail(502, "Não foi possível carregar a voz. Tente novamente."); }
@@ -37,3 +51,4 @@ export const config = {
   path: "/api/bibliotecario-voice",
   rateLimit: { windowLimit: 15, windowSize: 60, aggregateBy: "ip", action: "rate_limit" }
 };
+
