@@ -3193,8 +3193,8 @@
       function requestMicStream() {
         const fancy = {
           audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
+            echoCancellation: true,
+            noiseSuppression: true,
             autoGainControl: true
           },
           video: false
@@ -6880,6 +6880,7 @@
         updateButtons();
       }
 
+      let activeVoiceText = "";
       let voiceRequest = null;
       let voiceAudio = null;
       let voiceUrl = null;
@@ -6887,6 +6888,7 @@
       let voicePulse = null;
 
       function cancelVoice() {
+        activeVoiceText = "";
         voiceVersion++;
         if (voiceRequest) voiceRequest.abort();
         voiceRequest = null;
@@ -6909,6 +6911,7 @@
         opts = opts || {};
         if (!text || (!opts.allowWhileListening && listening)) return;
         cancelVoice();
+        activeVoiceText = normalize(String(text));
         const version = voiceVersion;
         const controller = new AbortController();
         voiceRequest = controller;
@@ -7639,7 +7642,8 @@
       function scheduleRecommend(text) {
         if (recommendTimer) clearTimeout(recommendTimer);
         recommendTimer = setTimeout(function () {
-          recommendFromText(text, { speak: true });
+          // A silent interim preview must not consume the final spoken answer.
+          recommendFromText(text, { force: true, speak: true });
         }, 900);
       }
 
@@ -7668,7 +7672,13 @@
             handleStopCommand();
             return;
           }
-          if (suppressStt) return;
+          if (combinedCheck && speaking) {
+            // Ignore recognizable speaker echo, but allow a new request to interrupt.
+            const heard = normalize(combinedCheck);
+            if (heard.length >= 12 && activeVoiceText.includes(heard)) return;
+            clearTimeout(recommendTimer);
+            cancelVoice();
+          }
 
           if (finals) {
             updateTranscript(finals, "");
