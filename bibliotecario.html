@@ -6879,46 +6879,85 @@
         updateButtons();
       }
 
-      function speakText(text, opts) {
+      let voiceRequest = null;
+      let voiceAudio = null;
+      let voiceUrl = null;
+      let voiceVersion = 0;
+      let voicePulse = null;
+
+      function cancelVoice() {
+        voiceVersion++;
+        if (voiceRequest) voiceRequest.abort();
+        voiceRequest = null;
+        if (voiceAudio) {
+          voiceAudio.onended = voiceAudio.onerror = null;
+          voiceAudio.pause();
+          voiceAudio.removeAttribute("src");
+          voiceAudio.load();
+        }
+        if (voiceUrl) URL.revokeObjectURL(voiceUrl);
+        voiceUrl = null;
+        clearInterval(voicePulse);
+        voicePulse = null;
+        if (ttsSupported) window.speechSynthesis.cancel();
+        suppressStt = false;
+        endSpeaking("stopped");
+      }
+
+      async function speakText(text, opts) {
         opts = opts || {};
-        if (!ttsSupported || !text) return;
-        if (!opts.allowWhileListening && listening) return;
-
-        window.speechSynthesis.cancel();
+        if (!text || (!opts.allowWhileListening && listening)) return;
+        cancelVoice();
+        const version = voiceVersion;
+        const controller = new AbortController();
+        voiceRequest = controller;
+        if (!voiceAudio) voiceAudio = new Audio();
         suppressStt = !!opts.allowWhileListening;
-        utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "pt-BR";
-        utterance.rate = opts.rate || 0.96;
-        utterance.pitch = 1;
-        utterance.volume = 1;
-        const voice = pickPortugueseVoice();
-        if (voice) utterance.voice = voice;
-
-        utterance.onstart = function () {
-          speaking = true;
+        speaking = true;
+        if (!listening) setStatus("Preparando voz…");
+        updateButtons();
+        try {
+          const response = await fetch("/api/bibliotecario-voice", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: String(text) }),
+            signal: controller.signal
+          });
+          if (!response.ok) throw new Error("voice-unavailable");
+          const blob = await response.blob();
+          if (version !== voiceVersion) return;
+          voiceRequest = null;
+          voiceUrl = URL.createObjectURL(blob);
+          voiceAudio.src = voiceUrl;
+          voiceAudio.playbackRate = opts.rate || 0.96;
+          voiceAudio.onended = function () {
+            if (version !== voiceVersion) return;
+            cancelVoice();
+            endSpeaking("ended");
+          };
+          voiceAudio.onerror = function () {
+            if (version !== voiceVersion) return;
+            cancelVoice();
+            setStatus("Voz indisponível");
+            hint.textContent = "Não foi possível reproduzir a voz. Tente novamente.";
+          };
+          await voiceAudio.play();
+          if (version !== voiceVersion) return;
           avatar.classList.add("speaking");
           if (!listening) setStatus("Falando…");
           bumpFromSpeech();
+          voicePulse = setInterval(function () {
+            if (Math.random() > 0.45) bumpFromSpeech();
+          }, 180);
           updateButtons();
-        };
-        utterance.onboundary = bumpFromSpeech;
-        utterance.onend = function () {
-          suppressStt = false;
-          endSpeaking("ended");
-        };
-        utterance.onerror = function () {
-          suppressStt = false;
-          endSpeaking("stopped");
-        };
-
-        window.speechSynthesis.speak(utterance);
-
-        const pulse = setInterval(function () {
-          if (!speaking) { clearInterval(pulse); return; }
-          if (Math.random() > 0.45) bumpFromSpeech();
-        }, 180);
-        utterance.addEventListener("end", function () { clearInterval(pulse); });
-        utterance.addEventListener("error", function () { clearInterval(pulse); });
+        } catch (error) {
+          if (version !== voiceVersion) return;
+          cancelVoice();
+          setStatus("Voz indisponível");
+          hint.textContent = error.name === "NotAllowedError"
+            ? "Toque no botão de fala para permitir o áudio."
+            : "Não foi possível carregar a voz. Tente novamente.";
+        }
       }
 
       function phraseBoundaryMatch(haystack, phrase) {
@@ -6942,7 +6981,9 @@
         ackText.textContent = "Ok, parei de escutar.";
         hint.textContent = "Escuta encerrada por comando de voz.";
         stopListening(false);
+        const stoppedVoiceVersion = voiceVersion;
         setTimeout(function () {
+          if (voiceVersion !== stoppedVoiceVersion) return;
           speakText("Ok, parei de escutar.", { allowWhileListening: true, rate: 1 });
         }, 120);
         setTimeout(function () { stopHandled = false; }, 800);
@@ -7681,9 +7722,7 @@
         }
         if (listening) return true;
 
-        if (ttsSupported) {
-          try { window.speechSynthesis.cancel(); } catch (e) { /* ignore */ }
-        }
+        cancelVoice();
         speaking = false;
         stopHandled = false;
         suppressStt = false;
@@ -7785,6 +7824,8 @@
       }
 
       function stopListening(updateHint) {
+        clearTimeout(recommendTimer);
+        cancelVoice();
         wantListen = false;
         listening = false;
         document.body.classList.remove("listening");
@@ -7941,7 +7982,7 @@
       }
 
       function speakWelcome() {
-        if (!ttsSupported || listening) return;
+        if (listening) return;
         speakText(SCRIPT, {});
         hint.textContent = "O Bibliotecário está falando. (Opcional — Escutar usa o seu microfone.)";
       }
@@ -8005,10 +8046,7 @@
             stopListening(true);
             return;
           }
-          if (ttsSupported && speaking) {
-            window.speechSynthesis.cancel();
-            endSpeaking("stopped");
-          }
+          if (speaking) cancelVoice();
         });
       }
 
@@ -8510,6 +8548,10 @@
               return;
             }
             if (data.action === "hover-audio") {
+              if (!data.on) {
+                clearTimeout(recommendTimer);
+                cancelVoice();
+              }
               if (data.on) {
                 if (!listening) {
                   startListening(requestMicStream()).catch(function () {
@@ -8904,7 +8946,7 @@
       }
 
       window.addEventListener("beforeunload", function () {
-        if (ttsSupported) window.speechSynthesis.cancel();
+        cancelVoice();
         stopListening(false);
         if (audioCtx) {
           try { audioCtx.close(); } catch (e) { /* ignore */ }
