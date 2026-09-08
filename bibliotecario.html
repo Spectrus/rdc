@@ -8176,10 +8176,11 @@
 
       // Compact dock for index.html Visualizar (bottom-right iframe)
       // Also powers in-page “Simular ecrã completo” on bibliotecario (viz-fs-sim).
-      const embedDock =
+      const standaloneLibrarian = window.parent === window;
+      const embedDock = standaloneLibrarian ||
         /(?:\?|&)embed=dock(?:&|$)/.test(String(location.search || "")) ||
         /(?:\?|&)embed=fullscreen(?:&|$)/.test(String(location.search || ""));
-      const embedFsInitial =
+      const embedFsInitial = standaloneLibrarian ||
         /(?:\?|&)(?:fs=1|embed=fullscreen)(?:&|$)/.test(String(location.search || ""));
       let vizDockCtl = null;
 
@@ -8491,7 +8492,7 @@
           }
 
           function setFs(on) {
-            const next = !!on;
+            const next = standaloneLibrarian ? true : !!on;
             if (pageFsSim && !next) {
               exitPageSim();
               return;
@@ -8977,6 +8978,74 @@
           resizeWaveCanvas();
           syncDockToolsUi();
         }, 120);
+      }
+
+      if (standaloneLibrarian) {
+        document.title = "Bibliotecário Álvaro — Biblioteca Digital";
+        document.body.classList.add("librarian-standalone");
+        const style = document.createElement("style");
+        style.textContent = `
+          .librarian-standalone .dock-exit-btn,.librarian-standalone .dock-exit-hint,
+          .librarian-standalone .dock-fs{display:none!important}
+          #conversation-start{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:100000;
+            border:1px solid #d3b35f;border-radius:24px;padding:10px 20px;background:#fffaf2;
+            color:#4a2c2a;font:16px Georgia,serif;cursor:pointer;box-shadow:0 3px 14px #4a2c2a18}
+          #catalog-connection{position:fixed;bottom:8px;left:12px;z-index:10000;font:12px Georgia,serif;color:#4a2c2a}
+          @media(max-width:600px){#conversation-start{top:78px;font-size:14px}}
+        `;
+        document.head.append(style);
+        const start = document.createElement("button");
+        start.id = "conversation-start"; start.textContent = "Conversar com Álvaro";
+        start.addEventListener("click", speakWelcome);
+        document.body.append(start);
+        const connection = document.createElement("span");
+        connection.id = "catalog-connection"; connection.setAttribute("role", "status");
+        connection.textContent = "Conectando ao acervo…";
+        document.body.append(connection);
+        if (location.protocol === "file:") {
+          connection.textContent = "Para usar voz e acervo ao vivo, abra a versão conectada.";
+          start.textContent = "Abrir versão conectada";
+          start.removeEventListener("click", speakWelcome);
+          start.onclick = () => location.assign("https://rdcguardandomomentos.com.br/bibliotecario.html");
+        } else {
+          // Read the live library in an invisible same-origin frame; never copy its data to Firebase.
+          const bridge = document.createElement("iframe");
+          bridge.hidden = true; bridge.tabIndex = -1; bridge.setAttribute("aria-hidden", "true");
+          bridge.title = "Conexão com o acervo"; bridge.src = "index.html?catalog-connection=1";
+          document.body.append(bridge);
+          let attempts = 0, observer, refreshTimer;
+          function refreshCatalog() {
+            try {
+              const site = bridge.contentDocument?.getElementById("site");
+              const doc = site?.contentDocument;
+              if (!doc || site.style.visibility !== "visible") return false;
+              const cards = Array.from(doc.querySelectorAll(".document-card"));
+              const entries = cards.map(card => {
+                const text = selector => (card.querySelector(selector)?.textContent || "").trim();
+                return {title:text("h3"),author:text(".document-author"),code:text(".document-code"),
+                  year:text(".document-year"),type:text(".document-type"),
+                  description:text(":scope > p, .video-synopsis"),
+                  link:card.querySelector(".read-button[href]")?.href || ""};
+              }).filter(item => item.title);
+              if (!entries.length) return false;
+              ACERVO_CATALOG.splice(0, ACERVO_CATALOG.length, ...entries);
+              connection.textContent = "Acervo conectado · " + entries.length + " obras";
+              if (!observer) {
+                observer = new MutationObserver(() => { clearTimeout(refreshTimer); refreshTimer=setTimeout(refreshCatalog,300); });
+                observer.observe(doc.getElementById("acervo") || doc.body,{childList:true,subtree:true,characterData:true});
+              }
+              return true;
+            } catch (_) { return false; }
+          }
+          const poll = setInterval(function () {
+            if (refreshCatalog()) clearInterval(poll);
+            else if (++attempts >= 60) {
+              clearInterval(poll);
+              connection.textContent = "Acervo ao vivo indisponível · usando catálogo salvo";
+            }
+          }, 500);
+          window.addEventListener("beforeunload",()=>{clearInterval(poll);clearTimeout(refreshTimer);observer?.disconnect();});
+        }
       }
 
       const btnVizFsSim = document.getElementById("btnVizFsSim");

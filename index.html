@@ -723,7 +723,11 @@
       document.title = doc.title || document.title;
       for (let i=0; i<40 && !injetar(doc); i++) await sleep(150);
       instalarSinopses(doc, win);
-      instalarBibliotecario(doc, win);
+      // Temporarily disabled on the public library; keep implementation for reactivation.
+      const librarianVisibility = doc.createElement('style');
+      librarianVisibility.textContent = 'a[href*="bibliotecario"],#rdc-librarian,#vizDock{display:none!important}';
+      doc.head.append(librarianVisibility);
+      // instalarBibliotecario(doc, win);
       instalarPlayerBiblioteca(doc, win);
       // Reveal only after the initial uniform layout has been measured and placed.
       // One Tap / FedCM in the child needs a visible iframe; notify after reveal.
