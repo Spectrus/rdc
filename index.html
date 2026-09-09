@@ -70,8 +70,8 @@
         const title = card.querySelector('h3');
         const synopsis = card.querySelector(':scope > p, :scope > .video-synopsis');
         if (code && code.textContent.trim() === '370') code.textContent = '350';
-        if (title && title.textContent !== 'Galo de Briga') title.textContent = 'Galo de Briga';
-        if (synopsis && synopsis.textContent !== sinopseGalo) synopsis.textContent = sinopseGalo;
+        if (title && title.textContent === 'Galo de Briga – versão já OK') title.textContent = 'Galo de Briga';
+        // Keep the editor's saved synopsis.
       });
     }
 
@@ -95,6 +95,25 @@
 
     function deduplicar(doc){
       corrigirGalo(doc);
+      // These two PDFs contain the same work; retain the final version (350).
+      doc.querySelectorAll('.document-card,.timeline-item-horizontal').forEach(card => {
+        if (Array.from(card.querySelectorAll('a[href]')).some(a => a.getAttribute('href').includes('1MRkTEXCj6sKRCtYvMkmG4tXBq83fQf5K'))) card.remove();
+      });
+      const galos = Array.from(doc.querySelectorAll('.document-card')).filter(c => cardCode(c) === '350');
+      const keeper = galos.find(c => c.dataset.cloudId) || galos[0];
+      galos.forEach(c => { if (c !== keeper) c.remove(); });
+      doc.querySelectorAll('.document-card').forEach(card => {
+        if (card.querySelector('.edit-card-btn')) return;
+        const button = doc.createElement('button');
+        button.type = 'button'; button.className = 'edit-card-btn';
+        button.textContent = '✏️'; button.title = 'Editar título e sinopse';
+        button.setAttribute('aria-label', 'Editar título e sinopse');
+        button.addEventListener('click', event => {
+          event.preventDefault(); event.stopPropagation();
+          doc.defaultView.editSystem?.openEditForCard(card);
+        });
+        card.append(button);
+      });
       const cardsByCode = new Map();
       doc.querySelectorAll('.document-card').forEach(card => {
         const code = cardCode(card);
@@ -116,9 +135,9 @@
       const grid = doc.getElementById('visible-documents');
       if (!grid) return false;
       const existing = new Set(Array.from(doc.querySelectorAll('.document-card'),
-        card => JSON.stringify([cardCode(card), cardTitle(card)])));
+        card => cardCode(card)));
       itens.forEach(item => {
-        const key = JSON.stringify([item.code, item.title]);
+        const key = item.code;
         if (!existing.has(key)) {
           grid.prepend(criarCard(doc, item));
           existing.add(key);
@@ -142,7 +161,7 @@
         const fields = { title:item.title, author:item.author, year:item.year, type:item.type, description:item.description, sinopse:item.description, link:item.link };
         try {
           if (porCodigo.has(item.code)) {
-            await win.firebaseUpdateByCode(Number(item.code), fields);
+            // Existing records belong to the editor; never overwrite them on page load.
           } else {
             await win.firebaseSaveMemory({ ...fields, code:Number(item.code), avisarLista:false });
             porCodigo.set(item.code, true);

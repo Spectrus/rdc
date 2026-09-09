@@ -4676,7 +4676,7 @@ video-synopsis {
                 </div>
 
                 <div class="document-card" style="animation-delay: 1s;">
-                    <div class="document-code">370</div>
+                    <div class="document-code">350</div>
                     <h3>Galo de Briga</h3>
                     <div class="document-author">Beatriz Marques Castanheira</div>
                     <div class="document-year">2020</div>
@@ -7825,16 +7825,16 @@ function openVideo(videoId, isProtected) {
                     
                     // Adicionar evento Enter para salvar memória
                     const handleEnter = (e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
+                        if (e.key === 'Enter' && !e.shiftKey && e.target.tagName !== 'TEXTAREA') {
                             e.preventDefault();
-                            this.saveNewMemory();
+                            this.onSaveMemoryClicked();
                         }
                     };
                     
                     // Adicionar evento a todos os inputs do formulário
                     const inputs = modal.querySelectorAll('input, select, textarea');
                     inputs.forEach(input => {
-                        input.addEventListener('keydown', handleEnter);
+                        input.onkeydown = handleEnter;
                     });
                     // Do not auto-scroll; keep modal at current viewport
                     const firstFocusable = modal.querySelector('input, select, textarea, button');
@@ -7855,6 +7855,7 @@ function openVideo(videoId, isProtected) {
                 const form = document.getElementById('addMemoryForm');
                 if (form) {
                     form.reset();
+                    delete form.dataset.editingId; delete form.dataset.editingCode;
                 }
             }
 
@@ -7875,6 +7876,17 @@ function openVideo(videoId, isProtected) {
                 }
             }
 
+            syncTimelineTitle(card, title) {
+                const link = card.querySelector('a.read-button, .video-thumbnail a[href]')?.getAttribute('href');
+                if (!link) return;
+                document.querySelectorAll('.timeline-item-horizontal').forEach(item => {
+                    if (Array.from(item.querySelectorAll('a[href]')).some(a => a.getAttribute('href') === link)) {
+                        const label = item.querySelector('.timeline-text-horizontal');
+                        if (label && label.textContent !== title) label.textContent = title;
+                    }
+                });
+            }
+
             // Open modal prefilled for editing a card
             openEditForCard(cardEl) {
                 if (!this.isAuthenticated) return;
@@ -7882,14 +7894,15 @@ function openVideo(videoId, isProtected) {
                 const title = cardEl.querySelector('h3')?.textContent || '';
                 const author = cardEl.querySelector('.document-author')?.textContent || '';
                 const year = cardEl.querySelector('.document-year')?.textContent || '';
-                const description = cardEl.querySelector('p')?.textContent || '';
+                const description = cardEl.querySelector(':scope > p, :scope > .video-synopsis')?.textContent || '';
                 const type = cardEl.querySelector('.document-type')?.textContent || '';
-                const link = cardEl.querySelector('a.read-button')?.getAttribute('href') || '';
+                const link = cardEl.querySelector('a.read-button, .video-thumbnail a[href]')?.getAttribute('href') || '';
                 const codeText = cardEl.querySelector('.document-code')?.textContent || '';
                 const code = parseInt(String(codeText).trim(), 10) || '';
-                form.title.value = title;
+                form.elements.namedItem('title').value = title;
                 form.author.value = author;
                 form.year.value = year;
+                if (type && !Array.from(form.type.options).some(o => o.value === type)) form.type.add(new Option(type, type));
                 form.type.value = type;
                 if (form.sinopse) form.sinopse.value = description;
                 form.link.value = link;
@@ -7915,13 +7928,14 @@ function openVideo(videoId, isProtected) {
                 };
                 const id = form.dataset.editingId || '';
                 const code = parseInt(form.dataset.editingCode || '0', 10) || 0;
-                if (!updated.title || !updated.author || !updated.year || !updated.type || !sinopseText) {
-                    this.showNotification('❌ Preencha todos os campos obrigatórios (incluindo a sinopse)!', 'error');
+                if (!String(updated.title || '').trim() || !sinopseText) {
+                    this.showNotification('❌ Preencha o título e a sinopse!', 'error');
                     return;
                 }
                 // Update in DOM
                 const target = id ? document.querySelector(`.document-card[data-cloud-id="${id}"]`) : Array.from(document.querySelectorAll('.document-card')).find(el => (el.querySelector('.document-code')?.textContent||'').trim() === String(code));
                 if (target) {
+                    this.syncTimelineTitle(target, updated.title);
                     target.querySelector('h3').textContent = updated.title;
                     const aEl = target.querySelector('a.read-button');
                     if (aEl) aEl.setAttribute('href', updated.link);
@@ -7929,7 +7943,9 @@ function openVideo(videoId, isProtected) {
                     if (tEl) tEl.textContent = this.normalizeType(updated.type);
                     const au = target.querySelector('.document-author'); if (au) au.textContent = updated.author;
                     const yr = target.querySelector('.document-year'); if (yr) yr.textContent = updated.year;
-                    const p = target.querySelector('p'); if (p) p.textContent = updated.description;
+                    let p = target.querySelector(':scope > p, :scope > .video-synopsis');
+                    if (!p) { p = document.createElement('p'); target.append(p); }
+                    p.textContent = updated.description;
                 }
                 // Update in local backup
                 try {
@@ -8145,7 +8161,18 @@ function openVideo(videoId, isProtected) {
                 // Adiciona inicialmente ao hidden; filtros/ordenação ajustarão a posição
                 cards.forEach(c => {
                     const codeNum = parseInt(String(c.codigo ?? c.code ?? 0), 10) || 0;
-                    if (existingUserCodes.has(codeNum)) return; // skip duplicate of user-added card
+                    if (existingUserCodes.has(codeNum)) {
+                        document.querySelectorAll('.document-card:not(.cloud-card)').forEach(card => {
+                            if (Number(card.querySelector('.document-code')?.textContent) !== codeNum) return;
+                            if (c.id) card.dataset.cloudId = c.id;
+                            const title = card.querySelector('h3');
+                            if (title) { title.textContent = c.titulo ?? c.title ?? title.textContent; this.syncTimelineTitle(card, title.textContent); }
+                            let synopsis = card.querySelector(':scope > p, :scope > .video-synopsis');
+                            if (!synopsis) { synopsis = document.createElement('p'); card.append(synopsis); }
+                            synopsis.textContent = c.sinopse ?? c.descricao ?? c.description ?? '';
+                        });
+                        return;
+                    }
                     const card = makeCard(c);
                     hidden.appendChild(card);
                 });
@@ -9244,7 +9271,7 @@ function openVideo(videoId, isProtected) {
             cursor:pointer;
         }
         .document-card { position:relative; }
-        body.edit-mode .document-card:hover .edit-card-btn,
+        body.edit-mode .document-card .edit-card-btn,
         body.authenticated .document-card:hover .edit-card-btn {
             display:flex;
         }
