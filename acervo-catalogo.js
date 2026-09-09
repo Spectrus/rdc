@@ -7,14 +7,26 @@
   const title = card => card.querySelector('h3')?.textContent.trim() || '';
   const original = card => card.querySelector('.document-code')?.textContent.trim() || '';
   const cinema = card => title(card) === 'Cine Regina' && original(card) === '100';
-  const byTitle = (a, b) => Number(cinema(b)) - Number(cinema(a)) || collator.compare(title(a), title(b)) || Number(original(a)) - Number(original(b));
+  const avelinaRank = card => {
+    const t = title(card);
+    if (t === 'Dona Avelina = Parte 1') return 1;
+    if (t === 'Dona Avelina - Final') return 2;
+    return 0;
+  };
+  const byTitle = (a, b) => {
+    const ar = avelinaRank(a), br = avelinaRank(b);
+    if (ar && br) return ar - br;
+    return Number(cinema(b)) - Number(cinema(a)) || collator.compare(title(a), title(b)) || Number(original(a)) - Number(original(b));
+  };
   let mode = titleMode;
   let timer;
   let observer;
+  const isEditor = () => document.body.classList.contains('edit-mode');
   function refresh() {
     const section = document.getElementById('acervo');
     const select = section?.querySelector('.sort-select');
     if (!section || !select) return;
+    if (mode === originalMode && !isEditor()) mode = titleMode;
     observer?.disconnect();
     const all = [...section.querySelectorAll('.document-card')];
     const identity = card => {
@@ -80,6 +92,7 @@
         badge.className = 'catalog-code';
         old.after(badge);
         badge.addEventListener('dblclick', () => {
+          if (!isEditor()) return;
           select.value = originalMode;
           mode = originalMode;
           refresh();
@@ -88,12 +101,13 @@
       }
       if (badge.textContent !== String(code)) badge.textContent = String(code);
       badge.title = 'Código por título · Código original: ' + original(card);
-      old.hidden = mode !== originalMode;
-      old.setAttribute('aria-hidden', String(mode !== originalMode));
-      badge.hidden = mode === originalMode;
+      const showOriginal = mode === originalMode && isEditor();
+      old.hidden = !showOriginal;
+      old.setAttribute('aria-hidden', String(!showOriginal));
+      badge.hidden = showOriginal;
     });
     select.value = mode;
-    const compare = mode === originalMode
+    const compare = mode === originalMode && isEditor()
       ? (a,b) => Number(original(a)) - Number(original(b))
       : mode === 'Ordenar por Autor'
       ? (a,b) => collator.compare(a.querySelector('.document-author')?.textContent || '', b.querySelector('.document-author')?.textContent || '') || byTitle(a,b)
@@ -186,12 +200,27 @@
       const link = event.target.closest('#acervo .document-card a[href], .timeline-item-horizontal a[href]');
       if (!link || dialog.contains(link)) return;
       const card = link.closest('.document-card,.timeline-item-horizontal');
-      const type = card?.querySelector('.document-type')?.textContent.trim() || '';
+      const type = card?.querySelector('.document-type,.timeline-tag-horizontal')?.textContent.trim() || '';
       const label = link.textContent.trim();
-      if (!/^ler$/i.test(label) || /^(mídia|midia|vídeo|video)$/i.test(type)) return;
+      const href = link.getAttribute('href') || '';
+      const isVideo = /^(mídia|midia|vídeo|video)$/i.test(type)
+        || card?.classList.contains('video-card')
+        || !!card?.querySelector('.video-thumbnail')
+        || /(?:youtube\.com|youtu\.be)/i.test(href)
+        || /\.(?:mp4|mpg|mpeg|mov|m4v|avi|webm)(?:$|[?#])/i.test(href)
+        || /\b(?:vídeo|video)\b/i.test(label);
+      const isReaderLink = link.matches('.read-button,.timeline-button-horizontal') || /^ler\b/i.test(label);
+      if (!isReaderLink || isVideo) return;
       let url;
       try {
-        const raw = window.bibliotecaPdfUrl ? window.bibliotecaPdfUrl(link.href) : link.href;
+        let raw = link.getAttribute('href') || link.href;
+        const absolute = new URL(raw,location.href);
+        const decodedPath = decodeURIComponent(absolute.pathname);
+        if (/\/Eduardo Biagioni visita Lenita e Carmem\.pptx$/i.test(decodedPath)) {
+          raw = '/pdfs/eduardo-biagioni-visita.pdf';
+        } else {
+          raw = window.bibliotecaPdfUrl ? window.bibliotecaPdfUrl(raw) : raw;
+        }
         url = new URL(raw,location.href);
       } catch (_) { return; }
       if (!/^https?:$/.test(url.protocol)) return;
@@ -203,6 +232,8 @@
         const id = url.pathname.match(/\/(?:document|spreadsheets|presentation)\/d\/([\w-]+)/)?.[1];
         const kind = url.pathname.split('/').filter(Boolean)[0];
         if (id && kind) preview = new URL('https://docs.google.com/' + kind + '/d/' + id + '/preview');
+      } else if (/\.(?:docx?|pptx?|xlsx?)$/i.test(url.pathname)) {
+        preview = new URL('https://docs.google.com/gview?embedded=1&url=' + encodeURIComponent(url.href));
       }
       event.preventDefault();
       event.stopPropagation();
@@ -221,19 +252,32 @@
   }
 
   function schedule() { clearTimeout(timer); timer = setTimeout(refresh, 100); }
-  window.bibliotecaDisplayCode = card => mode === originalMode ? original(card) : (card.dataset.titleCode || original(card));
+  window.bibliotecaDisplayCode = card => mode === originalMode && isEditor() ? original(card) : (card.dataset.titleCode || original(card));
   function init() {
     const select = document.querySelector('#acervo .sort-select');
     if (!select) return;
     select.addEventListener('change', e => {
       e.stopImmediatePropagation();
       mode = select.value;
+      if (mode === originalMode && !isEditor()) mode = titleMode;
       refresh();
     }, true);
     observer = new MutationObserver(schedule);
     installReader();
     refresh();
-    document.addEventListener('click', e => { if (e.target.closest('.filter-button')) schedule(); });
+    document.addEventListener('click', e => {
+      if (e.target.closest('.filter-button')) schedule();
+      if (e.target.closest('.search-button') && !isEditor()) {
+        mode = titleMode;
+        schedule();
+      }
+    });
+    document.querySelector('.search-input')?.addEventListener('keyup', e => {
+      if (e.key === 'Enter' && !isEditor()) {
+        mode = titleMode;
+        schedule();
+      }
+    });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
