@@ -9,8 +9,8 @@
   const cinema = card => title(card) === 'Cine Regina' && original(card) === '100';
   const avelinaRank = card => {
     const t = title(card);
-    if (t === 'Dona Avelina = Parte 1') return 1;
-    if (t === 'Dona Avelina - Final') return 2;
+    if (t === 'Dona Avelina - Final') return 1;
+    if (t === 'Dona Avelina = Parte 1') return 2;
     return 0;
   };
   const byTitle = (a, b) => {
@@ -361,10 +361,9 @@
         dialog.classList.add('rdc-fullscreen');
         button.title = 'Sair da tela cheia';
         button.setAttribute('aria-label',button.title); button.setAttribute('aria-pressed','true');
-        // Fullscreen the document, not a modal dialog (dialogs are in the top layer).
         if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
           try { await document.documentElement.requestFullscreen(); owned = true; }
-          catch (_) { owned = false; } // Remain full-viewport on unsupported devices.
+          catch (_) { owned = false; }
         }
       });
       dialog.addEventListener('close', () => { if (active === dialog) void leave(); });
