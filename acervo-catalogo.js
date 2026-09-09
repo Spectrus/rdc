@@ -461,3 +461,40 @@
   }).observe(document.body, {childList:true});
   Array.from(document.body.children).forEach(schedule);
 })();
+
+/* Responsive default: mobile opens in Listagem; desktop opens in Grade. */
+(() => {
+  let applied = false;
+  let attempts = 0;
+  function applyResponsiveDefault() {
+    if (applied) return;
+    const acervo = document.getElementById('acervo');
+    if (!acervo) {
+      if (++attempts < 30) setTimeout(applyResponsiveDefault, 100);
+      return;
+    }
+    const mobile = window.matchMedia('(max-width: 768px), (hover: none) and (pointer: coarse)').matches;
+    const wanted = mobile ? 'lista' : 'sinopses';
+    const button = acervo.querySelector('.view-mode-button[data-view="' + wanted + '"]');
+    if (typeof window.setAcervoViewMode === 'function') {
+      window.setAcervoViewMode(wanted);
+      applied = true;
+      return;
+    }
+    if (button) {
+      button.click();
+      applied = true;
+      return;
+    }
+    acervo.classList.toggle('view-list', mobile);
+    acervo.querySelectorAll('.view-mode-button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-view') === wanted);
+    });
+    applied = true;
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyResponsiveDefault, { once: true });
+  } else {
+    applyResponsiveDefault();
+  }
+})();
