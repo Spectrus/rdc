@@ -7652,7 +7652,7 @@ function openVideo(videoId, isProtected) {
                 const fgColor = primary.trim();
                 notification.style.cssText = `
                     position: fixed;
-                    top: 20px;
+                    top: 76px;
                     right: 20px;
                     background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(0,0,0,0.06)), ${fgColor};
                     color: ${bgColor};
@@ -8891,13 +8891,14 @@ function openVideo(videoId, isProtected) {
         document.addEventListener('DOMContentLoaded', async function() {
             editSystem.loadUserMemories();
             try {
-              // Notify recent additions (últimas 48h)
+              // Show each recent-additions notice automatically once per device.
               if (typeof window.firebaseLoadMemories === 'function') {
                 const all = await window.firebaseLoadMemories();
                 const now = Date.now();
+                const noticeWindow = 72*60*60*1000;
                 const recent = (all || []).filter(m => {
                   const ts = m.timestamp ? Date.parse(m.timestamp) : 0;
-                  return ts && (now - ts) <= 48*60*60*1000;
+                  return m.avisarLista !== false && ts && (now - ts) <= noticeWindow;
                 });
                 if (recent.length) {
                   const lines = recent.map(m => {
@@ -8906,7 +8907,69 @@ function openVideo(videoId, isProtected) {
                     const y = m.year || '';
                     return `\n• ${t} — ${a} (${y})`;
                   }).join('');
-                  editSystem.showNotification(`Novas Adições:${lines}`, 'info');
+                  const noticeMessage = `Novas Adições:${lines}`;
+                  const noticeIds = recent.map(m => String(m.id || m.code || `${m.title}|${m.timestamp}`));
+                  const seenKey = 'rdc-recent-additions-seen-v1';
+                  let seen = [];
+                  try {
+                    const stored = JSON.parse(localStorage.getItem(seenKey) || '[]');
+                    if (Array.isArray(stored)) seen = stored.map(String);
+                  } catch (_) {}
+
+                  const bellStyle = document.createElement('style');
+                  bellStyle.textContent = `
+                    #rdc-notification-bell {
+                      position: fixed; top: 18px; right: 20px; z-index: 1000002;
+                      width: 46px; height: 46px; display: grid; place-items: center;
+                      border: 1px solid color-mix(in srgb, var(--gold-color) 65%, transparent);
+                      border-radius: 50%; color: var(--gold-color); background: var(--primary-color);
+                      box-shadow: 0 8px 24px rgba(0,0,0,.22); cursor: pointer;
+                      font-size: 1.3rem; transition: transform .25s ease, filter .25s ease;
+                    }
+                    #rdc-notification-bell:hover { transform: scale(1.07); filter: brightness(1.12); }
+                    #rdc-notification-bell.rdc-ring { animation: rdcBellRing .55s ease; }
+                    #rdc-notification-bell .rdc-notification-dot {
+                      position: absolute; top: 3px; right: 3px; width: 10px; height: 10px;
+                      border: 2px solid var(--primary-color); border-radius: 50%; background: #d4b45f;
+                    }
+                    @keyframes rdcBellRing {
+                      0%,100% { transform: rotate(0); } 25% { transform: rotate(12deg); }
+                      50% { transform: rotate(-10deg); } 75% { transform: rotate(6deg); }
+                    }
+                    @media (max-width: 768px) {
+                      #rdc-notification-bell { top: 15px; right: 15px; }
+                    }
+                  `;
+                  document.head.appendChild(bellStyle);
+
+                  const bell = document.createElement('button');
+                  bell.id = 'rdc-notification-bell';
+                  bell.type = 'button';
+                  bell.title = 'Ver novidades';
+                  bell.setAttribute('aria-label', 'Ver novidades das últimas 72 horas');
+                  const bellIcon = document.createElement('span');
+                  bellIcon.setAttribute('aria-hidden', 'true');
+                  bellIcon.textContent = '🔔';
+                  const bellDot = document.createElement('span');
+                  bellDot.className = 'rdc-notification-dot';
+                  bellDot.setAttribute('aria-hidden', 'true');
+                  bell.append(bellIcon, bellDot);
+                  document.body.appendChild(bell);
+
+                  const replayNotice = () => editSystem.showNotification(noticeMessage, 'info');
+                  bell.addEventListener('click', () => {
+                    bell.classList.remove('rdc-ring');
+                    void bell.offsetWidth;
+                    bell.classList.add('rdc-ring');
+                    replayNotice();
+                  });
+
+                  if (noticeIds.some(id => !seen.includes(id))) {
+                    replayNotice();
+                    try {
+                      localStorage.setItem(seenKey, JSON.stringify(Array.from(new Set([...seen, ...noticeIds]))));
+                    } catch (_) {}
+                  }
                 }
               }
             } catch(_) {}
