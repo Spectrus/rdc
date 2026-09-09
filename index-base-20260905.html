@@ -4129,22 +4129,22 @@ video-synopsis {
                         </div>
                     </div>
                     
-                    <!-- 2010 - Dona Avelina = Parte 1 -->
+                    <!-- 2010 - Dona Avelina - Parte 1 -->
                     <div class="timeline-item-horizontal" style="animation-delay: 4.1s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2010</div>
-                            <div class="timeline-text-horizontal">Dona Avelina = Parte 1</div>
+                            <div class="timeline-text-horizontal">Dona Avelina - Parte 1</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Vídeo</div>
                             <a href="https://www.youtube.com/watch?v=GglxnXBYs5E" class="timeline-button-horizontal">Ver vídeo</a>
                         </div>
                     </div>
                     
-                    <!-- 2010 - Dona Avelina - Final -->
+                    <!-- 2010 - Dona Avelina - Parte 2 -->
                     <div class="timeline-item-horizontal" style="animation-delay: 4.2s;">
                         <div class="timeline-content-horizontal">
                             <div class="timeline-year-horizontal">2010</div>
-                            <div class="timeline-text-horizontal">Dona Avelina - Final</div>
+                            <div class="timeline-text-horizontal">Dona Avelina - Parte 2</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Vídeo</div>
                             <a href="https://www.youtube.com/watch?v=Hdb-hTM03ds" class="timeline-button-horizontal">Ver vídeo</a>
@@ -5161,7 +5161,7 @@ video-synopsis {
               sinopse: "Na grande mesa de nossa sala de jantar comemoramos a data festiva. Cenas do irmão Augusto Álvaro."
           },
     {
-        titulo: "Dona Avelina = Parte 1",
+        titulo: "Dona Avelina - Parte 1",
         id: "GglxnXBYs5E",
         protegido: false,
         codigo: "110",
@@ -5171,7 +5171,7 @@ video-synopsis {
         sinopse: "Professora Avelina conversa na sala de sua casa, contando um pouco de momentos e aventuras vividas."
     },
     {
-        titulo: "Dona Avelina - Final",
+        titulo: "Dona Avelina - Parte 2",
         id: "Hdb-hTM03ds",
         protegido: false,
         codigo: "111",
@@ -8897,7 +8897,7 @@ function openVideo(videoId, isProtected) {
                 const now = Date.now();
                 const recent = (all || []).filter(m => {
                   const ts = m.timestamp ? Date.parse(m.timestamp) : 0;
-                  return m.avisarLista !== false && ts && (now - ts) <= 48*60*60*1000;
+                  return ts && (now - ts) <= 48*60*60*1000;
                 });
                 if (recent.length) {
                   const lines = recent.map(m => {
@@ -10270,7 +10270,6 @@ function openVideo(videoId, isProtected) {
             type: d.tipo,
             link: window.bibliotecaPdfUrl(d.url),
             code: d.codigo || 0,
-            avisarLista: d.avisarLista !== false,
             timestamp: d.createdAt?.toDate?.()?.toISOString?.() || ''
           });
         });

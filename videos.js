@@ -49,13 +49,13 @@ const videos = [
         codigo: "108"
     },
     {
-        titulo: "Dona Avelina = Parte 1",
+        titulo: "Dona Avelina - Parte 1",
         id: "GglxnXBYs5E",
         protegido: true,
         codigo: "109"
     },
     {
-        titulo: "Dona Avelina - Final",
+        titulo: "Dona Avelina - Parte 2",
         id: "Hdb-hTM03ds",
         protegido: true,
         codigo: "110"

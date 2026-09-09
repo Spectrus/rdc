@@ -9,8 +9,8 @@
   const cinema = card => title(card) === 'Cine Regina' && original(card) === '100';
   const avelinaRank = card => {
     const t = title(card);
-    if (t === 'Dona Avelina - Final') return 1;
-    if (t === 'Dona Avelina = Parte 1') return 2;
+    if (t === 'Dona Avelina - Parte 1') return 1;
+    if (t === 'Dona Avelina - Parte 2') return 2;
     return 0;
   };
   const byTitle = (a, b) => {
