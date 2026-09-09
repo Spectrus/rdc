@@ -5794,6 +5794,16 @@ document.addEventListener('DOMContentLoaded', function() {
           window.setAcervoViewMode = setViewMode;
           window.clearAcervoListDetail = clearListDetail;
 
+          // Use the viewport default on entry and whenever the device breakpoint changes.
+          const mobileAcervo = window.matchMedia('(max-width: 768px)');
+          const syncViewportView = () => setViewMode(mobileAcervo.matches ? 'lista' : 'sinopses');
+          syncViewportView();
+          if (mobileAcervo.addEventListener) {
+            mobileAcervo.addEventListener('change', syncViewportView);
+          } else {
+            mobileAcervo.addListener(syncViewportView);
+          }
+
           viewModeButtons.forEach(button => {
             button.addEventListener('click', function(e) {
               e.preventDefault();
@@ -7972,11 +7982,11 @@ function openVideo(videoId, isProtected) {
                         if (n > 0) {
                             cloudOk = true;
                         } else if (typeof window.firebaseSaveMemory === 'function') {
-                            await window.firebaseSaveMemory({ ...updated, code });
+                            await window.firebaseSaveMemory({ ...updated, code, avisarLista: false });
                             cloudOk = true;
                         }
                     } else if (code && typeof window.firebaseSaveMemory === 'function') {
-                        await window.firebaseSaveMemory({ ...updated, code });
+                        await window.firebaseSaveMemory({ ...updated, code, avisarLista: false });
                         cloudOk = true;
                     }
                 } catch (e) {
@@ -10232,6 +10242,7 @@ function openVideo(videoId, isProtected) {
               sinopse: sinopse,
               tipo: fields.type,
               url: fields.link || "",
+              avisarLista: false,
               updatedAt: serverTimestamp()
             };
             if (Number.isFinite(ano)) patch.ano = ano;
@@ -10271,7 +10282,7 @@ function openVideo(videoId, isProtected) {
         snap.forEach((docSnap) => {
           const d = docSnap.data();
           if (Number(d.codigo) === Number(oldCode)) {
-            updates.push(updateDoc(docSnap.ref, { codigo: Number(newCode), updatedAt: serverTimestamp() }));
+            updates.push(updateDoc(docSnap.ref, { codigo: Number(newCode), avisarLista: false, updatedAt: serverTimestamp() }));
           }
         });
         await Promise.all(updates);
@@ -10290,6 +10301,7 @@ function openVideo(videoId, isProtected) {
           sinopse: sinopse,
           tipo: fields.type,
           url: fields.link || "",
+          avisarLista: false,
           updatedAt: serverTimestamp()
         };
         if (Number.isFinite(ano)) patch.ano = ano;
