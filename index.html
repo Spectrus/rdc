@@ -612,7 +612,7 @@
       const title = dialog.querySelector('h2');
       const grip = dialog.querySelector('#rdc-video-resize');
       const clamp = (n,min,max) => Math.max(min,Math.min(n,max));
-      let box = {x:0,y:0,w:0,h:0}, gesture = null;
+      let box = {x:0,y:0,w:0,h:0}, gesture = null, documentMode = false;
       function position(x,y,w,h){
         const vw = win.innerWidth, vh = win.innerHeight;
         box.w = clamp(w,Math.min(320,vw-16),vw-16);
@@ -622,8 +622,8 @@
         Object.assign(dialog.style,{left:box.x+'px',top:box.y+'px',width:box.w+'px',height:box.h+'px'});
       }
       function resetSize(){
-        const w = Math.min(1000,win.innerWidth-32,(win.innerHeight-96)*16/9);
-        const h = w*9/16+66;
+        const w = documentMode ? Math.min(1100,win.innerWidth-16) : Math.min(1000,win.innerWidth-32,(win.innerHeight-96)*16/9);
+        const h = documentMode ? win.innerHeight-24 : w*9/16+66;
         position((win.innerWidth-w)/2,(win.innerHeight-h)/2,w,h);
       }
       function scaleSize(factor){
@@ -685,10 +685,15 @@
         const card = link.closest('.document-card');
         const type = card?.querySelector('.document-type')?.textContent.trim() || '';
         const isVideo = card && (card.classList.contains('video-card') || card.querySelector('.video-thumbnail') || /^(mídia|midia|vídeo|video)$/i.test(type));
-        if(!isVideo && !(link.matches('.timeline-button-horizontal') && /vídeo/i.test(link.textContent))) return;
+        if(!card && !link.matches('.timeline-button-horizontal')) return;
+        if(link.hasAttribute('download') || link.getAttribute('href').startsWith('#')) return;
         let url;
         try { url = new URL(link.href,win.location.href); } catch (_) { return; }
-        if(url.protocol !== 'https:') return;
+        if(!['https:','http:'].includes(url.protocol)) return;
+        let pathname;
+        try { pathname = decodeURIComponent(url.pathname); } catch (_) { pathname = url.pathname; }
+        const isPDF = /\.pdf$/i.test(pathname);
+        const isOffice = /\.(docx?|xlsx?|pptx?|odt|ods|odp|rtf)$/i.test(pathname);
         let preview, provider;
         if(url.hostname === 'drive.google.com'){
           const id = url.pathname.match(/^\/file\/d\/([\w-]+)/)?.[1] || url.searchParams.get('id');
@@ -705,12 +710,26 @@
           preview.searchParams.set('autoplay','1');
           preview.searchParams.set('rel','0');
           provider = 'YouTube';
+        } else if(url.hostname === 'docs.google.com' && /^\/(document|spreadsheets|presentation)\/d\//.test(url.pathname)){
+          preview = new URL(url.href);
+          preview.pathname = preview.pathname.replace(/\/(edit|view|copy)(\/.*)?$/, '/preview');
+          preview.hash = '';
+          provider = 'Google Docs';
+        } else if(isOffice){
+          preview = new URL('https://view.officeapps.live.com/op/embed.aspx');
+          preview.searchParams.set('src',url.href);
+          provider = 'Documento';
+        } else if(isPDF || /\.(txt|csv)$/i.test(pathname)){
+          preview = new URL(url.href);
+          provider = isPDF ? 'PDF' : 'Documento';
         } else return;
+        documentMode = provider !== 'YouTube' && !isVideo && !/vídeo/i.test(link.textContent);
+        dialog.querySelector('#rdc-video-close').setAttribute('aria-label',documentMode ? 'Fechar documento' : 'Fechar vídeo');
         event.preventDefault();event.stopImmediatePropagation();
         trigger = link;
         title.textContent = cardTitle(card)
           || link.closest('.timeline-item-horizontal')?.querySelector('.timeline-text-horizontal,h3')?.textContent
-          || 'Vídeo da Biblioteca';
+          || (documentMode ? 'Documento da Biblioteca' : 'Vídeo da Biblioteca');
         const player = doc.createElement('iframe');
         player.title = title.textContent + ' — ' + provider;
         player.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
