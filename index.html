@@ -735,6 +735,30 @@
       },true);
     }
 
+    function posicionarVoltarListaMobile(doc, win){
+      const button = doc.getElementById('list-back-button');
+      const acervo = doc.getElementById('acervo');
+      if (!button || !acervo) return;
+      const originalPosition = doc.createComment('list-back-button desktop position');
+      button.before(originalPosition);
+      const mobile = win.matchMedia('(max-width: 768px)');
+      const sync = () => {
+        if (mobile.matches) {
+          const grids = acervo.querySelectorAll('.documents-grid');
+          const lastGrid = grids[grids.length - 1];
+          if (lastGrid) lastGrid.after(button);
+        } else {
+          originalPosition.after(button);
+        }
+      };
+      const style = doc.createElement('style');
+      style.textContent = '@media(max-width:768px){#acervo.view-list.list-detail-open #list-back-button{margin:1rem 0 1.25rem}}';
+      doc.head.append(style);
+      sync();
+      if (mobile.addEventListener) mobile.addEventListener('change', sync);
+      else mobile.addListener(sync);
+    }
+
     frame.addEventListener('load', async function(){
       let doc, win;
       try { doc = frame.contentDocument; win = frame.contentWindow; } catch (_) { return; }
@@ -742,6 +766,7 @@
       document.title = doc.title || document.title;
       for (let i=0; i<40 && !injetar(doc); i++) await sleep(150);
       instalarSinopses(doc, win);
+      posicionarVoltarListaMobile(doc, win);
       // Temporarily disabled on the public library; keep implementation for reactivation.
       const librarianVisibility = doc.createElement('style');
       librarianVisibility.textContent = 'a[href*="bibliotecario"],#rdc-librarian,#vizDock{display:none!important}';
