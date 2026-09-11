@@ -10,7 +10,7 @@
   </style>
 </head>
 <body>
-  <iframe id="site" title="Biblioteca Digital" allow="fullscreen; autoplay; identity-credentials-get" allowfullscreen src="index-base-20260905.html?v=ea2b715a"></iframe>
+  <iframe id="site" title="Biblioteca Digital" allow="fullscreen; autoplay; identity-credentials-get" allowfullscreen src="index-base-20260905.html?v=identity-fix-20260911"></iframe>
   <script>
   (function(){
     const itens = [
@@ -60,19 +60,7 @@
     }
 
     function corrigirGalo(doc){
-      doc.querySelectorAll('.document-author,.timeline-author-horizontal').forEach(author=>{
-        if (/^rdc$/i.test(author.textContent.trim())) author.textContent='Reinaldo Duarte Castanheira';
-      });
-      doc.querySelectorAll('.document-card').forEach(card => {
-        const link = card.querySelector('a[href]')?.getAttribute('href') || '';
-        if (cardTitle(card) !== 'Galo de Briga – versão já OK' && !link.includes('1MvVnk8HCNt88x1JbnDvW2wt9O7jHKC3D')) return;
-        const code = card.querySelector('.document-code');
-        const title = card.querySelector('h3');
-        const synopsis = card.querySelector(':scope > p, :scope > .video-synopsis');
-        if (code && code.textContent.trim() === '370') code.textContent = '350';
-        if (title && title.textContent === 'Galo de Briga – versão já OK') title.textContent = 'Galo de Briga';
-        // Keep the editor's saved synopsis.
-      });
+      // Saved content is authoritative; no automatic author/title/code corrections.
     }
 
     function criarCard(doc, item){
@@ -96,10 +84,10 @@
     function deduplicar(doc){
       corrigirGalo(doc);
       // These two PDFs contain the same work; retain the final version (350).
-      doc.querySelectorAll('.document-card,.timeline-item-horizontal').forEach(card => {
+      doc.querySelectorAll('.document-card:not([data-cloud-id]),.timeline-item-horizontal:not([data-cloud-id])').forEach(card => {
         if (Array.from(card.querySelectorAll('a[href]')).some(a => a.getAttribute('href').includes('1MRkTEXCj6sKRCtYvMkmG4tXBq83fQf5K'))) card.remove();
       });
-      const galos = Array.from(doc.querySelectorAll('.document-card')).filter(c => cardCode(c) === '350');
+      const galos = Array.from(doc.querySelectorAll('.document-card')).filter(c => !c.dataset.cloudId && cardCode(c) === '350');
       const keeper = galos.find(c => c.dataset.cloudId) || galos[0];
       galos.forEach(c => { if (c !== keeper) c.remove(); });
       doc.querySelectorAll('.document-card').forEach(card => {
@@ -116,6 +104,7 @@
       });
       const cardsByCode = new Map();
       doc.querySelectorAll('.document-card').forEach(card => {
+        if (card.dataset.cloudId) return;
         const code = cardCode(card);
         if (!cardsByCode.has(code)) cardsByCode.set(code, []);
         cardsByCode.get(code).push(card);
@@ -155,7 +144,7 @@
       if (typeof win.firebaseLoadMemories !== 'function' || typeof win.firebaseSaveMemory !== 'function') return;
       try { if (win.waitForFirebaseAuth) await win.waitForFirebaseAuth; } catch (_) {}
       let existentes = [];
-      try { existentes = await win.firebaseLoadMemories(); } catch (_) { existentes = []; }
+      try { existentes = await win.firebaseLoadMemories(); } catch (_) { return; }
       const porCodigo = new Map(existentes.map(x => [String(x.code || ''), x]));
       for (const item of itens) {
         const fields = { title:item.title, author:item.author, year:item.year, type:item.type, description:item.description, sinopse:item.description, link:item.link };
@@ -798,3 +787,4 @@
   </script>
 </body>
 </html>
+
