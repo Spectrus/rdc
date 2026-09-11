@@ -5,6 +5,7 @@
     // PDF editions used by static cards and entries loaded from Firebase.
     window.bibliotecaPdfUrl = function (value) {
       const urls = {
+        "14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6": "https://drive.google.com/file/d/1eY3gBlfMF7m0kcI0pqgFV5XI4pN0I99p/view",
         "1POhhP9mG8ExGzmO-07OY3R-TFj-UTkUa": "/pdfs/drive-1POhhP9mG8ExGzmO-07OY3R-TFj-UTkUa.pdf",
         "1DujHUHIWimep6EIRjEzrc8cudFOi8niW": "/pdfs/drive-1DujHUHIWimep6EIRjEzrc8cudFOi8niW.pdf",
 "1_gcJJiAr5xrvUdaePJzvjlzDzMpHThR5": "/pdfs/drive-1_gcJJiAr5xrvUdaePJzvjlzDzMpHThR5.pdf",
@@ -4015,7 +4016,7 @@ video-synopsis {
                             <div class="timeline-text-horizontal">Felipe 2007 Vila da Criança</div>
                             <div class="timeline-author-horizontal">Reinaldo Duarte Castanheira</div>
                             <div class="timeline-tag-horizontal">Mídia</div>
-                            <a href="https://drive.google.com/file/d/14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6/view?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
+                            <a href="https://drive.google.com/file/d/1eY3gBlfMF7m0kcI0pqgFV5XI4pN0I99p/view?usp=sharing" class="timeline-button-horizontal">Ver obra</a>
                         </div>
                     </div>
                     
@@ -5538,7 +5539,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 ano: "2007",
                 descricao: "Documentário sobre as atividades de Felipe na Vila da Criança em 2007, registrando momentos importantes de sua infância.",
                 tipo: "Mídia",
-                link: "https://drive.google.com/file/d/14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6/view?usp=sharing",
+                link: "https://drive.google.com/file/d/1eY3gBlfMF7m0kcI0pqgFV5XI4pN0I99p/view?usp=sharing",
                 capa: "Capa-5.jpg"
             },
             {
@@ -11462,7 +11463,7 @@ function openVideo(videoId, isProtected) {
             title:  card.querySelector('h3')?.textContent?.trim(),
             author: card.querySelector('.document-author')?.textContent?.trim(),
             type:   card.querySelector('.document-type')?.textContent?.trim(),
-            link:   (card.querySelector('.read-button')?.getAttribute('href') || '#').trim()
+            link:   (card.querySelector('.read-button[href], .video-thumbnail a[href], .media-thumbnail-container a[href]')?.getAttribute('href') || '#').trim()
           });
         });
         return list;
