@@ -7887,13 +7887,21 @@ function openVideo(videoId, isProtected) {
                 }
             }
 
-            syncTimelineTitle(card, title) {
+            syncTimelineTitle(card, title, fields) {
                 const link = card.querySelector('a.read-button, .video-thumbnail a[href]')?.getAttribute('href');
                 if (!link) return;
                 document.querySelectorAll('.timeline-item-horizontal').forEach(item => {
-                    if (Array.from(item.querySelectorAll('a[href]')).some(a => a.getAttribute('href') === link)) {
+                    if (card.dataset.cloudId && item.dataset.cloudId ? item.dataset.cloudId === card.dataset.cloudId : Array.from(item.querySelectorAll('a[href]')).some(a => a.getAttribute('href') === link)) {
                         const label = item.querySelector('.timeline-text-horizontal');
                         if (label && label.textContent !== title) label.textContent = title;
+                        if (fields) {
+                            for (const [selector, value] of [['.timeline-author-horizontal', fields.autor ?? fields.author], ['.timeline-year-horizontal', fields.ano ?? fields.year], ['.timeline-tag-horizontal', fields.tipo ?? fields.type]]) {
+                                const el = item.querySelector(selector); if (el && value != null) el.textContent = value;
+                            }
+                            const a = item.querySelector('a[href]');
+                            if (a) a.setAttribute('href', fields.url ?? fields.link ?? '');
+                            if (fields.id) item.dataset.cloudId = fields.id;
+                        }
                     }
                 });
             }
@@ -7943,10 +7951,40 @@ function openVideo(videoId, isProtected) {
                     this.showNotification('❌ Preencha o título e a sinopse!', 'error');
                     return;
                 }
+                let cloudOk = false;
+                try {
+                    if (typeof window.ensureFirebaseAuth === 'function') {
+                        await window.ensureFirebaseAuth();
+                    } else if (window.waitForFirebaseAuth && typeof window.waitForFirebaseAuth.then === 'function') {
+                        await window.waitForFirebaseAuth;
+                    }
+                    if (id && window.firebaseUpdateFieldsById) {
+                        await window.firebaseUpdateFieldsById(id, updated);
+                        cloudOk = true;
+                    } else if (code && typeof window.firebaseUpdateByCode === 'function') {
+                        const n = await window.firebaseUpdateByCode(code, updated);
+                        if (n > 0) {
+                            cloudOk = true;
+                        } else if (typeof window.firebaseSaveMemory === 'function') {
+                            form.dataset.editingId = await window.firebaseSaveMemory({ ...updated, code, avisarLista: false });
+                            cloudOk = true;
+                        }
+                    } else if (code && typeof window.firebaseSaveMemory === 'function') {
+                        form.dataset.editingId = await window.firebaseSaveMemory({ ...updated, code, avisarLista: false });
+                        cloudOk = true;
+                    }
+                } catch (e) {
+                    console.error('[conteudos] Falha ao atualizar no Firebase:', e);
+                    this._lastCloudError = this.firebaseErrorText(e);
+                }
+                if (!cloudOk) {
+                    this.showNotification('❌ Não foi possível atualizar no Firebase: ' + (this._lastCloudError || 'erro desconhecido'), 'error');
+                    return;
+                }
                 // Update in DOM
                 const target = id ? document.querySelector(`.document-card[data-cloud-id="${id}"]`) : Array.from(document.querySelectorAll('.document-card')).find(el => (el.querySelector('.document-code')?.textContent||'').trim() === String(code));
                 if (target) {
-                    this.syncTimelineTitle(target, updated.title);
+                    this.syncTimelineTitle(target, updated.title, updated);
                     target.querySelector('h3').textContent = updated.title;
                     const aEl = target.querySelector('a.read-button');
                     if (aEl) aEl.setAttribute('href', updated.link);
@@ -7963,37 +8001,11 @@ function openVideo(videoId, isProtected) {
                     let saved = JSON.parse(localStorage.getItem('userMemories') || '[]');
                     saved = saved.map(m => {
                         const c = parseInt(String(m.code).trim(), 10);
-                        if (c === code) return { ...m, ...updated };
+                        if (id ? m.id === id : c === code) return { ...m, ...updated };
                         return m;
                     });
                     localStorage.setItem('userMemories', JSON.stringify(saved));
                 } catch {}
-                let cloudOk = false;
-                try {
-                    if (typeof window.ensureFirebaseAuth === 'function') {
-                        await window.ensureFirebaseAuth();
-                    } else if (window.waitForFirebaseAuth && typeof window.waitForFirebaseAuth.then === 'function') {
-                        await window.waitForFirebaseAuth;
-                    }
-                    if (id && window.firebaseUpdateFieldsById) {
-                        await window.firebaseUpdateFieldsById(id, updated);
-                        cloudOk = true;
-                    } else if (code && typeof window.firebaseUpdateByCode === 'function') {
-                        const n = await window.firebaseUpdateByCode(code, updated);
-                        if (n > 0) {
-                            cloudOk = true;
-                        } else if (typeof window.firebaseSaveMemory === 'function') {
-                            await window.firebaseSaveMemory({ ...updated, code, avisarLista: false });
-                            cloudOk = true;
-                        }
-                    } else if (code && typeof window.firebaseSaveMemory === 'function') {
-                        await window.firebaseSaveMemory({ ...updated, code, avisarLista: false });
-                        cloudOk = true;
-                    }
-                } catch (e) {
-                    console.error('[conteudos] Falha ao atualizar no Firebase:', e);
-                    this._lastCloudError = this.firebaseErrorText(e);
-                }
                 this.hideAddMemoryModal();
                 if (cloudOk) {
                     this.showNotification('✏️ Memória atualizada no Firebase.', 'success');
@@ -8119,7 +8131,13 @@ function openVideo(videoId, isProtected) {
                         return false;
                     }
                     const id = await window.firebaseSaveMemory(memory);
-                    if (id) memory.cloudId = id;
+                    if (id) {
+                        memory.id = id;
+                        memory.cloudId = id;
+                        const saved = JSON.parse(localStorage.getItem('userMemories') || '[]');
+                        const index = saved.findIndex(m => m.timestamp === memory.timestamp && m.code === memory.code);
+                        if (index >= 0) { saved[index] = { ...saved[index], id }; localStorage.setItem('userMemories', JSON.stringify(saved)); }
+                    }
                     return true;
                 } catch (e) {
                     this._lastCloudError = this.firebaseErrorText(e);
@@ -8138,28 +8156,28 @@ function openVideo(videoId, isProtected) {
                 this.renderedCloudIds.clear();
                 if (!Array.isArray(cards)) cards = [];
                 const normalize = (t) => this.normalizeType(t);
-                // Avoid duplicating user-added cards already in DOM by code
-                const existingUserCodes = new Set(Array.from(document.querySelectorAll('.document-card:not(.cloud-card) .document-code'))
-                    .map(el => parseInt(String(el.textContent).trim(), 10))
-                    .filter(code => !Number.isNaN(code))
-                );
+                const existingCards = Array.from(document.querySelectorAll('.document-card:not(.cloud-card)'));
+                const counts = new Map();
+                cards.forEach(c => {
+                    const code = String(c.codigo ?? c.code ?? '');
+                    counts.set(code, (counts.get(code) || 0) + 1);
+                });
                 const makeCard = (c) => {
                     const card = document.createElement('div');
                     card.className = 'document-card cloud-card';
                     if (c.id) card.setAttribute('data-cloud-id', c.id);
                     const type = normalize(c.tipo ?? c.type);
                     const code = c.codigo ?? c.code ?? '';
-                    card.innerHTML = `
-                        <div class="document-code">${code}</div>
-                        <h3>${c.titulo ?? c.title ?? ''}</h3>
-                        <div class="document-author">${c.autor ?? c.author ?? ''}</div>
-                        <div class="document-year">${c.ano ?? c.year ?? ''}</div>
-                        <p>${c.sinopse ?? c.descricao ?? c.description ?? ''}</p>
-                        <div class="document-footer">
-                            <span class="document-type">${type}</span>
-                            <a href="${window.bibliotecaPdfUrl(c.url ?? c.link ?? '#')}" class="read-button" target="_blank">${this.getButtonText(type)}</a>
-                        </div>
-                    `;
+                    card.innerHTML = '<div class="document-code"></div><h3></h3><div class="document-author"></div><div class="document-year"></div><p></p><div class="document-footer"><span class="document-type"></span><a class="read-button" target="_blank" rel="noopener noreferrer"></a></div>';
+                    card.querySelector('a').textContent = this.getButtonText(type);
+                    // Assign saved values as text/attributes, never as markup.
+                    card.querySelector('.document-code').textContent = code;
+                    card.querySelector('h3').textContent = c.titulo ?? c.title ?? '';
+                    card.querySelector('.document-author').textContent = c.autor ?? c.author ?? '';
+                    card.querySelector('.document-year').textContent = c.ano ?? c.year ?? '';
+                    card.querySelector('p').textContent = c.sinopse ?? c.descricao ?? c.description ?? '';
+                    card.querySelector('.document-type').textContent = type;
+                    card.querySelector('a').setAttribute('href', c.url ?? c.link ?? '');
                     // floating oval edit button in top-right
                     const fab = document.createElement('button');
                     fab.className = 'edit-card-btn';
@@ -8171,20 +8189,18 @@ function openVideo(videoId, isProtected) {
                 };
                 // Adiciona inicialmente ao hidden; filtros/ordenação ajustarão a posição
                 cards.forEach(c => {
-                    const codeNum = parseInt(String(c.codigo ?? c.code ?? 0), 10) || 0;
-                    if (existingUserCodes.has(codeNum)) {
-                        document.querySelectorAll('.document-card:not(.cloud-card)').forEach(card => {
-                            if (Number(card.querySelector('.document-code')?.textContent) !== codeNum) return;
-                            if (c.id) card.dataset.cloudId = c.id;
-                            const title = card.querySelector('h3');
-                            if (title) { title.textContent = c.titulo ?? c.title ?? title.textContent; this.syncTimelineTitle(card, title.textContent); }
-                            let synopsis = card.querySelector(':scope > p, :scope > .video-synopsis');
-                            if (!synopsis) { synopsis = document.createElement('p'); card.append(synopsis); }
-                            synopsis.textContent = c.sinopse ?? c.descricao ?? c.description ?? '';
-                        });
+                    const code = String(c.codigo ?? c.code ?? '');
+                    // Cloud identity wins; a legacy code can bind only one unbound card.
+                    const existing = existingCards.find(card => c.id && card.dataset.cloudId === c.id)
+                        || (counts.get(code) === 1 && existingCards.find(card => !card.dataset.cloudId &&
+                            card.querySelector('.document-code')?.textContent.trim() === code));
+                    const card = makeCard(c);
+                    if (existing) {
+                        this.syncTimelineTitle(existing, c.titulo ?? c.title ?? '', c);
+                        existing.replaceWith(card);
+                        existingCards.splice(existingCards.indexOf(existing), 1);
                         return;
                     }
-                    const card = makeCard(c);
                     hidden.appendChild(card);
                 });
                 this.reapplyActiveFilterIfAny();
@@ -8268,7 +8284,7 @@ function openVideo(videoId, isProtected) {
                 if (!container) return;
                 // Prevent duplicate insertion if a card with same code already exists
                 const existing = Array.from(document.querySelectorAll('.document-card .document-code'))
-                    .find(el => el.textContent.trim() === String(memory.code));
+                    .find(el => memory.id ? el.closest('.document-card').dataset.cloudId === memory.id : el.textContent.trim() === String(memory.code));
                 if (existing) return;
 
                 const memoryCard = this.createMemoryCard(memory);
@@ -8287,6 +8303,7 @@ function openVideo(videoId, isProtected) {
             createMemoryCard(memory) {
                 const card = document.createElement('div');
                 card.className = 'document-card user-added';
+                if (memory.id) card.dataset.cloudId = memory.id;
                 const normalizedType = this.normalizeType(memory.type);
                 card.innerHTML = `
                     <div class="document-code">${memory.code}</div>
@@ -8477,8 +8494,9 @@ function openVideo(videoId, isProtected) {
                 // Merge by unique code to avoid duplicates
                 const byCode = new Map();
                 [...cloudMemories, ...localMemories].forEach(m => {
-                    const c = parseInt(String(m.codigo ?? m.code ?? 0), 10) || 0;
-                    if (!byCode.has(c)) byCode.set(c, m);
+                    const key = m.id ? 'id:' + m.id : 'local:' + String(m.code ?? m.codigo);
+                    if (!m.id && cloudMemories.some(c => String(c.code) === String(m.code))) return;
+                    if (!byCode.has(key)) byCode.set(key, m);
                 });
                 const merged = Array.from(byCode.values());
                 merged.forEach(memory => {
@@ -9629,7 +9647,7 @@ function openVideo(videoId, isProtected) {
       // ===== Import Firebase SDKs =====
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
       import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithCredential, linkWithCredential } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-      import { getFirestore, collection, addDoc, getDocs, serverTimestamp, doc, getDoc, setDoc, onSnapshot, updateDoc, deleteDoc, increment, query, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+      import { getFirestore, collection, addDoc, getDocs, serverTimestamp, doc, getDoc, setDoc, onSnapshot, updateDoc, deleteDoc, increment, query, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
     
       let catalogSyncTimer;
       window.firebaseSyncTitleCatalog = function (items) {
@@ -10331,6 +10349,8 @@ function openVideo(videoId, isProtected) {
       window.firebaseUpdateByCode = async (code, fields) => {
         await window.ensureFirebaseAuth();
         const snap = await getDocs(collection(db, "conteudos"));
+        const matches = snap.docs.filter(item => Number(item.data().codigo) === Number(code));
+        if (matches.length > 1) throw new Error('Código duplicado. Abra o registro pelo seu card para editar com segurança.');
         const updates = [];
         const sinopse = fields.sinopse || fields.description || '';
         const ano = Number(fields.year);
@@ -10365,11 +10385,11 @@ function openVideo(videoId, isProtected) {
             id: docSnap.id,
             title: d.titulo,
             year: d.ano,
-            author: /^rdc$/i.test(String(d.autor || '').trim()) ? 'Reinaldo Duarte Castanheira' : d.autor,
+            author: d.autor,
             description: sinopse,
             sinopse: sinopse,
             type: d.tipo,
-            link: window.bibliotecaPdfUrl(d.url),
+            link: d.url,
             code: d.codigo || 0,
             timestamp: d.createdAt?.toDate?.()?.toISOString?.() || ''
           });
@@ -10483,12 +10503,19 @@ function openVideo(videoId, isProtected) {
       window.firebaseNextCode = async () => {
         await window.ensureFirebaseAuth();
         const ref = doc(db, 'counters', 'codes');
-        await setDoc(ref, { last: 330, updatedAt: serverTimestamp() }, { merge: true });
-        const snap = await getDoc(ref);
-        const last = (snap.exists() && typeof snap.data().last === 'number') ? snap.data().last : 330;
-        const next = last + 1;
-        await setDoc(ref, { last: next, updatedAt: serverTimestamp() }, { merge: true });
-        return next;
+        const contents = await getDocs(collection(db, 'conteudos'));
+        let floor = 330;
+        contents.forEach(item => { floor = Math.max(floor, Number(item.data().codigo) || 0); });
+        document.querySelectorAll('.document-code').forEach(el => {
+          floor = Math.max(floor, Number(el.textContent.trim()) || 0);
+        });
+        return runTransaction(db, async transaction => {
+          const snap = await transaction.get(ref);
+          const last = snap.exists() ? Number(snap.data().last) || 0 : 0;
+          const next = Math.max(floor, last) + 1;
+          transaction.set(ref, { last: next, updatedAt: serverTimestamp() }, { merge: true });
+          return next;
+        });
       };
       startCardsFeed();
     
@@ -12700,3 +12727,4 @@ function openVideo(videoId, isProtected) {
 
 </body>
 </html>
+
