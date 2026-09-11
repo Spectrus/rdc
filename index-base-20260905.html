@@ -11681,6 +11681,7 @@ function openVideo(videoId, isProtected) {
         scrubber.addEventListener('blur', endScrubbing);
 
         scroller.addEventListener('pointerdown', (e) => {
+          moved = false; // A new tap must not inherit the previous drag.
           if (e.target.closest('a, button, input, select, textarea, .timeline-scrubber')) return;
           isPointerDown = true;
           moved = false;
