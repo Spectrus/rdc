@@ -10,7 +10,7 @@
   </style>
 </head>
 <body>
-  <iframe id="site" title="Biblioteca Digital" allow="fullscreen; autoplay; identity-credentials-get" allowfullscreen src="index-base-20260905.html?v=mobile-docs-20260911"></iframe>
+  <iframe id="site" title="Biblioteca Digital" allow="fullscreen; autoplay; identity-credentials-get" allowfullscreen src="index-base-20260905.html?v=timeline-links-20260911"></iframe>
   <script>
   (function(){
     const itens = [
@@ -81,7 +81,41 @@
       return card;
     }
 
+
+    // Keep timeline URLs aligned with current Acervo cards, including late cloud updates.
+    function sincronizarLinksLinhaDoTempo(doc) {
+      const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+      const usable = value => !!value && !String(value).trim().startsWith('#') && !/^javascript:/i.test(value);
+      const repaired = value => {
+        const raw = String(value || '').trim().replace('14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6', '1eY3gBlfMF7m0kcI0pqgFV5XI4pN0I99p');
+        return doc.defaultView.bibliotecaPdfUrl ? doc.defaultView.bibliotecaPdfUrl(raw) : raw;
+      };
+      const byId = new Map(), byTitle = new Map();
+      doc.querySelectorAll('.document-card').forEach(card => {
+        const links = [...card.querySelectorAll('a.read-button[href],.video-thumbnail a[href],.media-thumbnail-container a[href]')];
+        const source = links.find(a => usable(a.getAttribute('href')));
+        if (!source) return;
+        const href = repaired(source.getAttribute('href'));
+        links.forEach(a => {
+          if (a.getAttribute('href')?.includes('14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6')) a.setAttribute('href', href);
+        });
+        const record = {href, card};
+        if (card.dataset.cloudId) byId.set(card.dataset.cloudId, record);
+        const key = normalize(cardTitle(card)) + '|' + normalize(card.querySelector('.document-year')?.textContent);
+        if (!byTitle.has(key) || card.dataset.cloudId) byTitle.set(key, record);
+      });
+      doc.querySelectorAll('.timeline-item-horizontal').forEach(item => {
+        const key = normalize(item.querySelector('.timeline-text-horizontal')?.textContent) + '|' + normalize(item.querySelector('.timeline-year-horizontal')?.textContent);
+        const record = (item.dataset.cloudId && byId.get(item.dataset.cloudId)) || byTitle.get(key);
+        const link = item.querySelector('a.timeline-button-horizontal');
+        if (!link) return;
+        const href = record?.href || repaired(link.getAttribute('href'));
+        if (usable(href) && link.getAttribute('href') !== href) link.setAttribute('href', href);
+      });
+    }
+
     function deduplicar(doc){
+      sincronizarLinksLinhaDoTempo(doc);
       corrigirGalo(doc);
       // These two PDFs contain the same work; retain the final version (350).
       doc.querySelectorAll('.document-card:not([data-cloud-id]),.timeline-item-horizontal:not([data-cloud-id])').forEach(card => {
@@ -688,7 +722,7 @@
         if(!card && !link.matches('.timeline-button-horizontal')) return;
         if(link.hasAttribute('download') || link.getAttribute('href').startsWith('#')) return;
         let url;
-        try { url = new URL(link.href,win.location.href); } catch (_) { return; }
+        try { sincronizarLinksLinhaDoTempo(doc); url = new URL(link.href,win.location.href); } catch (_) { return; }
         if(!['https:','http:'].includes(url.protocol)) return;
         // These five legacy timeline links incorrectly wrapped known YouTube IDs as Drive IDs.
         const legacyFumecIds = {
@@ -817,7 +851,7 @@
         normalizePending = true;
         win.requestAnimationFrame(() => { normalizePending = false; deduplicar(doc); });
       });
-      try { obs.observe(doc.documentElement, {childList:true, subtree:true}); } catch (_) {}
+      try { obs.observe(doc.documentElement, {childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:['href']}); } catch (_) {}
       sincronizarFirebase(win).then(() => {
         setTimeout(() => { try { deduplicar(doc); } catch (_) {} }, 1200);
       });
