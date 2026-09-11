@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Demo imobiliária — navegação contínua</title>
+  <meta name="description" content="Protótipo de visita imobiliária fotorealista com navegação contínua.">
+  <style>
+    :root{color-scheme:dark;--ink:#f4f7f7;--muted:#b9c4c8;--glass:rgba(11,18,20,.88);--accent:#d6b56b}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:#071013;font:16px/1.45 Inter,Segoe UI,Arial,sans-serif;color:var(--ink);overflow:hidden}
+    #scene{position:fixed;inset:0;width:100%;height:100%;border:0;background:#071013}
+    .top{position:fixed;z-index:3;left:18px;top:18px;display:flex;align-items:center;gap:12px;max-width:calc(100% - 36px)}
+    .badge{background:var(--glass);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:11px 14px;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+    h1{font-size:16px;margin:0;font-weight:650}.sub{font-size:13px;color:var(--muted);margin-top:2px}
+    .help{position:fixed;z-index:3;left:18px;bottom:18px;background:var(--glass);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:12px 14px;max-width:min(610px,calc(100% - 36px));box-shadow:0 12px 30px rgba(0,0,0,.25)}
+    .help strong{color:var(--accent)} kbd{font:600 13px/1 Inter,Segoe UI,sans-serif;background:#eef2f2;color:#111;padding:4px 7px;border-radius:6px;margin:0 2px}
+    .open{position:fixed;z-index:4;right:18px;top:18px;color:#121718;background:var(--accent);text-decoration:none;font-weight:700;padding:12px 15px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.3)}
+    .credit{display:block;color:#89979c;font-size:11px;margin-top:7px}
+    @media(max-width:700px){.top{right:18px}.badge{padding:9px 11px}.sub{display:none}.open{top:auto;right:18px;bottom:18px}.help{right:18px;bottom:76px;font-size:13px}}
+  </style>
+</head>
+<body>
+  <iframe id="scene" title="Ambiente 3D fotorealista" src="https://superspl.at/s?id=44c73147" allow="fullscreen; xr-spatial-tracking" allowfullscreen></iframe>
+  <div class="top">
+    <div class="badge">
+      <h1>Demo imobiliária · ambiente fotorealista</h1>
+      <div class="sub">Movimento contínuo dentro de um espaço capturado</div>
+    </div>
+  </div>
+  <a class="open" href="https://superspl.at/s?id=44c73147" target="_blank" rel="noopener">Abrir em tela cheia</a>
+  <div class="help">
+    Clique dentro do ambiente. Pressione <kbd>3</kbd> para caminhar e <kbd>G</kbd> para controle livre.
+    Use <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> e o mouse. Não há saltos entre fotografias.
+    <span class="credit">Cena “African Developer bedroom”, por jindantesparda — CC BY 4.0. Visualizador SuperSplat.</span>
+  </div>
+</body>
+</html>
