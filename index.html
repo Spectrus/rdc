@@ -10,7 +10,7 @@
   </style>
 </head>
 <body>
-  <iframe id="site" title="Biblioteca Digital" allow="fullscreen; autoplay; identity-credentials-get" allowfullscreen src="index-base-20260905.html?v=identity-fix-20260911"></iframe>
+  <iframe id="site" title="Biblioteca Digital" allow="fullscreen; autoplay; identity-credentials-get" allowfullscreen src="index-base-20260905.html?v=mobile-docs-20260911"></iframe>
   <script>
   (function(){
     const itens = [
@@ -721,6 +721,12 @@
           provider = 'Documento';
         } else if(isPDF || /\.(txt|csv)$/i.test(pathname)){
           preview = new URL(url.href);
+          // Mobile browsers do not consistently render PDFs inside an iframe.
+          if(isPDF && win.matchMedia('(max-width: 768px), (pointer: coarse)').matches){
+            preview = new URL('https://docs.google.com/gview');
+            preview.searchParams.set('embedded','true');
+            preview.searchParams.set('url',url.href);
+          }
           provider = isPDF ? 'PDF' : 'Documento';
         } else return;
         documentMode = provider !== 'YouTube' && !isVideo && !/vídeo/i.test(link.textContent);
