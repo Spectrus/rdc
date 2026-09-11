@@ -690,6 +690,20 @@
         let url;
         try { url = new URL(link.href,win.location.href); } catch (_) { return; }
         if(!['https:','http:'].includes(url.protocol)) return;
+        // These five legacy timeline links incorrectly wrapped known YouTube IDs as Drive IDs.
+        const legacyFumecIds = {
+          '1pyTHG4CRWG8':'pyTHG4CRWG8',
+          '18uweco9C2F8':'8uweco9C2F8',
+          '1kAlTIJZTq1c':'kAlTIJZTq1c',
+          '1QiJlTOvM4bU':'QiJlTOvM4bU',
+          '1TBsjIp2XWjA':'TBsjIp2XWjA'
+        };
+        const legacyDriveId = url.hostname === 'drive.google.com'
+          ? (url.pathname.match(/^\/file\/d\/([\w-]+)/)?.[1] || url.searchParams.get('id')) : null;
+        if(legacyFumecIds[legacyDriveId]){
+          url = new URL('https://www.youtube.com/watch?v=' + legacyFumecIds[legacyDriveId]);
+        }
+
         let pathname;
         try { pathname = decodeURIComponent(url.pathname); } catch (_) { pathname = url.pathname; }
         const isPDF = /\.pdf$/i.test(pathname);
