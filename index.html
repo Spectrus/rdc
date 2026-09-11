@@ -94,8 +94,12 @@
       doc.querySelectorAll('.document-card').forEach(card => {
         const links = [...card.querySelectorAll('a.read-button[href],.video-thumbnail a[href],.media-thumbnail-container a[href]')];
         const source = links.find(a => usable(a.getAttribute('href')));
-        if (!source) return;
-        const href = repaired(source.getAttribute('href'));
+        const isFelipe = normalize(cardTitle(card)) === 'felipe 2007 vila da crianca';
+        const fallback = card.querySelector('a.read-button');
+        if (!source && isFelipe && fallback) fallback.setAttribute('href', 'https://drive.google.com/file/d/1eY3gBlfMF7m0kcI0pqgFV5XI4pN0I99p/view');
+        const action = source || (isFelipe ? fallback : null);
+        if (!action) return;
+        const href = repaired(action.getAttribute('href'));
         links.forEach(a => {
           if (a.getAttribute('href')?.includes('14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6')) a.setAttribute('href', href);
         });
@@ -716,6 +720,7 @@
         if(event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
         const link = event.target.closest('a[href]');
         if(!link || dialog.contains(link)) return;
+        sincronizarLinksLinhaDoTempo(doc);
         const card = link.closest('.document-card');
         const type = card?.querySelector('.document-type')?.textContent.trim() || '';
         const isVideo = card && (card.classList.contains('video-card') || card.querySelector('.video-thumbnail') || /^(mídia|midia|vídeo|video)$/i.test(type));
