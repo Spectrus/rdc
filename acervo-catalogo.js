@@ -30,6 +30,8 @@
     observer?.disconnect();
     const all = [...section.querySelectorAll('.document-card')];
     const identity = card => {
+      if (card.dataset.cloudId) return 'cloud:' + card.dataset.cloudId;
+      if (card.classList.contains('user-added')) return null;
       const raw = card.querySelector('a.read-button,.video-thumbnail a,a.timeline-button-horizontal')?.getAttribute('href');
       if (!raw || raw === '#') return null;
       try {
@@ -122,6 +124,7 @@
       if (sorted.some((e,i) => e !== current[i])) sorted.forEach(e => grid.appendChild(e));
     }
     section.querySelectorAll('a[href]').forEach(a => {
+      if (a.closest('[data-cloud-id],.user-added')) return;
       const value = a.getAttribute('href');
       const pdf = window.bibliotecaPdfUrl(value);
       if (pdf !== value) a.setAttribute('href', pdf);
@@ -498,3 +501,4 @@
     applyResponsiveDefault();
   }
 })();
+
