@@ -1,23 +1,19 @@
 type Point = readonly [number, number];
 
-// Conservative outer movement envelope based on the creator's indoor landmarks.
-// This is an exterior guard, not a mesh for collision with internal walls.
-const perimeter: Point[] = [
-    [-9.1, 1.15], [-0.7, 1.15], [-0.7, 2.1], [0.4, 2.1],
-    [0.4, 0.1], [8.5, 0.1], [8.5, -4.2], [13.8, -4.2],
-    [13.8, -10.4], [7.8, -10.4], [7.8, -11.7], [0, -11.7],
-    [0, -8.5], [-9.1, -8.5]
-];
+import grid from './collision-map.json';
 
+// Scan-derived occupancy, with 16 cm clearance from wall/furniture samples.
+// The connected floor region also closes gaps in the source's exterior capture.
 export function inside([x, z]: Point): boolean {
     if (!Number.isFinite(x) || !Number.isFinite(z)) return false;
-    let result = false;
-    for (let i = 0, j = perimeter.length - 1; i < perimeter.length; j = i++) {
-        const [ax, az] = perimeter[i];
-        const [bx, bz] = perimeter[j];
-        if ((az > z) !== (bz > z) && x < (bx - ax) * (z - az) / (bz - az) + ax) result = !result;
+    const col = Math.floor((x - grid.origin[0]) / grid.resolution);
+    const row = Math.floor((z - grid.origin[1]) / grid.resolution);
+    if (row < 0 || row >= grid.height || col < 0 || col >= grid.width) return false;
+    const spans = grid.rows[row];
+    for (let i = 0; i < spans.length; i += 2) {
+        if (col >= spans[i] && col < spans[i + 1]) return true;
     }
-    return result;
+    return false;
 }
 
 export function constrainStep(from: Point, to: Point): [number, number] {

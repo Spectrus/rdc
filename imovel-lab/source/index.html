@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
+        <link rel="preconnect" href="https://d28zzqy0iyovbz.cloudfront.net" crossorigin />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>RDC | Real Home Lab</title>
         <style>
@@ -24,16 +25,20 @@
     </head>
     <body>
         <header class="brand"><span>RDC / SPACES</span><h1>A real home.<br>A new perspective.</h1><p>Photographic reconstruction · New Jersey</p></header>
-        <nav class="toolbar" aria-label="View options"><button id="reset-view">Return to entrance</button><button id="walk-view">Explore at eye level</button><button id="fullscreen">Fullscreen</button></nav>
-        <div class="scene-note" id="scene-note">Interior exploration · Outer boundary enabled</div>
+        <nav class="toolbar" aria-label="View options"><button id="reset-view">Return to entrance</button><button id="walk-view">Reset eye level</button><label class="quality-label">Detail <select id="quality" aria-label="Rendering quality"><option value="light">Light</option><option value="high" selected>High</option><option value="ultra">Ultra</option></select></label><button id="fullscreen">Fullscreen</button></nav>
+        <div class="scene-note" id="scene-note">Interior exploration · Wall and furniture guard enabled</div>
         <footer class="credit">Home Scan by <a href="https://superspl.at/scene/3f89bbd3" target="_blank" rel="noopener">Isaiah Sweeney</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> · No ceilings in source capture</footer>
-        <div class="touch-move" aria-label="Movement"><button data-key="KeyW" aria-label="Move forward">↑</button><div><button data-key="KeyA" aria-label="Move left">←</button><button data-key="KeyS" aria-label="Move backward">↓</button><button data-key="KeyD" aria-label="Move right">→</button></div></div>
+        <div id="joystick" aria-label="Drag to move"><span id="joystick-thumb"></span><small>MOVE</small></div>
+        <span class="touch-look">Drag the view to look</span>
+        <output id="render-status" aria-live="off">Preparing the home</output>
         <canvas id="app"></canvas>
+        <img id="home-preview" src="/src/home-preview.webp" alt="Preview of the Home Scan by Isaiah Sweeney" />
         <div id="loader" role="status" aria-live="polite">
             <div class="loader-mark" aria-hidden="true"></div>
             <div class="loader-copy">
-                <div class="loader-title">Loading splat</div>
+                <div class="loader-title">Step inside</div>
                 <div id="loader-message" class="loader-message">Preparing scene...</div>
+                <button id="retry" hidden>Retry loading</button>
                 <div class="loader-progress" aria-hidden="true">
                     <div id="loader-progress-bar"></div>
                 </div>

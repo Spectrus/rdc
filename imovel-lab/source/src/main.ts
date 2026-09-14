@@ -61,18 +61,33 @@ const setLoadingState = (message: string, progress?: number, failed = false) => 
     }
 };
 
+let sceneReady = false;
 const hideLoader = () => {
+    sceneReady = true;
+    document.body.dataset.ready = 'true';
     if (loader) {
         loader.dataset.hidden = 'true';
     }
 };
 
+const mobile = matchMedia('(pointer: coarse)').matches;
+const qualitySelect = document.querySelector<HTMLSelectElement>('#quality')!;
+const status = document.querySelector<HTMLOutputElement>('#render-status')!;
+const retry = document.querySelector<HTMLButtonElement>('#retry')!;
+retry.addEventListener('click', () => location.reload());
+window.addEventListener('unhandledrejection', () => {
+    if (!sceneReady) {
+        setLoadingState('The 3D view could not start. Check your connection and graphics acceleration, then retry.', 1, true);
+        retry.hidden = false;
+    }
+});
 const device = await createGraphicsDevice(canvas, {
     deviceTypes: [DEVICETYPE_WEBGPU],
 
     // Gaussian splats do not benefit from antialiasing and it is expensive.
     antialias: false
 }).catch((error: unknown) => {
+    retry.hidden = false;
     setLoadingState('Graphics initialization failed. Try a recent Chrome or Edge with hardware acceleration enabled.', 1, true);
     throw error;
 });
@@ -89,10 +104,62 @@ app.init(createOptions);
 app.setCanvasFillMode(FILLMODE_FILL_WINDOW);
 app.setCanvasResolution(RESOLUTION_AUTO);
 app.start();
+let splatEntity: Entity | null = null;
+const profiles = {
+    light: { budget: 750_000, pixels: 1, minLod: 2 },
+    high: { budget: 3_000_000, pixels: 1.5, minLod: 0 },
+    ultra: { budget: 6_000_000, pixels: 2, minLod: 0 }
+};
+type Profile = keyof typeof profiles;
+let quality = mobile ? 'light' : 'high';
+try { quality = localStorage.getItem('rdc-quality') || quality; } catch { /* storage may be unavailable */ }
+if (!(quality in profiles)) quality = mobile ? 'light' : 'high';
+const applyQuality = () => {
+    const profile = profiles[quality as Profile];
+    device.maxPixelRatio = Math.min(window.devicePixelRatio || 1, profile.pixels);
+    // Start coarse, then refine after the first drawable frame.
+    app.scene.gsplat.splatBudget = sceneReady ? profile.budget : 600_000;
+    app.scene.gsplat.lodUnderfillLimit = 5;
+    app.scene.gsplat.lodUpdateDistance = 0.25;
+    app.scene.gsplat.lodUpdateAngle = 15;
+    app.scene.gsplat.lodBehindPenalty = 2;
+    if (splatEntity?.gsplat) splatEntity.gsplat.lodRangeMin = profile.minLod;
+    qualitySelect.value = quality;
+    status.textContent = sceneReady ? `${qualitySelect.selectedOptions[0].textContent} · Refining detail` : 'Preparing the home';
+    app.resizeCanvas();
+};
+qualitySelect.addEventListener('change', () => {
+    quality = qualitySelect.value;
+    try { localStorage.setItem('rdc-quality', quality); } catch { /* optional preference */ }
+    applyQuality();
+});
+applyQuality();
+let frameCount = 0;
+app.on('frameend', () => {
+    if (!sceneReady && app.stats.frame.gsplats > 0 && ++frameCount >= 2) {
+        hideLoader();
+        applyQuality();
+    }
+});
+let elapsed = 0;
+app.on('update', (dt: number) => {
+    elapsed += dt;
+    if (elapsed < 1) return;
+    elapsed = 0;
+    if (sceneReady) status.textContent = `${qualitySelect.selectedOptions[0].textContent} · ${Math.round(app.stats.frame.fps)} fps`;
+});
+setTimeout(() => {
+    if (!sceneReady) {
+        setLoadingState('Still loading the home. A slow connection or unavailable graphics acceleration may delay the view.', undefined);
+        retry.hidden = false;
+    }
+}, 30000);
 
 const camera = new Entity('Camera');
 camera.addComponent('camera', {
     clearColor: new Color(0.02, 0.025, 0.035),
+    nearClip: 0.05,
+    farClip: 100,
     fov: DEFAULT_FOV
 });
 app.root.addChild(camera);
@@ -318,6 +385,7 @@ canvas.addEventListener(
 );
 
 window.addEventListener('keydown', (event) => {
+    if (event.target instanceof HTMLElement && event.target.closest('button, select, input, a')) return;
     if (event.metaKey || event.altKey) {
         return;
     }
@@ -341,6 +409,8 @@ window.addEventListener('keyup', (event) => {
 window.addEventListener('blur', () => {
     pressedKeys.clear();
     isControlKeyDown = false;
+    flyVelocity.set(0, 0, 0);
+    stickX = stickY = 0;
 });
 
 const resize = () => app.resizeCanvas();
@@ -354,15 +424,16 @@ if (!CAMERA_POSE || !applyCameraPose(CAMERA_POSE)) {
 }
 
 app.on('update', (dt) => {
+    if (!sceneReady) return;
     dt = Math.min(dt, 0.05);
     desiredMove.set(0, 0, 0);
 
     const strafe =
-        Number(pressedKeys.has('KeyD') || pressedKeys.has('ArrowRight')) -
+        stickX + Number(pressedKeys.has('KeyD') || pressedKeys.has('ArrowRight')) -
         Number(pressedKeys.has('KeyA') || pressedKeys.has('ArrowLeft'));
     const lift = walking ? 0 : Number(pressedKeys.has('KeyE')) - Number(pressedKeys.has('KeyQ'));
     const advance =
-        Number(pressedKeys.has('KeyW') || pressedKeys.has('ArrowUp')) -
+        -stickY + Number(pressedKeys.has('KeyW') || pressedKeys.has('ArrowUp')) -
         Number(pressedKeys.has('KeyS') || pressedKeys.has('ArrowDown'));
 
     if (strafe !== 0 || lift !== 0 || advance !== 0) {
@@ -379,7 +450,7 @@ app.on('update', (dt) => {
                       ? 0.25
                       : 1;
 
-            desiredMove.normalize().mulScalar((walking ? 1.5 : MOVE_SPEED) * speedMultiplier);
+            desiredMove.normalize().mulScalar((walking ? 1.5 : MOVE_SPEED) * speedMultiplier * Math.min(1, Math.hypot(strafe, advance)));
         }
     }
 
@@ -415,6 +486,8 @@ splatAsset.on('load', () => {
     splat.addComponent('gsplat', {
         asset: splatAsset
     });
+    splatEntity = splat;
+    applyQuality();
     app.root.addChild(splat);
 
     const resource = splatAsset.resource as { aabb?: BoundingBox } | null;
@@ -428,7 +501,7 @@ splatAsset.on('load', () => {
     if (!CAMERA_POSE || !applyCameraPose(CAMERA_POSE)) {
         frameSplat(splat, aabb);
     }
-    hideLoader();
+    setLoadingState('Streaming the first view…', 0.3);
 });
 
 splatAsset.on('progress', (received: number, length: number) => {
@@ -440,7 +513,8 @@ splatAsset.on('progress', (received: number, length: number) => {
 
 splatAsset.on('error', (error: unknown) => {
     console.error(error);
-    setLoadingState('Failed to load splat.', 1, true);
+    setLoadingState('The home could not be downloaded. Check your connection and retry.', 1, true);
+    retry.hidden = false;
 });
 
 app.assets.add(splatAsset);
@@ -451,14 +525,14 @@ document.querySelector('#reset-view')?.addEventListener('click', () => {
     flyVelocity.set(0, 0, 0);
     pressedKeys.clear();
     if (CAMERA_POSE) applyCameraPose(CAMERA_POSE);
-    document.querySelector('#scene-note')!.textContent = 'Interior exploration · Outer boundary enabled';
+    document.querySelector('#scene-note')!.textContent = 'Interior exploration · Wall and furniture guard enabled';
 });
 document.querySelector('#walk-view')?.addEventListener('click', () => {
     walking = true;
     flyVelocity.set(0, 0, 0);
     pressedKeys.clear();
     applyCameraPose(CAMERA_POSE);
-    document.querySelector('#scene-note')!.textContent = 'Drag to look · WASD to move · Outer boundary enabled';
+    document.querySelector('#scene-note')!.textContent = 'Drag to look · WASD to move · Wall and furniture guard enabled';
 });
 document.querySelector('#fullscreen')?.addEventListener('click', async () => {
     try {
@@ -476,4 +550,46 @@ document.querySelectorAll<HTMLButtonElement>('[data-key]').forEach(button => {
     button.addEventListener('pointerup', release);
     button.addEventListener('pointercancel', release);
     button.addEventListener('lostpointercapture', release);
+});
+
+// Independent pointer capture allows left-thumb movement and right-thumb look.
+let stickX = 0, stickY = 0;
+const joystick = document.querySelector<HTMLDivElement>('#joystick')!;
+const thumb = document.querySelector<HTMLSpanElement>('#joystick-thumb')!;
+let stickPointer: number | null = null;
+const updateStick = (event: PointerEvent) => {
+    const rect = joystick.getBoundingClientRect();
+    const dx = event.clientX - rect.left - rect.width / 2;
+    const dy = event.clientY - rect.top - rect.height / 2;
+    const radius = rect.width * 0.32;
+    const length = Math.hypot(dx, dy);
+    const scale = Math.min(1, radius / Math.max(1, length));
+    stickX = length < 7 ? 0 : dx * scale / radius;
+    stickY = length < 7 ? 0 : dy * scale / radius;
+    thumb.style.transform = `translate(${stickX * radius}px, ${stickY * radius}px)`;
+};
+joystick.addEventListener('pointerdown', event => {
+    if (stickPointer !== null) return;
+    event.preventDefault();
+    stickPointer = event.pointerId;
+    joystick.setPointerCapture(event.pointerId);
+    updateStick(event);
+});
+joystick.addEventListener('pointermove', event => {
+    if (event.pointerId === stickPointer) updateStick(event);
+});
+const releaseStick = (event: PointerEvent) => {
+    if (event.pointerId !== stickPointer) return;
+    stickPointer = null;
+    stickX = stickY = 0;
+    thumb.style.transform = '';
+};
+for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) joystick.addEventListener(event, releaseStick as EventListener);
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        pressedKeys.clear();
+        flyVelocity.set(0, 0, 0);
+        stickX = stickY = 0;
+        thumb.style.transform = '';
+    }
 });

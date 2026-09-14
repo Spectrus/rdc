@@ -235,3 +235,31 @@ kbd {
         grid-template-columns: 1fr;
     }
 }
+
+.quality-label{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #ffffff30;border-radius:24px;background:#152321ed;font-size:12px}
+#quality{font:inherit;color:#fff;background:#182c26;border:0;border-radius:8px;padding:6px;cursor:pointer}
+#quality:focus-visible{outline:2px solid #b3e4d7}
+#render-status{position:fixed;right:28px;top:88px;font-size:11px;color:#b3e4d7;text-shadow:0 1px 4px #000;pointer-events:none}
+#retry{margin-top:12px;padding:8px 14px;font-size:12px}
+#loader{z-index:5;box-sizing:border-box}
+#joystick,.touch-look{display:none}
+@media(pointer:coarse){
+ #controls{display:none}
+ #joystick{display:grid;place-items:center;position:fixed;z-index:4;left:24px;bottom:145px;width:112px;height:112px;border-radius:50%;border:1px solid #c4eede60;background:#122b2460;touch-action:none;user-select:none;backdrop-filter:blur(8px)}
+ #joystick-thumb{width:42px;height:42px;border-radius:50%;background:#b3e4d799;border:1px solid #e0fff1;pointer-events:none}
+ #joystick small{position:absolute;bottom:-24px;font-size:10px;letter-spacing:2px;color:#ddf5ec}
+ .touch-look{display:block;position:fixed;bottom:205px;right:24px;pointer-events:none;font-size:11px;color:#def2e9;text-shadow:0 1px 4px #000}
+}
+@media(max-width:900px){.brand h1{font-size:28px}.toolbar{gap:5px}.toolbar button{padding:10px;font-size:12px}.brand{top:24px;left:24px}}
+@media(max-width:700px){
+ .toolbar{flex-wrap:wrap;bottom:max(16px,env(safe-area-inset-bottom));gap:6px}
+ #walk-view{display:none}
+ .quality-label{padding:5px 8px;font-size:11px}
+ #render-status{top:145px;left:20px;right:auto;font-size:10px}
+ .scene-note{top:167px;padding:8px 12px}
+ .credit{bottom:83px;max-width:calc(100vw - 40px);font-size:9px}
+ .brand h1{margin:12px 0 8px;font-size:25px}
+}
+@media(max-height:500px){.brand h1,.brand p,.scene-note{display:none}#joystick{bottom:85px;width:90px;height:90px}.credit{bottom:10px;left:auto;right:15px}.touch-look{bottom:105px}.toolbar{top:12px;bottom:auto;left:auto}.brand{top:18px}#render-status{top:70px;right:15px;left:auto}}
+
+#home-preview{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;opacity:.45;pointer-events:none}body[data-ready="true"] #home-preview{display:none}.scene-note,.credit,#render-status,#controls{z-index:2}
