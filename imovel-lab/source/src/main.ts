@@ -17,6 +17,7 @@ import {
 import type { BoundingBox } from 'playcanvas';
 
 import './style.css';
+import { constrainStep, lookTarget, inside } from './navigation';
 import type { CameraPose } from './splat-config';
 import { CAMERA_POSE, SPLAT_URL } from './splat-config';
 
@@ -133,6 +134,10 @@ const updateCameraPosition = () => {
 
 const updateCamera = () => {
     updateCameraPosition();
+    const corrected = inside([cameraPosition.x, cameraPosition.z]) ? [cameraPosition.x, cameraPosition.z] : [CAMERA_POSE.position[0], CAMERA_POSE.position[2]];
+    const correction = new Vec3(corrected[0] - cameraPosition.x, CAMERA_POSE.position[1] - cameraPosition.y, corrected[1] - cameraPosition.z);
+    target.add(correction);
+    cameraPosition.add(correction);
     camera.setPosition(cameraPosition);
     camera.lookAt(target);
 };
@@ -173,7 +178,9 @@ const applyCameraPose = (pose: CameraPose) => {
     target.set(pose.target[0], pose.target[1], pose.target[2]);
     yaw = (Math.atan2(dx, dz) * 180) / Math.PI;
     pitch = (Math.asin(Math.max(-1, Math.min(1, dy / poseDistance))) * 180) / Math.PI;
-    distance = poseDistance;
+    distance = 1;
+    const aim = lookTarget(pose.position, yaw, pitch);
+    target.set(...aim);
     fov = pose.fov;
 
     if (camera.camera) {
@@ -347,6 +354,7 @@ if (!CAMERA_POSE || !applyCameraPose(CAMERA_POSE)) {
 }
 
 app.on('update', (dt) => {
+    dt = Math.min(dt, 0.05);
     desiredMove.set(0, 0, 0);
 
     const strafe =
@@ -388,7 +396,10 @@ app.on('update', (dt) => {
     }
 
     move.copy(flyVelocity).mulScalar(dt);
-    target.add(move);
+    updateCameraPosition();
+    const next = constrainStep([cameraPosition.x, cameraPosition.z], [cameraPosition.x + move.x, cameraPosition.z + move.z]);
+    target.x += next[0] - cameraPosition.x;
+    target.z += next[1] - cameraPosition.z;
     updateCamera();
 });
 
@@ -440,14 +451,14 @@ document.querySelector('#reset-view')?.addEventListener('click', () => {
     flyVelocity.set(0, 0, 0);
     pressedKeys.clear();
     if (CAMERA_POSE) applyCameraPose(CAMERA_POSE);
-    document.querySelector('#scene-note')!.textContent = 'Research demo · Free navigation · No wall collisions yet';
+    document.querySelector('#scene-note')!.textContent = 'Interior exploration · Outer boundary enabled';
 });
 document.querySelector('#walk-view')?.addEventListener('click', () => {
     walking = true;
     flyVelocity.set(0, 0, 0);
     pressedKeys.clear();
     applyCameraPose(CAMERA_POSE);
-    document.querySelector('#scene-note')!.textContent = 'Eye-level preview · Drag to look · WASD to move · Walls are not solid yet';
+    document.querySelector('#scene-note')!.textContent = 'Drag to look · WASD to move · Outer boundary enabled';
 });
 document.querySelector('#fullscreen')?.addEventListener('click', async () => {
     try {
