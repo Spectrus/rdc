@@ -4,7 +4,17 @@ Standalone Home Scan walkthrough, published only under `imovel-lab/`. Starts at 
 
 ## Detail and loading
 
-Light: 750,000-splat budget, pixel ratio up to 1, highest two LODs excluded. High: 3 million, pixel ratio up to 1.5. Ultra: 6 million, pixel ratio up to 2. Mobile defaults to Light; desktop to High. Selection is remembered when local storage is available. Resolution never exceeds native device pixel ratio. The scene starts with a 600,000-splat budget and permits coarse LOD fallback, then refines after two frames with rendered splats. The loading preview is the author's actual scene poster, not a replacement reconstruction. Fullscreen requires browser support.
+Auto (default) adapts the splat budget during movement: initially 2.5 million on desktop / 1.5 million on mobile, decreasing if measured movement falls below 32 fps and increasing above 52 fps. When stationary, it refines to 5 million / 3 million respectively. High locks 6 million; Ultra locks 8 million. These are budgets, not guaranteed frame rates. Resolution stays at native CSS pixels or higher (device pixel ratio capped at 2); there is no sub-native resolution scaling. New preferences use rdc-detail-v2 so older fixed presets do not silently disable Auto.
+
+The camera uses a 75-degree field of view, radial splat sorting to avoid repeated CPU sorting during rotation, near-view LOD priority, and a 0.5-pixel culling threshold to retain fine splats. A CameraFrame composition pass applies moderate contrast-adaptive sharpening (0.45), contrast 1.025, saturation 0.96. TAA, depth of field, bloom and chromatic aberration are disabled. Captured softness cannot be recovered through these settings. No CSS backdrop blur is used.
+
+The scene starts with a 650,000-splat budget and permits coarse LOD fallback, refining after two frames with rendered splats. The loading preview is the author's actual scene poster. Movement is fixed at eye level, accelerates and stops smoothly, and applies pointer deltas once per frame. Shift gives a modest faster walking pace.
+
+## Room guide and reconstructed ceiling
+
+A 12-zone approximate room guide uses the creator's room annotations and the scan's layout. Current room and floor-plan position/view direction update as the camera moves. Click a numbered information point or select a room to read details; these actions do not teleport the visitor. The map explicitly does not provide verified measurements. Bedroom labels are neutral.
+
+A separate, toggleable ceiling mesh covers the traced footprint at an assumed 2.55 m height, with warm neutral coloring and baked edge shading. This is an interpretive addition, not recovered scan data or a surveyed ceiling. It is visibly labeled in the room guide. Source furniture and room captures are unchanged.
 
 The full scan streams from its existing public SuperSplat CDN: https://d28zzqy0iyovbz.cloudfront.net/3f89bbd3/v1/lod-meta.json . Its scene metadata is byte-identical to the uploaded ZIP. This deployment depends on that external host; it does not duplicate the 513 MB scan in GitHub. Attribution and CC BY 4.0 terms are in SPLAT-LICENSE.txt and on screen.
 
@@ -16,6 +26,6 @@ Regenerate the map with `python scripts/build-collision.py /path/to/scan`, where
 
 ## Build and validation
 
-`cd source && npm ci && node scripts/test-navigation.cjs && npm run build`
+`cd source && npm ci && npm test && npm run build`
 
-Copy dist contents to imovel-lab/, preserving README, source, and SPLAT-LICENSE.txt; remove superseded built assets. Tests check ten room destinations are connected, blocked wall/furniture locations, exterior/non-finite rejection, 20,000 seeded movement steps, and stationary look direction. TypeScript and production build pass. The available review browser has no WebGL and blocks localhost; GPU rendering and physical mobile-device performance need a supported device for visual verification.
+Copy dist contents to imovel-lab/, preserving README, source, and SPLAT-LICENSE.txt; remove superseded built assets. Tests check ten room destinations are connected, blocked wall/furniture locations, exterior/non-finite rejection, 20,000 seeded movement steps, and stationary look direction. Additional tests verify ceiling coverage above every one of 23,116 walkable cells, map heading, room classification, and adaptive versus fixed detail budgets. TypeScript and production build pass. The available review browser has no WebGL and blocks localhost; GPU rendering and physical mobile-device performance need a supported device for visual verification.

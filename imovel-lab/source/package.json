@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node scripts/test-navigation.cjs && node scripts/test-tour.cjs"
   },
   "dependencies": {
     "playcanvas": "2.22.1"

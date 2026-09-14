@@ -7,3 +7,5 @@ License: CC Attribution (Creative Commons Attribution)
 License URL: http://creativecommons.org/licenses/by/4.0/
 Requirements: Author must be credited. Commercial use is allowed.
 2026-09-14 RDC demo changes: scan-derived 2D collision occupancy map, movement controls, quality profiles, and progressive loading. Scene poster reproduced from the author's public SuperSplat scene. Scan and derived collision data remain credited to Isaiah Sweeney under CC BY 4.0. These changes do not imply endorsement by the creator.
+
+Additional RDC changes: interpretive ceiling mesh, approximate room guide, live orientation map, and rendering adjustments. Ceiling geometry and height are not part of the original capture.
