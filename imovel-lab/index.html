@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>RDC | Real Home Lab</title>
+        <style>
+            html,
+            body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                overflow: hidden;
+                background: #0d0f12;
+            }
+
+            #app {
+                display: block;
+                width: 100%;
+                height: 100%;
+                background: #0d0f12;
+            }
+        </style>
+      <script type="module" crossorigin src="./assets/index-BMawrEy-.js"></script>
+      <link rel="stylesheet" crossorigin href="./assets/index-DTImN_ZX.css">
+    </head>
+    <body>
+        <header class="brand"><span>RDC / SPACES</span><h1>A real home.<br>A new perspective.</h1><p>Photographic reconstruction · New Jersey</p></header>
+        <nav class="toolbar" aria-label="View options"><button id="reset-view">Return to entrance</button><button id="walk-view">Explore at eye level</button><button id="fullscreen">Fullscreen</button></nav>
+        <div class="scene-note" id="scene-note">Research demo · Free navigation · No wall collisions yet</div>
+        <footer class="credit">Home Scan by <a href="https://superspl.at/scene/3f89bbd3" target="_blank" rel="noopener">Isaiah Sweeney</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> · No ceilings in source capture</footer>
+        <div class="touch-move" aria-label="Movement"><button data-key="KeyW" aria-label="Move forward">↑</button><div><button data-key="KeyA" aria-label="Move left">←</button><button data-key="KeyS" aria-label="Move backward">↓</button><button data-key="KeyD" aria-label="Move right">→</button></div></div>
+        <canvas id="app"></canvas>
+        <div id="loader" role="status" aria-live="polite">
+            <div class="loader-mark" aria-hidden="true"></div>
+            <div class="loader-copy">
+                <div class="loader-title">Loading splat</div>
+                <div id="loader-message" class="loader-message">Preparing scene...</div>
+                <div class="loader-progress" aria-hidden="true">
+                    <div id="loader-progress-bar"></div>
+                </div>
+            </div>
+        </div>
+        <div id="controls" aria-label="Navigation controls">
+            <div class="control-primary">
+                <div class="key-grid" aria-hidden="true">
+                    <span></span>
+                    <kbd>W</kbd>
+                    <span></span>
+                    <kbd>A</kbd>
+                    <kbd>S</kbd>
+                    <kbd>D</kbd>
+                </div>
+                <div class="control-primary-copy">
+                    <span class="control-action">Move</span>
+                    <span class="control-detail">WASD or arrows</span>
+                </div>
+            </div>
+            <div class="control-list">
+                <div class="control-row">
+                    <span class="control-shortcut">
+                        <kbd>Q</kbd>
+                        <kbd>E</kbd>
+                    </span>
+                    <span class="control-label">Down / up</span>
+                </div>
+                <div class="control-row">
+                    <span class="control-token">Drag</span>
+                    <span class="control-label">Look around</span>
+                </div>
+                <div class="control-row">
+                    <span class="control-token">Right drag</span>
+                    <span class="control-label">Pan</span>
+                </div>
+                <div class="control-row">
+                    <span class="control-token">Wheel</span>
+                    <span class="control-label">Zoom</span>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

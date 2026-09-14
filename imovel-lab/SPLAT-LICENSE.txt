@@ -1,0 +1,8 @@
+This license applies to the included splat asset files in public/splat.
+
+Title: Home Scan (Creation process in description)
+Author: Isaiah Sweeney (https://superspl.at/user/luxury_scans)
+Source: https://superspl.at/scene/3f89bbd3
+License: CC Attribution (Creative Commons Attribution)
+License URL: http://creativecommons.org/licenses/by/4.0/
+Requirements: Author must be credited. Commercial use is allowed.
