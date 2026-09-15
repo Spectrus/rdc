@@ -1,0 +1,12 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Villa Alpina · RDC Spaces</title>  <script type="module" crossorigin src="./assets/index-DR54puLs.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-NhjDScfZ.css">
+</head><body>
+<canvas id="view" tabindex="0" aria-label="Passeio 3D. WASD ou setas para caminhar, arraste para olhar."></canvas>
+<header><p>RDC / SPACES</p><h1>Villa Alpina</h1><span>Uma casa. Dois níveis. Um percurso.</span></header>
+<nav aria-label="Controles"><button id="entrance">Voltar à entrada</button><button id="map-toggle" aria-expanded="true">Planta</button><button id="photo-toggle" hidden>Fotos de referência</button><button id="fullscreen">Tela cheia</button></nav>
+<div class="location"><span id="floor-label">Piso principal</span><strong id="room-label">Entrada principal</strong><span id="stair-label"></span></div>
+<aside id="map-panel"><div class="map-head"><span>SEU PERCURSO</span><button id="map-close" aria-label="Fechar planta">×</button></div><svg id="map" viewBox="-2 -2 60 22" role="img" aria-label="Planta aproximada e posição do visitante"></svg><div class="legend"><i></i> Você <span class="stair-key">▰</span> Escada</div><p>As portas estão abertas. Caminhe pela escada para mudar de piso.</p><div id="destination"></div><button id="route-stair">Mostrar caminho até a escada</button></aside>
+<div id="photo-panel" hidden><button id="photo-close" aria-label="Fechar foto">×</button><img id="reference" alt="Foto original do ambiente"><p id="photo-caption"></p><small>Foto original fornecida · referência da reconstrução</small></div>
+<div id="loading"><div><span>VILLA ALPINA</span><h2>Entre. Explore.</h2><p id="loading-message">Preparando o percurso pela casa…</p><button id="retry" hidden>Recarregar</button></div></div>
+<div id="joystick" aria-label="Arraste para caminhar"><b></b></div><div class="look-hint">Arraste para olhar</div>
+<footer><span>W A S D / setas · Caminhar &nbsp; Arrastar · Olhar &nbsp; Shift · Acelerar</span><small>Modelo 3D guiado pelas plantas e fotos. Medidas, mobiliário e áreas sem registro são aproximados.</small></footer></body></html>

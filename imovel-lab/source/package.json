@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "node scripts/test-navigation.cjs && node scripts/test-tour.cjs"
+    "test": "node scripts/test-navigation.cjs && node scripts/test-tour.cjs",
+    "build:villa": "tsc --noEmit && vite build --config vite.villa.config.ts",
+    "test:villa": "node scripts/test-villa.cjs"
   },
   "dependencies": {
     "playcanvas": "2.22.1"
