@@ -1,4 +1,4 @@
-import { AppBase, AppOptions, Asset, CameraComponentSystem, CameraFrame, Color, DEVICETYPE_WEBGPU, Entity, FILLMODE_FILL_WINDOW, GSplatComponentSystem, GSplatHandler, RenderComponentSystem, RESOLUTION_AUTO, TextureHandler, Vec3, createGraphicsDevice } from 'playcanvas';
+import { AppBase, AppOptions, Asset, CameraComponentSystem, CameraFrame, Color, DEVICETYPE_WEBGPU, Entity, FILLMODE_FILL_WINDOW, GSplatComponentSystem, GSplatHandler, GSPLATDATA_COMPACT, GSPLATDATA_LARGE, RenderComponentSystem, RESOLUTION_AUTO, TextureHandler, Vec3, createGraphicsDevice } from 'playcanvas';
 import './style.css';
 import { constrainStep, lookTarget } from './navigation';
 import { CAMERA_POSE, SPLAT_URL } from './splat-config';
@@ -49,6 +49,13 @@ app.scene.gsplat.lodUpdateDistance=.4;
 app.scene.gsplat.lodUpdateAngle=20;
 app.scene.gsplat.minPixelSize=.5;
 app.scene.gsplat.minContribution=1;
+const applyPrecision=()=>{
+ const ultra=detail.mode==='ultra';
+ app.scene.gsplat.dataFormat=detail.mode==='auto'?GSPLATDATA_COMPACT:GSPLATDATA_LARGE;
+ app.scene.gsplat.minPixelSize=ultra?.25:.5;
+ app.scene.gsplat.minContribution=ultra?.5:1;
+};
+applyPrecision();
 // Radial sorting avoids a full CPU re-sort every time the viewer turns their head.
 app.scene.gsplat.radialSorting=true;
 const camera=new Entity('Camera');camera.addComponent('camera',{clearColor:new Color(.19,.20,.19),nearClip:.04,farClip:70,fov:75});app.root.addChild(camera);
@@ -63,6 +70,7 @@ const ceiling=addCeiling(app);
 ceilingToggle.addEventListener('change',()=>{ceiling.enabled=ceilingToggle.checked;});
 qualitySelect.addEventListener('change',()=>{
  detail.mode=qualitySelect.value as QualityMode;
+ applyPrecision();
  try{localStorage.setItem('rdc-detail-v2',detail.mode);}catch{}
  qualitySelect.blur();
 });

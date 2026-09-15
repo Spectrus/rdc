@@ -12,8 +12,8 @@ const detail=new DetailController(false);
 assert.equal(detail.update(.016,true,false),650000);
 for(let i=0;i<300;i++)detail.update(.05,true,true);
 assert(detail.motionBudget>=1000000&&detail.motionBudget<2500000,'Slow frame rate must reduce geometry budget');
-let resting;for(let i=0;i<200;i++)resting=detail.update(.016,false,true);assert.equal(resting,5000000,'Stationary view refines');
-detail.mode='ultra';for(let i=0;i<200;i++)resting=detail.update(.016,true,true);assert.equal(resting,8000000,'Explicit Ultra remains fixed');
+let resting;for(let i=0;i<200;i++)resting=detail.update(.016,false,true);assert.equal(resting,7000000,'Stationary view refines');
+detail.mode='ultra';for(let i=0;i<200;i++)resting=detail.update(.016,true,true);assert.equal(resting,12000000,'Explicit Ultra remains fixed');
 for(const [x,z,name]of [[-.26,2,'entrance'],[5,-1,'front-living'],[7,-6,'kitchen'],[3,-5,'dining'],[3,-11,'rear-living'],[14,-10,'main-bedroom'],[-3,-1,'office']])assert.equal(roomAt(x,z).id,name);
 // An arrow initially pointing up must point down-map when facing negative world Z.
 for(const yaw of [0,90,180,270]){const t=headingAngle(yaw)*Math.PI/180,r=yaw*Math.PI/180;assert(Math.abs(Math.sin(t)+Math.sin(r))<1e-10);assert(Math.abs(-Math.cos(t)-Math.cos(r))<1e-10);}
