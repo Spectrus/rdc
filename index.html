@@ -222,15 +222,6 @@
           console.error('[publicacoes 2026-09-05] falha no código', item.code, err);
         }
       }
-      const maintenance = new URLSearchParams(window.location.search).get('rdc-maintenance');
-      if (maintenance === 'dedupe-exact-v1' && typeof win.firebaseRemoveExactDuplicates === 'function') {
-        try {
-          const result = await win.firebaseRemoveExactDuplicates(itens);
-          console.info('[manutenção] duplicados exatos removidos:', result);
-        } catch (err) {
-          console.error('[manutenção] falha ao remover duplicados exatos:', err);
-        }
-      }
     }
 
     // Explicit target heights keep animation independent of resize notifications.
