@@ -8155,6 +8155,25 @@ function openVideo(videoId, isProtected) {
                 document.querySelectorAll('.document-card.cloud-card').forEach(el => el.remove());
                 this.renderedCloudIds.clear();
                 if (!Array.isArray(cards)) cards = [];
+                // Render at most one Firebase card for an exact
+                // title + URL + synopsis match. This prevents a duplicate
+                // flash while the persisted records are being cleaned.
+                const duplicateText = value => String(value || '')
+                    .normalize('NFC')
+                    .toLocaleLowerCase('pt-BR')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                const duplicateKey = value => [
+                    duplicateText(value.titulo ?? value.title),
+                    String(value.url ?? value.link ?? '').trim(),
+                    duplicateText(value.sinopse ?? value.descricao ?? value.description)
+                ].join('\u0001');
+                const uniqueCards = new Map();
+                cards.forEach(card => {
+                    const key = duplicateKey(card);
+                    if (!uniqueCards.has(key)) uniqueCards.set(key, card);
+                });
+                cards = Array.from(uniqueCards.values());
                 const normalize = (t) => this.normalizeType(t);
                 const existingCards = Array.from(document.querySelectorAll('.document-card:not(.cloud-card)'));
                 const counts = new Map();
@@ -10304,6 +10323,23 @@ function openVideo(videoId, isProtected) {
         return data;
       }
 
+      function normalizeExactDuplicateText(value) {
+        return String(value || "")
+          .normalize("NFC")
+          .toLocaleLowerCase("pt-BR")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function exactConteudoKey(data) {
+        const synopsis = data.sinopse || data.descricao || data.description || "";
+        return [
+          normalizeExactDuplicateText(data.titulo || data.title),
+          String(data.url || data.link || "").trim(),
+          normalizeExactDuplicateText(synopsis)
+        ].join("\u0001");
+      }
+
       // ===== Função: Adicionar novo conteúdo =====
       async function adicionarConteudo(titulo, ano, autor, descricao, tipo, url) {
         try {
@@ -10336,6 +10372,14 @@ function openVideo(videoId, isProtected) {
           throw new Error("Título em falta — o documento não foi gravado.");
         }
         try {
+          // Never create a second record with the same title + URL + synopsis.
+          const wantedKey = exactConteudoKey(data);
+          const existing = await getDocs(collection(db, "conteudos"));
+          const duplicate = existing.docs.find(item => exactConteudoKey(item.data() || {}) === wantedKey);
+          if (duplicate) {
+            console.info("[conteudos] registro idêntico já existente:", duplicate.id, data.titulo);
+            return duplicate.id;
+          }
           const ref = await addDoc(collection(db, "conteudos"), data);
           console.log("[conteudos] documento criado:", ref.id, data.titulo);
           return ref.id;
@@ -10449,6 +10493,41 @@ function openVideo(videoId, isProtected) {
           return deletions.length;
         }
         return 0;
+      };
+
+      // Removes only records whose normalized title, exact URL and normalized
+      // synopsis are all equal. The oldest record in each group is retained.
+      window.firebaseRemoveExactDuplicates = async (allowedRecords) => {
+        await window.ensureFirebaseAuth();
+        const snap = await getDocs(collection(db, "conteudos"));
+        const allowedKeys = Array.isArray(allowedRecords)
+          ? new Set(allowedRecords.map(exactConteudoKey))
+          : null;
+        const groups = new Map();
+        snap.docs.forEach(item => {
+          const key = exactConteudoKey(item.data() || {});
+          if (allowedKeys && !allowedKeys.has(key)) return;
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push(item);
+        });
+        const removedIds = [];
+        let duplicateGroups = 0;
+        const deletions = [];
+        groups.forEach(items => {
+          if (items.length < 2) return;
+          duplicateGroups += 1;
+          items.sort((a, b) => {
+            const aTime = a.data()?.createdAt?.toMillis?.() ?? Number.MAX_SAFE_INTEGER;
+            const bTime = b.data()?.createdAt?.toMillis?.() ?? Number.MAX_SAFE_INTEGER;
+            return aTime - bTime || a.id.localeCompare(b.id);
+          });
+          items.slice(1).forEach(item => {
+            removedIds.push(item.id);
+            deletions.push(deleteDoc(item.ref));
+          });
+        });
+        await Promise.all(deletions);
+        return { duplicateGroups, removed: removedIds.length, removedIds };
       };
 
       window.firebaseInscreverAviso = async (comoChamar, email) => {
