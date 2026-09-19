@@ -128,6 +128,31 @@
       const galos = Array.from(doc.querySelectorAll('.document-card')).filter(c => !c.dataset.cloudId && cardCode(c) === '350');
       const keeper = galos.find(c => c.dataset.cloudId) || galos[0];
       galos.forEach(c => { if (c !== keeper) c.remove(); });
+      const normalizeExact = value => String(value || '')
+        .normalize('NFC')
+        .toLocaleLowerCase('pt-BR')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const exactCards = new Map();
+      doc.querySelectorAll('.document-card').forEach(card => {
+        const title = normalizeExact(cardTitle(card));
+        const link = String(card.querySelector('a.read-button[href],.video-thumbnail a[href],.media-thumbnail-container a[href]')?.getAttribute('href') || '').trim();
+        const synopsis = normalizeExact(card.querySelector('.rdc-synopsis,p')?.textContent);
+        if (!title || !link) return;
+        const key = [title, link, synopsis].join('\u0001');
+        const previous = exactCards.get(key);
+        if (!previous) {
+          exactCards.set(key, card);
+          return;
+        }
+        // Prefer the persisted Firebase card over its static fallback.
+        if (card.dataset.cloudId && !previous.dataset.cloudId) {
+          previous.remove();
+          exactCards.set(key, card);
+        } else {
+          card.remove();
+        }
+      });
       doc.querySelectorAll('.document-card').forEach(card => {
         if (card.querySelector('.edit-card-btn')) return;
         const button = doc.createElement('button');
