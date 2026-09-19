@@ -10495,41 +10495,6 @@ function openVideo(videoId, isProtected) {
         return 0;
       };
 
-      // Removes only records whose normalized title, exact URL and normalized
-      // synopsis are all equal. The oldest record in each group is retained.
-      window.firebaseRemoveExactDuplicates = async (allowedRecords) => {
-        await window.ensureFirebaseAuth();
-        const snap = await getDocs(collection(db, "conteudos"));
-        const allowedKeys = Array.isArray(allowedRecords)
-          ? new Set(allowedRecords.map(exactConteudoKey))
-          : null;
-        const groups = new Map();
-        snap.docs.forEach(item => {
-          const key = exactConteudoKey(item.data() || {});
-          if (allowedKeys && !allowedKeys.has(key)) return;
-          if (!groups.has(key)) groups.set(key, []);
-          groups.get(key).push(item);
-        });
-        const removedIds = [];
-        let duplicateGroups = 0;
-        const deletions = [];
-        groups.forEach(items => {
-          if (items.length < 2) return;
-          duplicateGroups += 1;
-          items.sort((a, b) => {
-            const aTime = a.data()?.createdAt?.toMillis?.() ?? Number.MAX_SAFE_INTEGER;
-            const bTime = b.data()?.createdAt?.toMillis?.() ?? Number.MAX_SAFE_INTEGER;
-            return aTime - bTime || a.id.localeCompare(b.id);
-          });
-          items.slice(1).forEach(item => {
-            removedIds.push(item.id);
-            deletions.push(deleteDoc(item.ref));
-          });
-        });
-        await Promise.all(deletions);
-        return { duplicateGroups, removed: removedIds.length, removedIds };
-      };
-
       window.firebaseInscreverAviso = async (comoChamar, email) => {
         await window.ensureFirebaseAuth();
         const nome = String(comoChamar || "").trim().slice(0, 80);
