@@ -10,7 +10,7 @@
   </style>
 </head>
 <body>
-  <iframe id="site" title="Biblioteca Digital" allow="fullscreen; autoplay; identity-credentials-get" allowfullscreen src="index-base-20260905.html?v=dedupe-224-225-20260920"></iframe>
+  <iframe id="site" title="Biblioteca Digital" allow="fullscreen; autoplay; identity-credentials-get" allowfullscreen src="index-base-20260905.html?v=renumber-224-225-20260920b"></iframe>
   <script>
   (function(){
     const itens = [
@@ -209,37 +209,37 @@
       let existentes = [];
       try { existentes = await win.firebaseLoadMemories(); } catch (_) { return; }
 
-      // Correção pontual: 224 e 225 foram reportados como a mesma peça.
-      // Só apaga o 225 se título + link + sinopse forem realmente idênticos.
+      // Correção definitiva solicitada: remover o código 225 duplicado
+      // e fechar a numeração inteira depois dele (226→225, 227→226, ...).
       try {
-        const normalizeDuplicateField = value => String(value || '')
-          .normalize('NFC')
-          .toLocaleLowerCase('pt-BR')
-          .replace(/\s+/g, ' ')
-          .trim();
-        const duplicateKey = item => [
-          normalizeDuplicateField(item?.title),
-          String(item?.link || '').trim(),
-          normalizeDuplicateField(item?.sinopse || item?.description)
-        ].join('\u0001');
+        const has224 = existentes.some(item => Number(item?.code) === 224);
+        const has225 = existentes.some(item => Number(item?.code) === 225);
 
-        const items224 = existentes.filter(item => Number(item?.code) === 224);
-        const keys224 = new Set(items224.map(duplicateKey).filter(key => key && !key.startsWith('\u0001')));
-        const duplicated225 = existentes.filter(item =>
-          Number(item?.code) === 225 &&
-          item?.id &&
-          keys224.has(duplicateKey(item))
-        );
+        if (has224 && has225 &&
+            typeof win.firebaseDeleteMemory === 'function' &&
+            typeof win.firebaseUpdateMemoryCode === 'function') {
 
-        if (duplicated225.length && typeof win.firebaseDeleteMemory === 'function') {
-          for (const item of duplicated225) {
-            await win.firebaseDeleteMemory({ id: item.id });
-          }
+          // Remove o registro 225 do Firestore.
+          await win.firebaseDeleteMemory({ code: 225 });
+
+          // Recarrega após a exclusão e renumera cada código acima de 225.
           existentes = await win.firebaseLoadMemories();
-          console.log('[dedupe 224/225] removido(s):', duplicated225.length);
+          const codesAbove225 = [...new Set(
+            existentes
+              .map(item => Number(item?.code))
+              .filter(code => Number.isInteger(code) && code > 225)
+          )].sort((a, b) => a - b);
+
+          for (const oldCode of codesAbove225) {
+            await win.firebaseUpdateMemoryCode(oldCode, oldCode - 1);
+          }
+
+          existentes = await win.firebaseLoadMemories();
+          console.log('[renumber 224/225] 225 removido e sequência fechada até', 
+            Math.max(0, ...existentes.map(item => Number(item?.code) || 0)));
         }
       } catch (err) {
-        console.error('[dedupe 224/225] falha na correção segura:', err);
+        console.error('[renumber 224/225] falha na correção definitiva:', err);
       }
 
       const porCodigo = new Map(existentes.map(x => [String(x.code || ''), x]));
