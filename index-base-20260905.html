@@ -10435,6 +10435,7 @@ function openVideo(videoId, isProtected) {
             type: d.tipo,
             link: d.url,
             code: d.codigo || 0,
+            avisarLista: d.avisarLista !== false,
             timestamp: d.createdAt?.toDate?.()?.toISOString?.() || ''
           });
         });

@@ -11,6 +11,7 @@
 </head>
 <body>
   <iframe id="site" title="Biblioteca Digital" allow="fullscreen; autoplay; identity-credentials-get" allowfullscreen src="index-base-20260905.html?v=renumber-224-225-20260920b"></iframe>
+  <script src="emails/obra-link.js"></script>
   <script>
   (function(){
     const itens = [
@@ -899,6 +900,7 @@
       doc.head.append(librarianVisibility);
       // instalarBibliotecario(doc, win);
       instalarPlayerBiblioteca(doc, win);
+      window.BibliotecaObraLink.install(doc, win, window.location.search);
       // Reveal only after the initial uniform layout has been measured and placed.
       // One Tap / FedCM in the child needs a visible iframe; notify after reveal.
       frame.style.visibility = 'visible';
