@@ -50,7 +50,7 @@
   let works=[{title:'59 anos depois',author:'Reinaldo Duarte Castanheira',year:'2026',createdAt:new Date().toISOString()}];
   const type=root.querySelector('#bc-type'),style=root.querySelector('#bc-style'),editor=root.querySelector('#bc-editor'),status=root.querySelector('#bc-status');
   function options(){return {type:type.value,style:style.value,works};}
-  function asset(name){return 'data:image/jpeg;base64,'+assets[name];}
+  function asset(name){return name==='branch'?'https://rdcguardandomomentos.com.br/emails/assets/branch.jpg':'data:image/jpeg;base64,'+assets[name];}
   function render(){
     root.querySelector('#bc-mail').innerHTML=api.render(options(),asset);
     root.querySelector('#bc-list-controls').hidden=type.value==='welcome';
