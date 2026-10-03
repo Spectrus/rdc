@@ -60,7 +60,7 @@
       if(timelineKeys.has(key))item.remove();else timelineKeys.add(key);
     });
     const cards = all.filter(card => card.isConnected);
-    document.querySelectorAll('#obras-stat .stat-number,.stat-item.obras .stat-number').forEach(el=>{if(el.textContent !== '120+') el.textContent='120+';});
+    document.querySelectorAll('#obras-stat .stat-number,.stat-item.obras .stat-number').forEach(el=>{if(el.textContent !== '130+') el.textContent='130+';});
     window.bibliotecaUniqueCount = cards.length;
     cards.forEach(card => {
       if (card.querySelector('.document-footer .read-button')) return;
@@ -501,4 +501,3 @@
     applyResponsiveDefault();
   }
 })();
-
