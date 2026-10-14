@@ -808,7 +808,13 @@
         const isPDF = /\.pdf$/i.test(pathname);
         const isOffice = /\.(docx?|xlsx?|pptx?|odt|ods|odp|rtf)$/i.test(pathname);
         let preview, provider;
-        if(url.hostname === 'drive.google.com'){
+        // Cine Regina is part of the library: render its local edition in this dialog.
+        const isCineRegina = (url.origin === win.location.origin && /^\/cine-regina(?:\.html)?\/?$/.test(url.pathname))
+          || url.hostname === 'cine-regina-espelho.sampaiocastanheira.chatgpt.site';
+        if(isCineRegina){
+          preview = new URL('/cine-regina?autoplay=1', win.location.origin);
+          provider = 'Cine Regina';
+        } else if(url.hostname === 'drive.google.com'){
           const id = url.pathname.match(/^\/file\/d\/([\w-]+)/)?.[1] || url.searchParams.get('id');
           if(!id || !/^[\w-]+$/.test(id)) return;
           preview = new URL('https://drive.google.com/file/d/' + id + '/preview');
@@ -842,7 +848,7 @@
           }
           provider = isPDF ? 'PDF' : 'Documento';
         } else return;
-        documentMode = provider !== 'YouTube' && !isVideo && !/vídeo/i.test(link.textContent);
+        documentMode = provider === 'Cine Regina' || (provider !== 'YouTube' && !isVideo && !/vídeo/i.test(link.textContent));
         dialog.querySelector('#rdc-video-close').setAttribute('aria-label',documentMode ? 'Fechar documento' : 'Fechar vídeo');
         event.preventDefault();event.stopImmediatePropagation();
         trigger = link;

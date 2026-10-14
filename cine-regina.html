@@ -3,32 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acervo Cine Regina | RDC Guardando Momentos</title>
+    <title>Cine Regina | RDC Guardando Momentos</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,300&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'classic': ['"Playfair Display"', 'serif'],
-                        'sans': ['Lato', 'sans-serif'],
-                    },
-                    colors: {
-                        'cinema-gold': '#D4AF37',
-                        'cinema-dark': '#0a0a0a',
-                    }
-                }
-            }
-        }
-    </script>
+    
+    
+    
+    
+    
 
-    <style>
+    <link rel="stylesheet" href="/cine-regina-mark2/assets/fonts.css"><link rel="stylesheet" href="/cine-regina-mark2/assets/utilities.css"><style>
         .film-grain {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -244,7 +229,7 @@
             100% { transform: translate(-0.5px, 0.5px); }
         }
     </style>
-</head>
+<link rel="stylesheet" href="/cine-regina-mark2/assets/local.css"></head>
 <body class="bg-cinema-dark text-gray-200 font-sans min-h-screen relative overflow-hidden flex items-center justify-center">
 
     <!-- SPLASH SCREEN: Black screen with centered button -->
@@ -281,16 +266,7 @@
         </div>
     </div>
 
-    <video 
-        autoplay 
-        loop 
-        muted 
-        playsinline 
-        class="absolute inset-0 w-full h-full object-cover opacity-30 z-0 mix-blend-luminosity"
-        poster="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop"
-    >
-        <source src="https://assets.mixkit.co/videos/preview/mixkit-vintage-cinema-projector-rolling-a-film-407-large.mp4" type="video/mp4">
-    </video>
+    <section id="original-scene" class="cinema-scene" aria-label="Menu Cine Regina"><img src="/cine-regina-mark2/assets/poster.jpg" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30 z-0 mix-blend-luminosity">
 
     <div class="film-grain"></div>
     <div class="vignette"></div>
@@ -303,15 +279,14 @@
         
         <section class="flex-none md:flex-1 flex flex-col justify-center items-center text-center space-y-2 md:space-y-6 md:pr-8 md:border-r md:border-white/10 shrink-0 mt-4 md:mt-0">
             <div class="space-y-1 md:space-y-2">
-                <p class="text-cinema-gold tracking-[0.2em] md:tracking-[0.3em] text-[10px] md:text-sm uppercase font-light">Acervo Documental</p>
+                <p class="text-cinema-gold tracking-[0.2em] md:tracking-[0.3em] text-[10px] md:text-sm uppercase font-light">Menu</p>
                 <h1 class="font-classic text-3xl sm:text-4xl md:text-6xl text-white drop-shadow-lg">Cine Regina</h1>
             </div>
             
             <div class="relative group">
                 <div class="absolute inset-0 bg-cinema-gold opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-sm"></div>
                 <img 
-                    src="38 j.jpg"
-                    onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='file:///C:/Users/Felipe%20Sampaio%20C/.cursor/projects/c-Users-Felipe-Sampaio-C-Pictures-Saved-Pictures-Copy-Copy-2-Copy-New-Folder-5-New-folder-New-folder-2-New-folder-4/assets/c__Users_Felipe_Sampaio_C_AppData_Roaming_Cursor_User_workspaceStorage_beee22416e8289dcd2bf0796eee2307d_images_image-e91b474a-75ad-4ca2-bfbf-edddafb94371.png';}"
+                    src="/cine-regina-mark2/assets/fachada.jpg"
                     alt="Fachada do Cine Regina" 
                     class="w-32 sm:w-48 h-auto md:w-80 object-cover rounded-sm shadow-2xl sepia-[.3] contrast-125 transition-all duration-500 group-hover:sepia-0"
                 />
@@ -331,36 +306,16 @@
             </header>
 
             <div class="menu-scroll overflow-y-auto overflow-x-hidden pr-2 pb-4 space-y-1 flex-1">
-                <script>
-                    const menuItems = [
-                        { parte: "", titulo: "Palavra do autor", tempo: "0:56'", url: "https://drive.google.com/file/d/15pSyn-tZwZJom0_dnfzpeCYexOYGm1g0/view?usp=sharing" },
-                        { parte: "Parte I", titulo: "A construção do Cinema", tempo: "6:22'", url: "https://drive.google.com/file/d/1mKS_Ho3mHqWGCD4rpVcaVSyD6WpBdK2g/view?usp=sharing" },
-                        { parte: "Parte II", titulo: "A ligação com o Geraldo Zebral", tempo: "3:41'", url: "https://drive.google.com/file/d/1KQoKHLcBVOEsqc5EKkZZXkQgKpHFpdUM/view?usp=sharing" },
-                        { parte: "Parte III", titulo: "Um Filme do Passado", tempo: "3:36'", url: "https://drive.google.com/file/d/15YQyp8gMbbk8GcRB3u1kZbzWbm2zde9h/view" },
-                        { parte: "Parte IV", titulo: "O discurso de inauguração", tempo: "5:32'", url: "https://drive.google.com/file/d/1Estk4okos3_PEYC-Sn5uLIA-ayLpIg_b/view?usp=sharing" },
-                        { parte: "Parte V", titulo: "A Inauguração: Melodia Imortal", tempo: "13:01'", url: "https://drive.google.com/file/d/16oqfQqT9C1yE71_OZn4maYvVKDDvFMNA/view?usp=sharing" },
-                        { parte: "Parte VI", titulo: "O Baile do Clube Carijós – Parte I", tempo: "17:14'", url: "https://drive.google.com/file/d/19gLO3MfQ-IE_RPjF2gyaZtK75HaJNZl_/view?usp=sharing" },
-                        { parte: "Parte VII", titulo: "O Baile do Clube Carijós – Parte II", tempo: "16:33'", url: "https://drive.google.com/file/d/10nvqvQqpPKDyDDEpkf8pVTMiYMJJmiGR/view?usp=sharing" },
-                        { parte: "Parte VIII", titulo: "Crônica: Cine Regina", tempo: "6:27'", url: "https://drive.google.com/file/d/18VHiTeHzNzzvuvwa4V6lClH4hi79zQes/view" },
-                        { parte: "Parte IX", titulo: "Anos Dourados do Cinema", tempo: "5:50'", url: "https://drive.google.com/file/d/1s3OI0O8-cCAiZorO-7O_WEXcFxMoD3Kt/view?usp=sharing" }
-                    ];
-
-                    document.write(menuItems.map(item => `
-                        <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="menu-item block group px-2 py-2 md:px-4 md:py-3 rounded-r-lg border-l-2 border-transparent no-underline">
-                            <div class="flex items-center justify-between">
-                                <div class="flex flex-col justify-center">
-                                    ${item.parte ? `<span class="text-[10px] md:text-xs text-cinema-gold tracking-widest uppercase font-semibold mb-0.5 md:mb-1 opacity-80">${item.parte}</span>` : ''}
-                                    <span class="item-title font-classic text-sm sm:text-base md:text-lg text-gray-200 transition-colors">${item.titulo}</span>
-                                </div>
-                                <div class="text-gray-500 font-mono text-xs md:text-sm group-hover:text-cinema-gold transition-colors ml-2">
-                                    <span class="flex items-center gap-1">
-                                        ${item.tempo}
-                                    </span>
-                                </div>
-                            </div>
-                        </a>
-                    `).join(''));
-                </script>
+                <button type="button" data-chapter="0" class="menu-item block group px-2 py-2 md:px-4 md:py-3 rounded-r-lg border-l-2 border-transparent no-underline w-full text-left"><div class="flex items-center justify-between"><div class="flex flex-col justify-center"><span class="item-title font-classic text-sm sm:text-base md:text-lg text-gray-200 transition-colors">Palavra do autor</span></div><div class="text-gray-500 font-mono text-xs md:text-sm group-hover:text-cinema-gold transition-colors ml-2"><span class="flex items-center gap-1">0:56'</span></div></div></button>
+<button type="button" data-chapter="1" class="menu-item block group px-2 py-2 md:px-4 md:py-3 rounded-r-lg border-l-2 border-transparent no-underline w-full text-left"><div class="flex items-center justify-between"><div class="flex flex-col justify-center"><span class="text-[10px] md:text-xs text-cinema-gold tracking-widest uppercase font-semibold mb-0.5 md:mb-1 opacity-80">Parte I</span><span class="item-title font-classic text-sm sm:text-base md:text-lg text-gray-200 transition-colors">A construção do Cinema</span></div><div class="text-gray-500 font-mono text-xs md:text-sm group-hover:text-cinema-gold transition-colors ml-2"><span class="flex items-center gap-1">6:22'</span></div></div></button>
+<button type="button" data-chapter="2" class="menu-item block group px-2 py-2 md:px-4 md:py-3 rounded-r-lg border-l-2 border-transparent no-underline w-full text-left"><div class="flex items-center justify-between"><div class="flex flex-col justify-center"><span class="text-[10px] md:text-xs text-cinema-gold tracking-widest uppercase font-semibold mb-0.5 md:mb-1 opacity-80">Parte II</span><span class="item-title font-classic text-sm sm:text-base md:text-lg text-gray-200 transition-colors">A ligação com o Geraldo Zebral</span></div><div class="text-gray-500 font-mono text-xs md:text-sm group-hover:text-cinema-gold transition-colors ml-2"><span class="flex items-center gap-1">3:41'</span></div></div></button>
+<button type="button" data-chapter="3" class="menu-item block group px-2 py-2 md:px-4 md:py-3 rounded-r-lg border-l-2 border-transparent no-underline w-full text-left"><div class="flex items-center justify-between"><div class="flex flex-col justify-center"><span class="text-[10px] md:text-xs text-cinema-gold tracking-widest uppercase font-semibold mb-0.5 md:mb-1 opacity-80">Parte III</span><span class="item-title font-classic text-sm sm:text-base md:text-lg text-gray-200 transition-colors">Um Filme do Passado</span></div><div class="text-gray-500 font-mono text-xs md:text-sm group-hover:text-cinema-gold transition-colors ml-2"><span class="flex items-center gap-1">3:36'</span></div></div></button>
+<button type="button" data-chapter="4" class="menu-item block group px-2 py-2 md:px-4 md:py-3 rounded-r-lg border-l-2 border-transparent no-underline w-full text-left"><div class="flex items-center justify-between"><div class="flex flex-col justify-center"><span class="text-[10px] md:text-xs text-cinema-gold tracking-widest uppercase font-semibold mb-0.5 md:mb-1 opacity-80">Parte IV</span><span class="item-title font-classic text-sm sm:text-base md:text-lg text-gray-200 transition-colors">O discurso de inauguração</span></div><div class="text-gray-500 font-mono text-xs md:text-sm group-hover:text-cinema-gold transition-colors ml-2"><span class="flex items-center gap-1">5:32'</span></div></div></button>
+<button type="button" data-chapter="5" class="menu-item block group px-2 py-2 md:px-4 md:py-3 rounded-r-lg border-l-2 border-transparent no-underline w-full text-left"><div class="flex items-center justify-between"><div class="flex flex-col justify-center"><span class="text-[10px] md:text-xs text-cinema-gold tracking-widest uppercase font-semibold mb-0.5 md:mb-1 opacity-80">Parte V</span><span class="item-title font-classic text-sm sm:text-base md:text-lg text-gray-200 transition-colors">A Inauguração: Melodia Imortal</span></div><div class="text-gray-500 font-mono text-xs md:text-sm group-hover:text-cinema-gold transition-colors ml-2"><span class="flex items-center gap-1">13:01'</span></div></div></button>
+<button type="button" data-chapter="6" class="menu-item block group px-2 py-2 md:px-4 md:py-3 rounded-r-lg border-l-2 border-transparent no-underline w-full text-left"><div class="flex items-center justify-between"><div class="flex flex-col justify-center"><span class="text-[10px] md:text-xs text-cinema-gold tracking-widest uppercase font-semibold mb-0.5 md:mb-1 opacity-80">Parte VI</span><span class="item-title font-classic text-sm sm:text-base md:text-lg text-gray-200 transition-colors">O Baile do Clube Carijós – Parte I</span></div><div class="text-gray-500 font-mono text-xs md:text-sm group-hover:text-cinema-gold transition-colors ml-2"><span class="flex items-center gap-1">17:14'</span></div></div></button>
+<button type="button" data-chapter="7" class="menu-item block group px-2 py-2 md:px-4 md:py-3 rounded-r-lg border-l-2 border-transparent no-underline w-full text-left"><div class="flex items-center justify-between"><div class="flex flex-col justify-center"><span class="text-[10px] md:text-xs text-cinema-gold tracking-widest uppercase font-semibold mb-0.5 md:mb-1 opacity-80">Parte VII</span><span class="item-title font-classic text-sm sm:text-base md:text-lg text-gray-200 transition-colors">O Baile do Clube Carijós – Parte II</span></div><div class="text-gray-500 font-mono text-xs md:text-sm group-hover:text-cinema-gold transition-colors ml-2"><span class="flex items-center gap-1">16:33'</span></div></div></button>
+<button type="button" data-chapter="8" class="menu-item block group px-2 py-2 md:px-4 md:py-3 rounded-r-lg border-l-2 border-transparent no-underline w-full text-left"><div class="flex items-center justify-between"><div class="flex flex-col justify-center"><span class="text-[10px] md:text-xs text-cinema-gold tracking-widest uppercase font-semibold mb-0.5 md:mb-1 opacity-80">Parte VIII</span><span class="item-title font-classic text-sm sm:text-base md:text-lg text-gray-200 transition-colors">Crônica: Cine Regina</span></div><div class="text-gray-500 font-mono text-xs md:text-sm group-hover:text-cinema-gold transition-colors ml-2"><span class="flex items-center gap-1">6:27'</span></div></div></button>
+<button type="button" data-chapter="9" class="menu-item block group px-2 py-2 md:px-4 md:py-3 rounded-r-lg border-l-2 border-transparent no-underline w-full text-left"><div class="flex items-center justify-between"><div class="flex flex-col justify-center"><span class="text-[10px] md:text-xs text-cinema-gold tracking-widest uppercase font-semibold mb-0.5 md:mb-1 opacity-80">Parte IX</span><span class="item-title font-classic text-sm sm:text-base md:text-lg text-gray-200 transition-colors">Anos Dourados do Cinema</span></div><div class="text-gray-500 font-mono text-xs md:text-sm group-hover:text-cinema-gold transition-colors ml-2"><span class="flex items-center gap-1">5:50'</span></div></div></button>
             </div>
 
             <div class="mt-1 md:mt-2 pt-1 md:pt-2 border-t border-white/10 px-2 md:px-4">
@@ -368,138 +323,19 @@
             </div>
 
         </section>
-    </main>
+    </main></section>
 
     <audio
         id="cine-regina-bg-music"
-        src="chopin-nocturne-op9-no2.mp3"
+        src="/cine-regina-mark2/assets/noturno.mp3"
         preload="auto"
         loop
     ></audio>
 
-    <audio
-        id="projector-noise"
-        src="projector-noise.mp3"
-        preload="auto"
-        loop
-    ></audio>
+    <audio id="projector-noise" src="/cine-regina-mark2/assets/projector-noise.mp3" preload="auto" loop></audio>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const splash = document.getElementById('splash-screen');
-            const splashBtn = document.getElementById('splash-btn');
-            const countdownOverlay = document.getElementById('cinema-countdown');
-            const numberEl = document.getElementById('countdown-number');
-            const flashEl = document.getElementById('frame-flash');
-            const bgMusic = document.getElementById('cine-regina-bg-music');
-            const projectorNoise = document.getElementById('projector-noise');
-            const MUSIC_POS_KEY = 'cineReginaMusicPosition';
-            const MUSIC_STATE_KEY = 'cineReginaMusicShouldResume';
-            const TARGET_VOLUME = 0.65;
-            const PROJECTOR_VOLUME = 0.3;
+    
 
-            bgMusic.volume = TARGET_VOLUME;
-            bgMusic.playbackRate = 0.985;
-
-            function pauseMusic() {
-                if (bgMusic.paused) return;
-                sessionStorage.setItem(MUSIC_POS_KEY, String(bgMusic.currentTime || 0));
-                bgMusic.pause();
-                sessionStorage.setItem(MUSIC_STATE_KEY, '1');
-            }
-
-            function resumeMusic() {
-                const savedTime = parseFloat(sessionStorage.getItem(MUSIC_POS_KEY) || '0');
-                if (Number.isFinite(savedTime) && savedTime > 0) {
-                    try { bgMusic.currentTime = savedTime; } catch (_) {}
-                }
-                bgMusic.volume = TARGET_VOLUME;
-                bgMusic.play().catch(() => {});
-                sessionStorage.setItem(MUSIC_STATE_KEY, '1');
-            }
-
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    pauseMusic();
-                } else if (sessionStorage.getItem(MUSIC_STATE_KEY) === '1') {
-                    resumeMusic();
-                }
-            });
-
-            window.addEventListener('blur', () => { pauseMusic(); });
-            window.addEventListener('focus', () => {
-                if (sessionStorage.getItem(MUSIC_STATE_KEY) === '1') {
-                    resumeMusic();
-                }
-            });
-
-            bgMusic.addEventListener('timeupdate', () => {
-                if (!bgMusic.paused) {
-                    sessionStorage.setItem(MUSIC_POS_KEY, String(bgMusic.currentTime || 0));
-                }
-            });
-
-            function fadeOutProjector() {
-                let vol = projectorNoise.volume;
-                const fade = setInterval(() => {
-                    vol -= 0.05;
-                    if (vol <= 0) {
-                        clearInterval(fade);
-                        projectorNoise.pause();
-                        projectorNoise.volume = 0;
-                    } else {
-                        projectorNoise.volume = vol;
-                    }
-                }, 50);
-            }
-
-            function startEverything() {
-                splash.style.display = 'none';
-
-                countdownOverlay.style.display = 'flex';
-
-                // Start projector noise during countdown
-                projectorNoise.volume = PROJECTOR_VOLUME;
-                projectorNoise.play().catch(() => {});
-
-                // Start Nocturne
-                bgMusic.volume = TARGET_VOLUME;
-                bgMusic.play().catch(() => {});
-                sessionStorage.setItem(MUSIC_STATE_KEY, '1');
-
-                let count = 3;
-                flashEl.classList.add('flash-active');
-
-                const timer = setInterval(() => {
-                    count--;
-                    
-                    if (count >= 1) {
-                        numberEl.innerText = count;
-                        flashEl.classList.remove('flash-active');
-                        void flashEl.offsetWidth;
-                        flashEl.classList.add('flash-active');
-                    } else {
-                        clearInterval(timer);
-                        flashEl.style.opacity = '1';
-
-                        // Fade out projector noise as countdown ends
-                        fadeOutProjector();
-                        
-                        setTimeout(() => {
-                            countdownOverlay.style.opacity = '0';
-                            setTimeout(() => {
-                                if (countdownOverlay.parentNode) {
-                                    countdownOverlay.parentNode.removeChild(countdownOverlay);
-                                }
-                            }, 600);
-                        }, 150);
-                    }
-                }, 1000);
-            }
-
-            // Click the button or anywhere on splash to start
-            splash.addEventListener('click', startEverything);
-        });
-    </script>
-</body>
+    
+<div id="mirror-layer" class="mirror-layer" aria-hidden="true" hidden><div id="mirror-copy" class="mirror-copy"></div><div id="mirror-shine" class="mirror-shine"></div><div id="mirror-edge" class="mirror-edge"></div></div><div id="transition-lock" hidden></div><p id="status" class="screen-reader" role="status" aria-live="polite"></p><script src="/cine-regina-mark2/hls.min.js"></script><script src="/cine-regina-mark2/assets/app.js"></script></body>
 </html>
