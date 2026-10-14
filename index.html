@@ -89,6 +89,7 @@
       const usable = value => !!value && !String(value).trim().startsWith('#') && !/^javascript:/i.test(value);
       const repaired = value => {
         const raw = String(value || '').trim().replace('14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6', '1eY3gBlfMF7m0kcI0pqgFV5XI4pN0I99p');
+        if (/^https:\/\/cine-regina-espelho\.sampaiocastanheira\.chatgpt\.site(?:\/|$)/i.test(raw)) return '/cine-regina?autoplay=1';
         return doc.defaultView.bibliotecaPdfUrl ? doc.defaultView.bibliotecaPdfUrl(raw) : raw;
       };
       const byId = new Map(), byTitle = new Map();
@@ -103,6 +104,7 @@
         const href = repaired(action.getAttribute('href'));
         links.forEach(a => {
           if (a.getAttribute('href')?.includes('14aUAG4dLF1J_zn7LmGcgiNJYnjyqK4q6')) a.setAttribute('href', href);
+          if (href === '/cine-regina?autoplay=1') { a.setAttribute('href', href); a.removeAttribute('target'); }
         });
         const record = {href, card};
         if (card.dataset.cloudId) byId.set(card.dataset.cloudId, record);
