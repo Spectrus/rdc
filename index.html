@@ -122,6 +122,10 @@
     }
 
     function deduplicar(doc){
+      // Remove public item 226 (original code 366), duplicated by item 225.
+      // Match the persisted identity, not the public number which changes on sorting.
+      // Keep the underlying document recoverable and preserve the shared PDF.
+      doc.querySelectorAll('.document-card[data-cloud-id="h8Dyqpvp346JuYNhuSOh"],.timeline-item-horizontal[data-cloud-id="h8Dyqpvp346JuYNhuSOh"]').forEach(item => item.remove());
       sincronizarLinksLinhaDoTempo(doc);
       corrigirGalo(doc);
       // These two PDFs contain the same work; retain the final version (350).
@@ -212,38 +216,7 @@
       let existentes = [];
       try { existentes = await win.firebaseLoadMemories(); } catch (_) { return; }
 
-      // Correção definitiva solicitada: remover o código 225 duplicado
-      // e fechar a numeração inteira depois dele (226→225, 227→226, ...).
-      try {
-        const has224 = existentes.some(item => Number(item?.code) === 224);
-        const has225 = existentes.some(item => Number(item?.code) === 225);
-
-        if (has224 && has225 &&
-            typeof win.firebaseDeleteMemory === 'function' &&
-            typeof win.firebaseUpdateMemoryCode === 'function') {
-
-          // Remove o registro 225 do Firestore.
-          await win.firebaseDeleteMemory({ code: 225 });
-
-          // Recarrega após a exclusão e renumera cada código acima de 225.
-          existentes = await win.firebaseLoadMemories();
-          const codesAbove225 = [...new Set(
-            existentes
-              .map(item => Number(item?.code))
-              .filter(code => Number.isInteger(code) && code > 225)
-          )].sort((a, b) => a - b);
-
-          for (const oldCode of codesAbove225) {
-            await win.firebaseUpdateMemoryCode(oldCode, oldCode - 1);
-          }
-
-          existentes = await win.firebaseLoadMemories();
-          console.log('[renumber 224/225] 225 removido e sequência fechada até', 
-            Math.max(0, ...existentes.map(item => Number(item?.code) || 0)));
-        }
-      } catch (err) {
-        console.error('[renumber 224/225] falha na correção definitiva:', err);
-      }
+      // Historical one-off deletion/renumbering retired: never mutate the catalog on page load.
 
       const porCodigo = new Map(existentes.map(x => [String(x.code || ''), x]));
       for (const item of itens) {
