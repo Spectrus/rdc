@@ -2778,6 +2778,22 @@ video-synopsis {
     </style>
 <style>.document-code[hidden], .catalog-code[hidden] { display:none !important; }</style>
 <script src="acervo-catalogo.js" defer></script>
+    <style id="rdc-mobile-catalog-width">
+      /* Let long catalogue titles shrink within a phone's single column. */
+      @media (max-width: 768px) {
+        #acervo .documents-grid,
+        #acervo.view-list .documents-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        #acervo .document-card {
+          min-width: 0;
+          max-width: 100%;
+        }
+        .search-input {
+          min-width: 0;
+        }
+      }
+    </style>
 </head>
 <body>
     
