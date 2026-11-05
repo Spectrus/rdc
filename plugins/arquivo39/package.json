@@ -1,0 +1,7 @@
+{
+  "name": "netlify-plugin-arquivo39",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.cjs",
+  "engines": { "node": ">=18" }
+}
