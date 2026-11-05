@@ -1,0 +1,129 @@
+name: Preserve approved Arquivo 39 publication
+on:
+  push:
+    branches: [main]
+    paths: ['netlify.toml', '.github/workflows/persist-arquivo39.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: arquivo39-publication
+  cancel-in-progress: false
+jobs:
+  preserve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          lfs: false
+      - name: Retrieve and verify the approved published assets
+        run: |
+          python - <<'PY'
+          import hashlib, json, time
+          from pathlib import Path
+          from urllib.request import Request, urlopen
+          base = 'https://rdcguardandomomentos.com.br/arquivo-39/'
+          expected = {
+            'metadata.json': '9c088c0e5f9694da1d342358cac0591329b4e63b33cb644ec75569829ad3b79c',
+            'index.html': '3e89cbe6b25bc9d6ec9a8532022d67907498767ea9f9e45117c6bde276381649',
+            'capa.jpg': '65adbc5fcb1e9d6e1970df8ab4a53c4fdcbef59b555663d8ae004dbc6f6dd3e9',
+          }
+          def retrieve(name):
+            request = Request(base + name + '?publication=arquivo39-v1', headers={'Cache-Control':'no-cache', 'User-Agent':'Arquivo39-Preservation/1.0'})
+            with urlopen(request, timeout=45) as response:
+              data = response.read(35_000_001)
+            if len(data) > 35_000_000 or hashlib.sha256(data).hexdigest() != expected[name]:
+              raise ValueError('Published file does not match the approved source: ' + name)
+            return data
+          for attempt in range(60):
+            try:
+              metadata = retrieve('metadata.json')
+              break
+            except Exception:
+              if attempt == 59:
+                raise SystemExit('Approved deployment not available. Existing source files unchanged.') from None
+              time.sleep(5)
+          assets = {'metadata.json': metadata}
+          for name in ('index.html', 'capa.jpg'):
+            assets[name] = retrieve(name)
+          destination = Path('arquivo-39')
+          destination.mkdir(exist_ok=True)
+          for name, content in assets.items():
+            (destination / name).write_bytes(content)
+          print('All three assets match the approved checksums.')
+          PY
+      - name: Integrate approved catalogue entry
+        run: python3 scripts/publish-arquivo39.py
+      - name: Commit assets and catalogue without overwriting other changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add arquivo-39/index.html arquivo-39/metadata.json arquivo-39/capa.jpg index.html
+          if git diff --cached --quiet; then
+            echo 'Approved publication already preserved.'
+          else
+            git commit -m 'Publish Arquivo ’39, Documento by Reinaldo Duarte Castanheira'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Install browser verification
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Verify reader and library card
+        run: |
+          mkdir -p verification
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          checks = []
+          def check(name, ok):
+            checks.append({'check':name,'passed':bool(ok)})
+            if not ok:
+              raise AssertionError(name)
+          with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page(viewport={'width':1440,'height':1000})
+            errors = []
+            page.on('pageerror', lambda e: errors.append(str(e)))
+            response = page.goto('https://rdcguardandomomentos.com.br/arquivo-39/', wait_until='load', timeout=120000)
+            page.wait_for_selector('.hotspot', timeout=60000)
+            check('Reader returns HTTP 200', response.status == 200)
+            check('Approved apostrophe title', 'Arquivo ’39' in page.title())
+            check('No old book logo', page.locator('.brand-icon').count() == 0)
+            page.locator('#openLibrary').click()
+            check('Nine newspaper pages', page.locator('#gallery .thumb').count() == 9)
+            page.locator('[data-close="libraryDialog"]').click()
+            page.locator('#zoomPlus').click()
+            check('Working zoom', page.locator('#zoomReadout').inner_text() != '100%')
+            page.locator('#zoomReset').click()
+            page.locator('.hotspot').first.click(force=True)
+            page.wait_for_selector('#detailDialog[open]', timeout=10000)
+            check('Portuguese article explanation', len(page.locator('#detailDesc').inner_text()) > 50)
+            check('Bibliography links', page.locator('#detailSource a').count() > 0)
+            page.locator('#detailClose').click()
+            page.screenshot(path='verification/arquivo39-desktop.png')
+            check('Reader has no script errors', len(errors) == 0)
+            page.goto('https://rdcguardandomomentos.com.br/?obra=10039', wait_until='domcontentloaded', timeout=90000)
+            frame = page.frame_locator('#site')
+            card = frame.locator('.document-card').filter(has=frame.locator('h3', has_text='Arquivo ’39')).first
+            card.wait_for(timeout=90000)
+            check('Library card title', card.locator('h3').inner_text() == 'Arquivo ’39')
+            check('Author', card.locator('.document-author').inner_text() == 'Reinaldo Duarte Castanheira')
+            check('Category Documento', card.locator('.document-type').inner_text() == 'Documento')
+            check('Approved first-person synopsis', 'É dessa lembrança que partimos ao encontrar' in card.inner_text())
+            check('Reader linked from catalogue', '/arquivo-39/' in card.locator('a.read-button').get_attribute('href'))
+            card.scroll_into_view_if_needed()
+            page.screenshot(path='verification/arquivo39-biblioteca.png')
+            browser.close()
+          Path('verification/checks.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(checks,ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: arquivo39-publication-verification
+          path: verification/
