@@ -15,6 +15,7 @@
   <script>
   (function(){
     const itens = [
+      {"code":"378","title":"Diário de um cético","author":"Sergio Marques Castanheira","year":"2022","type":"Livro","button":"Ler","link":"https://drive.google.com/file/d/1FyEC3Dzk6nXlveXQFPBj0J3qeno0XvJr/view","description":"A realização de aventura vivida, pelo meu sobrinho Sergio Marques Castanheira, aos 62 anos de idade.\n\nTendo inicio em 4 de outubro de 2022, durante 29 dias, ao longo dos 800 km, com uma média de 28 km/dia.\n\nMuitas pessoas sonham em realizar esta caminhada. Ele caminhou e guardou seu DIÁRIO que ora é disponibilizado para deleite dos sonhadores."},
       {
         code:'370', title:'Tiro de Guerra 281 – versão final', author:'Reinaldo Duarte Castanheira', year:'2026', type:'Mídia', button:'Ver',
         link:'https://drive.google.com/file/d/1agPb_hRx7KzrVmTsMSUUJNRf1McM3h7i/view?usp=sharing',
@@ -74,6 +75,16 @@
       const autor = doc.createElement('div'); autor.className = 'document-author'; autor.textContent = item.author;
       const ano = doc.createElement('div'); ano.className = 'document-year'; ano.textContent = item.year;
       const p = doc.createElement('p'); p.textContent = item.description;
+      if (item.code === '378') {
+        p.style.whiteSpace = 'pre-line';
+        p.replaceChildren();
+        const parts = item.description.split(/(DIÁRIO |sonhadores\.)/);
+        parts.forEach(part => {
+          if (part === 'DIÁRIO ' || part === 'sonhadores.') {
+            const emphasis = doc.createElement('em'); emphasis.textContent = part; p.append(emphasis);
+          } else p.append(doc.createTextNode(part));
+        });
+      }
       const footer = doc.createElement('div'); footer.className = 'document-footer';
       const tipo = doc.createElement('span'); tipo.className = 'document-type'; tipo.textContent = item.type;
       const a = doc.createElement('a'); a.className = 'read-button'; a.href = item.link; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = item.button;
