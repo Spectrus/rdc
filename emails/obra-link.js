@@ -4,7 +4,22 @@
   function install(doc, win, search) {
     const params = new URLSearchParams(search);
     const id = params.get('obra'), code = params.get('codigo'), title = params.get('titulo');
-    if (!id && !code && !title && !params.has('acervo')) return;
+    if (!id && !code && !title && !params.has('acervo')) {
+      // The regular homepage visit uses the milestone animation. Archive links open immediately.
+      if (win.frameElement?.id !== 'site' || (global.location.hash && global.location.hash !== '#intro') ||
+          win.matchMedia('(prefers-reduced-motion: reduce)').matches || doc.getElementById('rdc-chuva-5000-css')) return;
+      const style = doc.createElement('link');
+      style.id = 'rdc-chuva-5000-css';
+      style.rel = 'stylesheet';
+      style.href = '/chuva-5000.css';
+      style.onload = () => {
+        const celebration = doc.createElement('script');
+        celebration.src = '/chuva-5000.js';
+        doc.head.append(celebration);
+      };
+      doc.head.append(style);
+      return;
+    }
     let done = false, observer, timer;
     function stop() { done = true; observer?.disconnect(); clearTimeout(timer); }
     function findCard() {
